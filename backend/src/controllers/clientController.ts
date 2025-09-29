@@ -32,3 +32,26 @@ export const getClientById = async (req: express.Request, res: express.Response)
         res.status(500).json({ error: error.message });
     }
 };
+
+export const deleteClient = async (req: express.Request, res: express.Response) => {
+    const { id } = req.params;
+    try {
+        const deleted = await clientService.deleteClientById(Number(id));
+        if (!deleted) {
+            return res.status(404).json({ error: "Client not found" });
+        }
+        res.status(200).json({ message: "Client deleted successfully" });
+    }
+    catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const getModelClients = async (req: express.Request, res: express.Response) => {
+    try {
+        const clients = await clientService.findModelClients();
+        res.status(200).json(clients);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+};

@@ -91,7 +91,7 @@
 
 "@esbuild/linux-x64@0.25.8":
   version "0.25.8"
-  resolved "https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.25.8.tgz"
+  resolved "https://registry.yarnpkg.com/@esbuild/linux-x64/-/linux-x64-0.25.8.tgz#9a4f78c75c051e8c060183ebb39a269ba936a2ac"
   integrity sha512-ASFQhgY4ElXh3nDcOMTkQero4b1lgubskNlhIfJrsH5OKZXDpUAKBlNS0Kx81jwOBp+HCeZqmoJuihTv57/jvQ==
 
 "@esbuild/netbsd-arm64@0.25.8":
@@ -136,7 +136,7 @@
 
 "@esbuild/win32-x64@0.25.8":
   version "0.25.8"
-  resolved "https://registry.yarnpkg.com/@esbuild/win32-x64/-/win32-x64-0.25.8.tgz#610d7ea539d2fcdbe39237b5cc175eb2c4451f9c"
+  resolved "https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-0.25.8.tgz"
   integrity sha512-cn3Yr7+OaaZq1c+2pe+8yxC8E144SReCQjN6/2ynubzYjvyqZjTXfQJpAcQpsdJq3My7XADANiYGHoFC69pLQw==
 
 "@jridgewell/resolve-uri@^3.0.3":

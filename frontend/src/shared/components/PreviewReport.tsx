@@ -85,7 +85,7 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
                                 return (
                                     <TableRow key={contract.ID_Contrato} sx={{ '&:nth-of-type(odd)': { backgroundColor: theme.palette.action.hover } }}>
                                         <TableCell align="center">{contract.Cont_Comodato}</TableCell>
-                                        <TableCell>{product?.Prod_Nome || 'Produto não encontrado'}</TableCell>
+                                        <TableCell>{product?.Prod_CodProduto || 'Produto não encontrado'}</TableCell>
                                         <TableCell align="right">R$ {product?.Prod_Valor?.toFixed(2) || '0.00'}</TableCell>
                                         <TableCell align="center">{contract.Cont_Qtde || 0}</TableCell>
                                         <TableCell align="right">R$ {valorTotal.toFixed(2)}</TableCell>
