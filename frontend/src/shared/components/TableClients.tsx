@@ -1,8 +1,8 @@
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination } from "@mui/material"
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination, Button, Icon } from "@mui/material"
 import SearchIcon from "@mui/icons-material/Search";
 import { ClientDTO } from "../utils/DTOS";
 import React, { useEffect, useState } from "react";
-import { getAllClients } from "../services/clientService";
+import { getAllClients, removeClient } from "../services/clientService";
 import { SearchField } from "./searchField";
 
 export const TableClients: React.FC = () => {
@@ -37,6 +37,12 @@ export const TableClients: React.FC = () => {
         client.cli_razaoSocial.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    async function onRemoveContract(id: number): Promise<void> {
+        filteredClients.splice(filteredClients.findIndex(client => client.id === id), 1);
+        setClientsData([...filteredClients]);
+        await removeClient(id);
+    }
+
     return (
         <Box sx={{ maxWidth: "70%", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", marginTop: 3, marginBottom: 2, '@media (max-width: 600px)': { maxWidth: "90%" } }}>
             <SearchField onSearchChange={setSearchTerm} />
@@ -47,6 +53,7 @@ export const TableClients: React.FC = () => {
                             <TableCell  sx={{ fontSize: 20, textAlign: "center" }}>Cliente</TableCell>
                             <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { display: 'none' } }}>E-mail</TableCell>
                             <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { display: 'none' } }}>Endereço</TableCell>
+                            <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>REMOVER</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -64,11 +71,14 @@ export const TableClients: React.FC = () => {
                                         key={client.id}
                                         hover
                                         style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}
-                                        onClick={() => window.location.href = `/contrato-cliente/${client.id}`}
+                                        
                                     >
-                                        <TableCell sx={{ fontSize: 16, textAlign: "center" }}>{client.cli_razaoSocial}</TableCell>
-                                        <TableCell sx={{ fontSize: 16, textAlign: "center", '@media (max-width: 600px)': { display: 'none' } }}>{client.cli_email === "" ? "Não informado" : client.cli_email}</TableCell>
-                                        <TableCell sx={{ fontSize: 16, textAlign: "center", '@media (max-width: 600px)': { display: 'none' } }}>{client.cli_end === "" ? "Não informado" : client.cli_end}</TableCell>
+                                        <TableCell onClick={() => window.location.href = `/contrato-cliente/${client.id}`} sx={{ fontSize: 16, textAlign: "center" }}>{client.cli_razaoSocial}</TableCell>
+                                        <TableCell onClick={() => window.location.href = `/contrato-cliente/${client.id}`} sx={{ fontSize: 16, textAlign: "center", '@media (max-width: 600px)': { display: 'none' } }}>{client.cli_email === "" ? "Não informado" : client.cli_email}</TableCell>
+                                        <TableCell onClick={() => window.location.href = `/contrato-cliente/${client.id}`} sx={{ fontSize: 16, textAlign: "center", '@media (max-width: 600px)': { display: 'none' } }}>{client.cli_end === "" ? "Não informado" : client.cli_end}</TableCell>
+                                        <TableCell  sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { padding: "0px" } }}>
+                                            <Button onClick={() => onRemoveContract(client.id)} sx={{ '@media (max-width: 600px)': { padding: "0px" } }}><Icon sx={{ fontSize: 30, '@media (max-width: 600px)': { padding: "0px" } }}>delete_forever</Icon></Button>
+                                        </TableCell>
                                     </TableRow>
                                 ))
                             )

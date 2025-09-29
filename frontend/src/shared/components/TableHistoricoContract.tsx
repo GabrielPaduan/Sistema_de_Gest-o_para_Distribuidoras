@@ -9,6 +9,7 @@ import { getProductById } from "../services/productService";
 import { PreviewReport } from "./PreviewReport";
 import { GenericButton } from "./GenericButton";
 import { generateReport } from "../utils/Report";
+import { useNavigate } from "react-router-dom";
 
 export const TableHistoricoContract: React.FC = () => {
     const [pdfsData, setPdfsData] = React.useState<PdfStructDTO[]>([]);
@@ -18,6 +19,7 @@ export const TableHistoricoContract: React.FC = () => {
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [showReport, setShowReport] = useState<boolean>(false);
     const [selectedPdf, setSelectedPdf] = useState<PdfStructCompleteDTO | null>(null);
+    const navigate = useNavigate();
 
     const handleShowReport = (pdf: PdfStructCompleteDTO) => {
         setSelectedPdf(pdf);
@@ -57,7 +59,8 @@ export const TableHistoricoContract: React.FC = () => {
                             PDF_Generated_Date: pdf.PDF_Generated_Date,
                             PDF_Client: dataClient,
                             PDF_Contracts: contractsArray,
-                            PDF_Products: productData
+                            PDF_Products: productData,
+                            PDF_Observacoes: pdf.PDF_Observacoes
                         };
                     })
                 );
@@ -73,7 +76,7 @@ export const TableHistoricoContract: React.FC = () => {
     function handleConfirmPdf(): void {
         if (selectedPdf) {           
             selectedPdf.PDF_Status = 1; // Atualiza o status para confirmado
-            const selectedPDF: PdfStructDTO = { id: selectedPdf.id, PDF_Client_Id: selectedPdf.PDF_Client ? selectedPdf.PDF_Client.id : 0, PDF_Status: selectedPdf.PDF_Status, PDF_Generated_Date: selectedPdf.PDF_Generated_Date };
+            const selectedPDF: PdfStructDTO = { id: selectedPdf.id, PDF_Client_Id: selectedPdf.PDF_Client ? selectedPdf.PDF_Client.id : 0, PDF_Status: selectedPdf.PDF_Status, PDF_Generated_Date: selectedPdf.PDF_Generated_Date, PDF_Observacoes: selectedPdf.PDF_Observacoes };
             const fetchUpdatePdf = async () => {
                 try {
                     await updatePdf(selectedPDF.id, selectedPDF);
@@ -152,15 +155,30 @@ export const TableHistoricoContract: React.FC = () => {
                 </Box>
             )}
             {selectedPdf && selectedPdf?.PDF_Client && showReport && (
-                <Box>
+                <Box width={"100%"}>
                     <PreviewReport client={selectedPdf?.PDF_Client} contracts={selectedPdf?.PDF_Contracts} products={selectedPdf?.PDF_Products} />
-                    <Box display={"flex"} justifyContent={"space-evenly"} sx={{ textAlign: 'center', my: 4, '@media (max-width: 600px)': { flexDirection: "column", gap: 2 } }}>
+                    
+                    <Box>
+                        <Typography variant="h5" sx={{ textAlign: 'center', mt: 4 }}>Observações:</Typography>
+                        <Typography variant="body1" sx={{ textAlign: 'center', mb: 2, fontSize: 20, borderRadius: '4px', padding: '10px', width: '80%', margin: 'auto' }}>
+                            {selectedPdf.PDF_Observacoes ? selectedPdf.PDF_Observacoes : "Nenhuma observação adicionada."}
+                        </Typography>
+                    </Box>
+                    
+                    <Box display={"flex"} justifyContent={"center"} gap={2} sx={{ textAlign: 'center', my: 4, '@media (max-width: 600px)': { flexDirection: "column", gap: 2 } }}>
                         <Button
                             variant="contained"
                             size="large"
                             onClick={handleConfirmPdf}
                         >
                             <Typography variant="h6">Gerar Contrato</Typography>
+                        </Button>
+                        <Button
+                            variant="contained"
+                            size="large"
+                            onClick={() => navigate(`/contrato-cliente/${selectedPdf.PDF_Client?.id}`)}
+                        >
+                            <Typography variant="h6">Editar</Typography>
                         </Button>
                         <Button
                             variant="contained"

@@ -15,7 +15,16 @@ export const getClientById = async (id: number): Promise<ClientDTO> => {
 
 // Função para CRIAR um novo cliente
 // Omit<ClientDTO, 'id'> significa que pegamos todos os campos do ClientDTO, exceto o 'id'
-export const createClient = async (clientData: Omit<ClientDTO, 'id'>): Promise<ClientDTO> => {
+export const createClient = async (clientData: Omit<ClientDTO, 'id'>): Promise<ClientDTO[]> => {
   const response = await api.post('/clientes', clientData);
+  return response.data;
+};
+
+export const removeClient = async (id: number): Promise<void> => {
+  await api.delete(`/clientes/${id}`);
+};
+
+export const getModelClients = async (): Promise<ClientDTO[]> => {
+  const response = await api.get('/clientes/modelos/list');
   return response.data;
 };

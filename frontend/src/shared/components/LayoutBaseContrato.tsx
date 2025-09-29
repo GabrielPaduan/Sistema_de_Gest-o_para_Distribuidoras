@@ -1,9 +1,9 @@
-import { Box, Button, Modal, TablePagination, TextField, Typography } from "@mui/material";
+import { Box, Button, Modal, TablePagination, TextareaAutosize, TextField, Typography } from "@mui/material";
 import { ClientDTO, ContractDTO, ContractDTOInsert, DadosProdutoComodatoDTO, LayoutBaseContratoProps, ProductDTO } from "../utils/DTOS";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { TableContract } from "./TableContract";
 import { generateReport } from "../utils/Report";
-import { getClientById } from "../services/clientService"; // Supondo que você tenha este serviço
+import { getClientById, getModelClients } from "../services/clientService"; // Supondo que você tenha este serviço
 import { GenericButton } from "./GenericButton";
 import { getAllProducts, getProductByContractId, getProductById, searchProductsByName } from "../services/productService";
 import { SearchField } from "./searchField";
@@ -42,7 +42,10 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
     const navigate = useNavigate();
     const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
     const [loading, setLoading] = useState(false);
-
+    const [observation, setObservation] = useState<string>("");
+    const [modelosContrato, setModelosContrato] = useState<ClientDTO[]>([]);
+    const [selectedModelContract, setSelectedModelContract] = useState<number>(0);
+    const [openModelo, setOpenModelo] = useState(false);
 
     const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
         setPage(newPage);
@@ -60,6 +63,14 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
         setCmdt(1);
         setOpen(false);
     }
+
+    const handleOpenModelo = () => {
+        setOpenModelo(true);
+    };
+
+    const handleCloseModelo = () => {
+        setOpenModelo(false);
+    };
 
     const handleShowReport = () => {
         if (!showReport) {
@@ -102,6 +113,8 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                             setProductsClient(prevProducts => [...prevProducts, ...(Array.isArray(productData) ? productData : [productData])]);
                         }
                     });
+
+                    setModelosContrato(await getModelClients());
                 } catch (err) {
                     console.error("Erro ao buscar dados:", err);
                 }
@@ -116,15 +129,15 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                 const contractData = await getContractByClientId(id);
                 setContracts(Array.isArray(contractData) ? contractData : [contractData]);
                 if (contractsInsert && contractsInsert.Cont_ID_Prod !== undefined) {
-                const productData = await getProductById(contractsInsert.Cont_ID_Prod);
-                console.log("Produto inserido: ", productData)
-                if (productData != null) {
-                    if (productsClient.map(p => p.ID_Prod).includes(productData.ID_Prod)) {
-                        setProductsClient(prevProducts => prevProducts.map(p => p.ID_Prod === productData.ID_Prod ? productData : p));
-                    } else {
-                        setProductsClient(prevProducts => [...prevProducts, ...(Array.isArray(productData) ? productData : [productData])]);
+                    const productData = await getProductById(contractsInsert.Cont_ID_Prod);
+                    console.log("Produto inserido: ", productData)
+                    if (productData != null) {
+                        if (productsClient.map(p => p.ID_Prod).includes(productData.ID_Prod)) {
+                            setProductsClient(prevProducts => prevProducts.map(p => p.ID_Prod === productData.ID_Prod ? productData : p));
+                        } else {
+                            setProductsClient(prevProducts => [...prevProducts, ...(Array.isArray(productData) ? productData : [productData])]);
+                        }
                     }
-                }
                 }
             };
             fetchDataContInsert();
@@ -137,25 +150,24 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
 
     const handleGeneratePdf = async () => {
         try {
-            contracts.forEach((contract) => {
-                updateContract(contract.ID_Contrato, contract.Cont_Comodato, contract.Cont_Qtde, contract.Cont_ValorTotal);
-            });
+            for (const contract of contracts) {
+                await updateContract(contract.ID_Contrato, contract.Cont_Comodato, contract.Cont_Qtde, contract.Cont_ValorTotal);
+            }
             const clientPDF = await getPdfByClientId(id);
             if (clientPDF == null) {
-                await createPDFContracts({ PDF_Client_Id: id, PDF_Status: 0, PDF_Generated_Date: new Date().toISOString() });
+                await createPDFContracts({ PDF_Client_Id: id, PDF_Status: 0, PDF_Generated_Date: new Date().toISOString(), PDF_Observacoes: observation });
             } else {
-                await updatePdf(clientPDF.id, {id: clientPDF.id, PDF_Client_Id: clientPDF.PDF_Client_Id, PDF_Status: 0, PDF_Generated_Date: new Date().toISOString() });
+                await updatePdf(clientPDF.id, {id: clientPDF.id, PDF_Client_Id: clientPDF.PDF_Client_Id, PDF_Status: 0, PDF_Generated_Date: new Date().toISOString(), PDF_Observacoes: observation });
             }
             navigate("/pagina-inicial");
-            // generateReport(client, contracts, products);
         } catch (err) {
             alert("PDF já criado no sistema!");
             console.error(err);
         }
     };
 
-    useEffect(()=> {
-        console.log("Contratos: ", contracts)
+    useEffect(() => {
+        console.log("Contracts updated: ", contracts);
     }, [contracts]);
 
     const handleAddProduct = (contractId: number, cmdt: number) => {
@@ -189,36 +201,44 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
             })
         );
     };
-    
-    const handleRemoveContract = (contractId: number, productId: number) => {
+
+    const handleRemoveContract = async (contractId: number, productId: number) => {
         setContracts(currentContracts => currentContracts.filter(c => c.ID_Contrato !== contractId));
         setProductsClient(currentProducts => currentProducts.filter(p => p.ID_Prod !== productId));
         try {
-            removeContract(contractId);
+            await removeContract(contractId);
         } catch (err) {
             console.error("Erro ao remover contrato:", err);
         }
     };
 
-    const handleInsertContract = (productId: number, cmdt: number) => {
-        const newContract: ContractDTOInsert = {
-            Cont_ID_Cli: client?.id || 0,
-            Cont_ID_Prod: productId,
-            Cont_Comodato: cmdt,
-            Cont_Qtde: 0,
-            Cont_ValorTotal: 0.00
-        };
+    const handleInsertContract = async (productId: number, cmdt: number) => {
+        const contractExists = contracts.find(c => c.Cont_ID_Prod === productId);
 
-        if (contracts.find(c => c.Cont_ID_Prod !== productId) || contracts.length === 0) {
-            console.log("Entrei aqui")
-            setContractsInsert(newContract);
+        if (!contractExists || contracts.length === 0) {
+                const newContract: ContractDTOInsert = {
+                Cont_ID_Cli: client?.id || 0,
+                Cont_ID_Prod: productId,
+                Cont_Comodato: cmdt,
+                Cont_Qtde: 0,
+                Cont_ValorTotal: 0.00
+            };
+
             try {
-            createContract(newContract);
+                await createContract(newContract);
+                setContractsInsert(newContract);
             } catch(err) {
                 console.error("Erro ao criar contrato:", err);
-            }
+            }          
         } else {
-            console.log("Teste")
+            const updateContractData = { ...contractExists, Cont_Comodato: cmdt };
+            
+            try {
+                await updateContract(updateContractData.ID_Contrato, cmdt, updateContractData.Cont_Qtde, updateContractData.Cont_ValorTotal);
+            } catch (err) {
+                console.error("Erro ao atualizar contrato:", err);
+            }
+
             setContracts(currentContracts =>
                 currentContracts.map(c => {
                     if (c.Cont_ID_Prod === productId) {
@@ -234,7 +254,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
 
     const handleSearch = async (query: string) => {
         if (query.length == 0) { // Não busca se o termo for muito curto
-            getAllProducts().then(allProducts => setProducts(allProducts));
+            await getAllProducts().then(allProducts => setProducts(allProducts));
             return;
         }
 
@@ -325,6 +345,62 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                     </Box>
                 </Box>
             </Modal>
+
+
+            {/* Modal Referente ao modelo de Contrato */}
+            <Modal
+            open={openModelo}
+            onClose={handleCloseModelo}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+            >
+                <Box sx={{ ...style, '@media (max-width: 600px)': { width: "80%" } }}>
+                    <Typography id="modal-modal-title" variant="h6" component="h2" textAlign={"center"}>
+                        Modelos de Contrato
+                    </Typography>
+                    <Typography id="modal-modal-description" sx={{ mt: 2 }} />
+
+                    <Box sx={{ maxHeight: "20vh", overflowY: "scroll", marginTop: 2 }}>
+                        {modelosContrato.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((modelContract) => (
+                            <Box key={modelContract.id} sx={{ display: 'flex', justifyContent: 'space-between', padding: 1, borderBottom: '1px solid #ccc', cursor: 'pointer' }} onClick={() => setSelectedProduct(modelContract.id)}>
+
+                                <Typography width={"90%"} alignSelf={"center"}>{modelContract.cli_razaoSocial}</Typography>
+                                <Checkbox
+                                    checked={modelContract.id === selectedModelContract}
+                                    onChange={(e) => setSelectedModelContract(e.target.checked ? modelContract.id : 0)}
+                                    sx={{ width: '9%', color: 'grey' }}
+                                    color="secondary"
+                                />
+                            </Box>
+                        ))}
+                    </Box>
+                    <TablePagination
+                        component="div"
+                        count={products.length}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        rowsPerPage={rowsPerPage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        rowsPerPageOptions={[3, 7, 12]}
+                    />
+                    <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} gap={2} mt={2} sx={{ '@media (max-width: 600px)': { flexDirection: "column" } }}>
+                        <Box width={"100%"} display={"flex"} justifyContent={"space-evenly"} height={"100%"} gap={1} sx={{ '@media (max-width: 600px)': { width: "100%" } }}>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={() => handleInsertContract(selectedProduct, cmdt)}
+                            >
+                                <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 600px)': { fontSize: '12px' } }}> Confirmar</Typography>
+                            </Button>
+                            <Button onClick={handleCloseModelo} variant="contained" color="primary">
+                                <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 600px)': { fontSize: '12px' } }}>Fechar</Typography>
+                            </Button>
+                        </Box>
+                    </Box>
+                </Box>
+            </Modal>
+
+
             {/* <Modal
             open={open}
             onClose={handleClose}
@@ -395,13 +471,28 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                         onRemoveContract={handleRemoveContract}
                     />
 
+                    <Box>
+                        <TextareaAutosize
+                            minRows={3}
+                            placeholder="Digite observações aqui..."
+                            style={{ width: '98%', padding: '8px', marginTop: "32px", fontSize: "20px", fontFamily: "Arial", borderRadius: "4px" }}
+                            value={observation}
+                            onChange={(e) => setObservation(e.target.value)}
+                        />
+                    </Box>
+
                     <Box display={"flex"} alignItems="center" justifyContent="center" gap={2} mt={4} sx={{ '@media (max-width: 600px)': { flexDirection: "column" } }}>
-                        <Box sx={{width: "33%", '@media (max-width: 600px)': { width: '100%' } }}>
+                        <Box sx={{width: "25%", '@media (max-width: 600px)': { width: '100%' } }}>
                             <Button variant="contained" color="primary" sx={{ padding: "15px", width: "100%", '@media (max-width: 600px)': { padding: "15px" } }} onClick={handleOpen}>
                                 <Typography variant="h6" sx={{ '@media (max-width: 600px)': { fontSize: "1rem" } }}>Adicionar Produto</Typography>
                             </Button>
                         </Box>
-                        <Box sx={{width: "33%", '@media (max-width: 600px)': { width: '100%' } }}>
+                        <Box sx={{width: "25%", '@media (max-width: 600px)': { width: '100%' } }}>
+                            <Button onClick={handleOpenModelo} variant="contained" color="primary" sx={{ padding: "15px", width: "100%", '@media (max-width: 600px)': { padding: "15px" } }}>
+                                <Typography variant="h6" sx={{ '@media (max-width: 600px)': { fontSize: "1rem" } }}>Modelos Contrato</Typography>
+                            </Button>
+                        </Box>
+                        <Box sx={{width: "25%", '@media (max-width: 600px)': { width: '100%' } }}>
                             <Button
                                 variant="contained"
                                 color="primary"
@@ -412,7 +503,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                                 <Typography variant="h6" sx={{ '@media (max-width: 600px)': { fontSize: "1rem" } }}>Prévia Relatório</Typography>
                             </Button>
                         </Box>
-                        <Box sx={{ width: "33%", '@media (max-width: 600px)': { width: '100%' } }}>
+                        <Box sx={{ width: "25%", '@media (max-width: 600px)': { width: '100%' } }}>
                             <GenericButton name="Voltar" type="button" link="/visualizar-clientes" />
                         </Box>
                     </Box>

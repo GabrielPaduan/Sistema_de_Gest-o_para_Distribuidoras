@@ -35,6 +35,7 @@ export const LoginForm: React.FC = () => {
                         localStorage.setItem('authToken', token); // Salva o token
                         
                         navigate("/pagina-inicial");
+                        window.location.reload();
                         setErro(false);
                     })
                     .catch((error) => {

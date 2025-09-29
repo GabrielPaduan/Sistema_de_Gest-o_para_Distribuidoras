@@ -7,7 +7,13 @@ export const findAllClients = async (): Promise<ClientDTO[]> => {
     return data;
 };
 
-export const createNewClient = async (clientData: ClientDTOInsert): Promise<ClientDTOInsert[]> => {
+export const findModelClients = async (): Promise<ClientDTO[]> => {
+    const { data, error } = await supabase.from('Clientes').select('*').eq('cli_modelo', 1);
+    if (error) throw error;
+    return data;
+};
+
+export const createNewClient = async (clientData: ClientDTOInsert): Promise<ClientDTO[]> => {
     // Não inclua o campo 'id' no objeto inserido, pois ele será gerado automaticamente pelo banco
     console.log(clientData)
     const { data, error } = await supabase
@@ -25,4 +31,14 @@ export const findClientById = async (id: number): Promise<ClientDTO | null> => {
     return data;
 };
 
+export const deleteClientById = async (id: number): Promise<boolean> => {
+    const { error } = await supabase.from('Contratos').delete().eq('Cont_ID_Cli', id);
+    if (error) throw error;
 
+    const { error: errorPDF } = await supabase.from('ContratosPDF').delete().eq('PDF_Client_Id', id);
+    if (errorPDF) throw errorPDF;
+
+    const { error: errorCliente } = await supabase.from('Clientes').delete().eq('id', id);
+    if (errorCliente) throw errorCliente;
+    return true;
+};

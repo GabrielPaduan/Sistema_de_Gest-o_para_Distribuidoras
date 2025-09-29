@@ -1,4 +1,4 @@
-import { Box, Button, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Box, Button, Checkbox, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { FormField } from "./FormField";
 import { GenericButton } from "./GenericButton";
 import { useState } from "react";
@@ -9,8 +9,15 @@ import { useNavigate } from "react-router-dom";
 
 export const Form: React.FC = () => {
     const [client, setClient] = useState<ClientDTOInsert | null>(null);
+    const [isChecked, setIsChecked] = useState<number>(0);
     const navigate = useNavigate();
-    const submitForm = (event: React.FormEvent<HTMLFormElement>) => {
+
+    const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        // Atualize o estado: 1 se estiver marcado, 0 se não estiver
+        setIsChecked(event.target.checked ? 1 : 0);
+    };
+
+    const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         try {
             const formData = new FormData(event.currentTarget);
@@ -30,13 +37,15 @@ export const Form: React.FC = () => {
                 cli_cidade: formData.get("cidade") as string,
                 cli_celular: formData.get("cel") as string,
                 cli_endNum: formData.get("endNum") as string,
+                cli_modelo: isChecked, // Default value; adjust as needed
             };
             setClient(newClient);
             console.log("Submitting client:", newClient);
             // Here you would typically send the newClient to your backend
-            createClient(newClient);
+            const idCliente = await createClient(newClient);
+            console.log("Created client with ID:", idCliente[0].id);
             setClient(null);
-            navigate("/visualizar-clientes");
+            navigate(`/contrato-cliente/${idCliente[0].id}`); // Redirect to the desired page after submission
         } catch (error) {
             console.error("Error submitting form:", error);
         }
@@ -99,14 +108,21 @@ export const Form: React.FC = () => {
                     <TextField id="tel" name="tel" variant="outlined" placeholder="Digite o telefone" sx={{ width: "90%", '@media (max-width: 600px)': { width: "83%" } }} />
                 </Box>
                 <Box display={"flex"} justifyContent={"space-between"}>
-                        <TextField id="dddCel" name="dddCel" variant="outlined" placeholder="DDD" sx={{ width: "9%", '@media (max-width: 600px)': { width: "15%" } }} />
-                        <TextField id="cel" name="cel" variant="outlined" placeholder="Digite o celular" sx={{ width: "90%", '@media (max-width: 600px)': { width: "83%" } }} />
-                    </Box>
+                    <TextField id="dddCel" name="dddCel" variant="outlined" placeholder="DDD" sx={{ width: "9%", '@media (max-width: 600px)': { width: "15%" } }} />
+                    <TextField id="cel" name="cel" variant="outlined" placeholder="Digite o celular" sx={{ width: "90%", '@media (max-width: 600px)': { width: "83%" } }} />
                 </Box>
+            </Box>
+            <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2} sx={{ '@media (max-width: 600px)': { flexDirection: "column" } }}>
+                <Typography variant="h6" textAlign={"center"}>Selecione essa opção caso queira definir esse cliente como modelo de contrato: </Typography>
+                <Checkbox id="modelo" name="modelo" style={{ color: "black" }} checked={isChecked === 1} // Use o estado para controlar a propriedade 'checked'
+                    onChange={handleCheckboxChange}/>
+            </Box>
+
+
             <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2}>
                 <Box>
                     <Button variant="contained" color="primary" type="submit" sx={{ margin: "10px auto", padding: "15px", '@media (max-width: 600px)': { width: "100%" } }}>
-                        <Typography variant="h6" color="text.secondary" sx={{ '@media (max-width: 600px)': { fontSize: "1rem" } }}>
+                        <Typography variant="h6" color="text.secondary" sx={{ '@media (max-width: 600px)': { fontSize: "1rem" } }} >
                             Cadastrar
                         </Typography>
                     </Button>
