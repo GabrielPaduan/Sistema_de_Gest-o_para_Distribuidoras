@@ -3,7 +3,7 @@ import { ClientDTO, ContractDTO, ContractDTOInsert, DadosProdutoComodatoDTO, Lay
 import React, { use, useEffect, useState } from "react";
 import { TableContract } from "./TableContract";
 import { generateReport } from "../utils/Report";
-import { getClientById, getModelClients } from "../services/clientService"; // Supondo que você tenha este serviço
+import { getClientById, getModelClients, getModelContracts } from "../services/clientService"; // Supondo que você tenha este serviço
 import { GenericButton } from "./GenericButton";
 import { getAllProducts, getProductByContractId, getProductById, searchProductsByName } from "../services/productService";
 import { SearchField } from "./searchField";
@@ -271,6 +271,28 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
         }
     };
 
+    const handleInsertModelContract = async (modelId: number) => {
+        const modelContracts = await getModelContracts(modelId);
+        modelContracts?.forEach(async (modelContract) => {
+            const newContract: ContractDTOInsert = {
+                Cont_ID_Cli: client?.id || 0,
+                Cont_ID_Prod: modelContract.Cont_ID_Prod,
+                Cont_Comodato: modelContract.Cont_Comodato,
+                Cont_Qtde: 0,
+                Cont_ValorTotal: 0.00
+            };
+            
+            try {
+                await createContract(newContract);
+                setContractsInsert(newContract);
+            } catch (err) {
+                console.error("Erro ao criar contrato:", err);
+            }
+        });
+
+        handleCloseModelo();
+    }
+
     useEffect(() => {
         handleSearch(debouncedSearchTerm);
     }, [debouncedSearchTerm]);
@@ -388,7 +410,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                             <Button
                                 variant="contained"
                                 color="primary"
-                                onClick={() => handleInsertContract(selectedProduct, cmdt)}
+                                onClick={() => handleInsertModelContract(selectedModelContract)}
                             >
                                 <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 600px)': { fontSize: '12px' } }}> Confirmar</Typography>
                             </Button>
