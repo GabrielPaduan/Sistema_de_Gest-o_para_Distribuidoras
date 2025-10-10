@@ -7,9 +7,10 @@ interface CustomTableContractProps extends TableContractProps {
     onAddProduct: (productId: number, cmdt: number) => void;
     onRemoveProduct: (productId: number) => void;
     onRemoveContract: (contractId: number, productId: number) => void;
+    openEditContract: (contractId: number) => void;
 }
 
-export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, products, onAddProduct, onRemoveProduct, onRemoveContract }) => {
+export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, products, onAddProduct, onRemoveProduct, onRemoveContract, openEditContract }) => {
     const sortedContracts = [...contracts].sort((a, b) => {
         const productA = products.find(p => p.ID_Prod === a.Cont_ID_Prod);
         const productB = products.find(p => p.ID_Prod === b.Cont_ID_Prod);
@@ -29,6 +30,7 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>ESTOQUE</TableCell>
                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>VALOR TOTAL</TableCell>
                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>REMOVER</TableCell>
+                    <TableCell sx={{ fontSize: 20, textAlign: "center" }}>EDITAR</TableCell>
                 </TableHead>
                 <TableBody>
                     {
@@ -59,9 +61,9 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
                                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { padding: "0px" } }}>
                                         <Button onClick={() => onRemoveContract(contract.ID_Contrato, contract.Cont_ID_Prod)} sx={{ '@media (max-width: 600px)': { padding: "0px" } }}><Icon sx={{ fontSize: 30, '@media (max-width: 600px)': { padding: "0px" } }}>delete_forever</Icon></Button>
                                     </TableCell>
-                                    {/* <TableCell sx={{ fontSize: 20, textAlign: "center" }}>
-                                        <Button onClick={() => onEditContract(contract.ID_Contrato, 15)}><Icon sx={{ fontSize: 40 }}>edit</Icon></Button>
-                                    </TableCell> */}
+                                    <TableCell sx={{ fontSize: 20, textAlign: "center" }}>
+                                        <Button onClick={() => openEditContract(contract.ID_Contrato)}><Icon sx={{ fontSize: 40 }}>edit</Icon></Button>
+                                    </TableCell>
                                     
                                 </TableRow>
                             );

@@ -46,6 +46,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
     const [modelosContrato, setModelosContrato] = useState<ClientDTO[]>([]);
     const [selectedModelContract, setSelectedModelContract] = useState<number>(0);
     const [openModelo, setOpenModelo] = useState(false);
+    const [openEdit, setOpenEdit] = useState(false);
 
     const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
         setPage(newPage);
@@ -70,6 +71,14 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
 
     const handleCloseModelo = () => {
         setOpenModelo(false);
+    };
+
+    const handleOpenEdit = () => {
+        setOpenEdit(true);
+    };
+
+    const handleCloseEdit = () => {
+        setOpenEdit(false);
     };
 
     const handleShowReport = () => {
@@ -281,7 +290,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                 Cont_Qtde: 0,
                 Cont_ValorTotal: 0.00
             };
-            
+
             try {
                 await createContract(newContract);
                 setContractsInsert(newContract);
@@ -291,6 +300,10 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
         });
 
         handleCloseModelo();
+    }
+
+    const handleEditContract = async (contractId: number) => {
+        handleOpenEdit();
     }
 
     useEffect(() => {
@@ -423,9 +436,9 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
             </Modal>
 
 
-            {/* <Modal
-            open={open}
-            onClose={handleClose}
+            <Modal
+            open={openEdit}
+            onClose={handleCloseEdit}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
             >
@@ -440,7 +453,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                     </Box>
                     <TablePagination
                         component="div"
-                        count={filteredProduct.length}
+                        count={1}
                         page={page}
                         onPageChange={handleChangePage}
                         rowsPerPage={rowsPerPage}
@@ -472,13 +485,13 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                             >
                                 <Typography variant="h6" fontSize={16}> Adicionar</Typography>
                             </Button>
-                            <Button onClick={handleClose} variant="contained" color="primary">
+                            <Button onClick={handleCloseEdit} variant="contained" color="primary">
                                 <Typography variant="h6" fontSize={16}>Voltar</Typography>
                             </Button>
                         </Box>
                     </Box>
                 </Box>
-            </Modal> */}
+            </Modal>
             <Typography variant="h4" color="text.primary" textAlign={"center"} paddingTop={10} sx={{ "@media (max-width: 600px)": { fontSize: "1.5rem" } }}>
                         {client?.cli_razaoSocial ? `Contrato de ${client.cli_razaoSocial}` : "Carregando Contrato..."}
             </Typography>
@@ -491,6 +504,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                         onAddProduct={handleAddProduct}    
                         onRemoveProduct={handleRemoveProduct}
                         onRemoveContract={handleRemoveContract}
+                        openEditContract={handleOpenEdit}
                     />
 
                     <Box>
