@@ -2,7 +2,7 @@ import supabase from '../config/supabase.js'; // Ajuste o caminho conforme neces
 import type { ProductDTO } from '../types/dtos.js'; // Supondo que você tenha seus tipos definidos
 
 export const findAllProduct = async (): Promise<ProductDTO[]> => {
-    const { data, error } = await supabase.from('Produtos').select('*').range(0, 7329);
+    const { data, error } = await supabase.from('Produtos').select('*').range(0, 8000);
     if (error) throw error;
     return data;
 };

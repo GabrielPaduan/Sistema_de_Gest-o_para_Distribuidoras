@@ -7,6 +7,8 @@ import { Login } from "../pages/login/Login";
 import { HistoricoContratos } from "../pages/HistoricoContratos/HistoricoContratos";
 import { CadastroUser } from "../pages/cadastroUser/CadastroUser";
 import { ProtectedRoute } from "../shared/components/ProtectedRoute";
+import { EstoqueProdutos } from "../pages/estoqueProdutos/EstoqueProdutos";
+import { CadastroProduto } from "../pages/cadastroProduto/CadastroProduto";
 
 export const AppRoutes = () => {
   return (
@@ -19,6 +21,8 @@ export const AppRoutes = () => {
         <Route path="/contrato-cliente/:id" element={<ProtectedRoute><ContratoCliente /></ProtectedRoute>} />
         <Route path="/historico-contratos" element={<ProtectedRoute><HistoricoContratos /></ProtectedRoute>} />
         <Route path="/cadastro-user" element={<ProtectedRoute><CadastroUser /></ProtectedRoute>} />
+        <Route path="/estoque-produtos" element={<ProtectedRoute><EstoqueProdutos /></ProtectedRoute>} />
+        <Route path="/cadastro-produto" element={<ProtectedRoute><CadastroProduto /></ProtectedRoute>} /> 
     </Routes>
  );
 }

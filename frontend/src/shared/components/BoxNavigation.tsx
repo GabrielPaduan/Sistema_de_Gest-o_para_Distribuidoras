@@ -16,6 +16,9 @@ export const BoxNavigation: React.FC = () => {
           <Box sx={{ '@media (max-width: 600px)': { width: '90%' } }}>
             <GenericButton name="Histórico de Contratos" type="button" link="/historico-contratos" />
           </Box>
+          <Box sx={{ '@media (max-width: 600px)': { width: '90%' } }}>
+            <GenericButton name="Acessar Estoque" type="button" link="/estoque-produtos" />
+          </Box>
       </Box>
     </>
   );
