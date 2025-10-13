@@ -62,3 +62,16 @@ export const searchProducts = async (req: express.Request, res: express.Response
         res.status(500).json({ error: "Erro interno no servidor ao buscar produtos." });
     }
 };
+
+export const deleteProduct = async (req: express.Request, res: express.Response) => {
+    try {
+        const productId = Number(req.params.id);
+        if (isNaN(productId)) {
+            return res.status(400).json({ message: "Invalid product ID" });
+        }
+        await productService.deleteProductById(productId);
+        res.status(204).send();
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+};

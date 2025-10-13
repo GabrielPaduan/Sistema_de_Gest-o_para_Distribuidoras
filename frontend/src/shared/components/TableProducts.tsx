@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAllProducts, searchProductsByName } from "../services/productService";
+import { getAllProducts, removeProduct, searchProductsByName } from "../services/productService";
 import { Box, Button, Icon, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from "@mui/material";
 import { SearchField } from "./searchField";
 import React from "react";
@@ -55,6 +55,13 @@ export const TableProducts: React.FC = () => {
         }
     }
 
+    async function onRemoveProduct(idProd: number): Promise<void> {
+        filteredProducts.splice(filteredProducts.findIndex(product => product.ID_Prod === idProd), 1);
+        setProductsData([...filteredProducts]);
+        setSearchTerm('');
+        await removeProduct(idProd);
+    }
+
     useEffect(() => {
         handleSearch(debouncedSearchTerm);
     }, [debouncedSearchTerm]);
@@ -83,16 +90,16 @@ export const TableProducts: React.FC = () => {
                             ) : (
                              
                                 filteredProducts.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(product => (
-                                        <TableRow key={product.ID_Prod} hover onClick={() => navigate(`/products/${product.ID_Prod}`)} sx={{ cursor: 'pointer' }}>
+                                        <TableRow key={product.ID_Prod} hover sx={{ cursor: 'pointer' }}>
                                             <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_CodProduto}</TableCell>
                                             <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_Estoque}</TableCell>
                                             <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>R${product.Prod_CustoCompra}</TableCell>
                                             <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>R${product.Prod_Valor}</TableCell>
                                             <TableCell sx={{ fontSize: 20, textAlign: "center" }}>
-                                                <Button><Icon sx={{ fontSize: 40 }}>edit</Icon></Button>
+                                                <Button onClick={() => navigate(`/editar-produto/${product.ID_Prod}`)}><Icon sx={{ fontSize: 40 }}>edit</Icon></Button>
                                             </TableCell>
                                             <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { padding: "0px" } }}>
-                                                <Button sx={{ '@media (max-width: 600px)': { padding: "0px" } }}><Icon sx={{ fontSize: 30, '@media (max-width: 600px)': { padding: "0px" } }}>delete_forever</Icon></Button>
+                                                <Button onClick={() => onRemoveProduct(product.ID_Prod)} sx={{ '@media (max-width: 600px)': { padding: "0px" } }}><Icon sx={{ fontSize: 30, '@media (max-width: 600px)': { padding: "0px" } }}>delete_forever</Icon></Button>
                                             </TableCell>  
                                         </TableRow>
                                     ))

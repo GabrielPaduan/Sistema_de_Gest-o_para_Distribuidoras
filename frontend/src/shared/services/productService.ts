@@ -28,3 +28,7 @@ export const searchProductsByName = async (nameQuery: string): Promise<ProductDT
   });
   return response.data;
 }
+
+export const removeProduct = async (idProd: number): Promise<void> => {
+  await api.delete(`/produtos/${idProd}`);
+}

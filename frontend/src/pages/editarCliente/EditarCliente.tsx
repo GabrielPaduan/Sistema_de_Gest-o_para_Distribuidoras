@@ -1,17 +1,16 @@
 import { Box, Typography } from "@mui/material";
 import React from "react";
-import { DefaultHeader, FormCadastroProduto } from "../../shared/components";
+import { DefaultHeader } from "../../shared/components";
 
-export class CadastroProduto extends React.Component {
+export class EditarCliente extends React.Component {
     render() {
         return (
             <>
                 <DefaultHeader />
                 <Box textAlign="center" paddingTop={10}>
-                    <Typography variant="h4">Cadastro de Produto</Typography>
-                    <FormCadastroProduto />
+                    <Typography variant="h4">Editar Cliente</Typography>
                 </Box>
             </>
         );
     }
-};
+}

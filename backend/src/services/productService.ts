@@ -67,3 +67,17 @@ export const searchProductsByName = async (nameQuery: string): Promise<any[]> =>
         throw error;
     }
 };
+
+export const deleteProductById = async (id: number): Promise<void> => {
+  const { error: errorContrato } = await supabase.from('Contratos').delete().eq('Cont_ID_Prod', id);  
+  if (errorContrato) {
+      console.error('Erro ao remover contratos associados ao produto:', errorContrato);
+      throw errorContrato;
+  }  
+  
+  const { error } = await supabase.from('Produtos').delete().eq('ID_Prod', id);
+    if (error) {
+        console.error('Erro ao remover produto:', error);
+        throw error;
+    }
+};

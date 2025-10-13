@@ -11,3 +11,5 @@ export { TableHistoricoContract } from "./TableHistoricoContract"
 export { PreviewReport } from "./PreviewReport"
 export { FormCadastroUser } from "./FormCadastroUser";
 export { TableProducts } from "./TableProducts";
+export { FormCadastroProduto } from "./FormCadastroProduto";
+export { FormEditarProduto } from "./FormEditarProduto";
