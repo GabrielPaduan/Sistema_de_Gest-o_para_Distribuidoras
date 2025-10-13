@@ -1,5 +1,5 @@
 import supabase from '../config/supabase.js'; // Ajuste o caminho conforme necessário
-import type { ClientDTO, ClientDTOInsert } from '../types/dtos.js'; // Supondo que você tenha seus tipos definidos
+import type { ClientDTO, ClientDTOInsert, ContractDTO } from '../types/dtos.js'; // Supondo que você tenha seus tipos definidos
 
 export const findAllClients = async (): Promise<ClientDTO[]> => {
     const { data, error } = await supabase.from('Clientes').select('*');
@@ -41,4 +41,24 @@ export const deleteClientById = async (id: number): Promise<boolean> => {
     const { error: errorCliente } = await supabase.from('Clientes').delete().eq('id', id);
     if (errorCliente) throw errorCliente;
     return true;
+};
+
+export const getModelContracts = async (modelId: number): Promise<ContractDTO[] | null> => {
+    const { data, error } = await supabase
+        .from('Clientes')
+        .select(`Contratos ( * )`)
+        .eq('cli_modelo', 1)
+        .eq('id', modelId);
+
+    if (error) {
+        if (error.code === 'PGRST116') {
+            return null;
+        }
+        console.error('Erro ao buscar contratos do modelo:', error);
+        throw error;
+    }
+
+    const contratos: ContractDTO[] | undefined = Array.isArray(data) && data.length > 0 ? data[0]?.Contratos : undefined;
+
+    return contratos || null;
 };

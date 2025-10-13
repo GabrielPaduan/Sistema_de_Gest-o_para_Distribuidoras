@@ -1,5 +1,5 @@
 import api from '../services/api'; // Importa nossa instância centralizada do axios
-import { ProductDTO } from '../utils/DTOS'; // Supondo que você também tenha um arquivo de tipos no frontend
+import { ProductDTO, ProductDTOInsert } from '../utils/DTOS'; // Supondo que você também tenha um arquivo de tipos no frontend
 
 // Função para buscar TODOS os produtos
 export const getAllProducts = async (): Promise<ProductDTO[]> => {
@@ -17,7 +17,7 @@ export const getProductByContractId = async (id: number): Promise<ProductDTO> =>
   return response.data;
 };
 
-export const createProduct = async (productData: Omit<ProductDTO, 'id'>): Promise<ProductDTO> => {
+export const createProduct = async (productData: ProductDTOInsert): Promise<ProductDTO> => {
   const response = await api.post('/produtos', productData);
   return response.data;
 };
@@ -27,4 +27,8 @@ export const searchProductsByName = async (nameQuery: string): Promise<ProductDT
     params: { q: nameQuery } // Passa o termo de busca como query parameter
   });
   return response.data;
+}
+
+export const removeProduct = async (idProd: number): Promise<void> => {
+  await api.delete(`/produtos/${idProd}`);
 }

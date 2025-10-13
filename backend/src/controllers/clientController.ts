@@ -55,3 +55,17 @@ export const getModelClients = async (req: express.Request, res: express.Respons
         res.status(500).json({ error: error.message });
     }
 };
+
+export const getModelContracts = async (req: express.Request, res: express.Response) => {
+    const { modelId } = req.params;
+    try {
+        const contracts = await clientService.getModelContracts(Number(modelId));
+        if (!contracts) {
+            return res.status(404).json({ error: "No contracts found for the given model ID" });
+        }
+        res.status(200).json(contracts);
+    }
+    catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+};

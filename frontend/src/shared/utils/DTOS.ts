@@ -45,10 +45,21 @@ export interface ProductDTO {
     Prod_NCM: number;
     Prod_UnMedida: string;
     Prod_CodProduto: string;
-    Prod_CodBarras: string;
+    Prod_CodBarras: number;
     Prod_Nome: string;
     Prod_Estoque: number;
-    
+}
+
+export interface ProductDTOInsert {
+    Prod_Valor: number;
+    Prod_CustoCompra: number;
+    Prod_CFOP: string;
+    Prod_NCM: number;
+    Prod_UnMedida: string;
+    Prod_CodProduto: string;
+    Prod_CodBarras: number;
+    Prod_Nome: string;
+    Prod_Estoque: number;
 }
 
 export interface ContractDTO {

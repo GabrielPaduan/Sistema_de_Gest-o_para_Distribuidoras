@@ -3,7 +3,7 @@ import { ClientDTO, ContractDTO, ContractDTOInsert, DadosProdutoComodatoDTO, Lay
 import React, { use, useEffect, useState } from "react";
 import { TableContract } from "./TableContract";
 import { generateReport } from "../utils/Report";
-import { getClientById, getModelClients } from "../services/clientService"; // Supondo que você tenha este serviço
+import { getClientById, getModelClients, getModelContracts } from "../services/clientService"; // Supondo que você tenha este serviço
 import { GenericButton } from "./GenericButton";
 import { getAllProducts, getProductByContractId, getProductById, searchProductsByName } from "../services/productService";
 import { SearchField } from "./searchField";
@@ -46,6 +46,8 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
     const [modelosContrato, setModelosContrato] = useState<ClientDTO[]>([]);
     const [selectedModelContract, setSelectedModelContract] = useState<number>(0);
     const [openModelo, setOpenModelo] = useState(false);
+    const [openEdit, setOpenEdit] = useState(false);
+    const [contractToEdit, setContractToEdit] = useState<number>(0);
 
     const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
         setPage(newPage);
@@ -57,6 +59,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
     };
 
     const handleOpen = () => {
+        console.log(products)
         setOpen(true);
     };
     const handleClose = () => {
@@ -70,6 +73,19 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
 
     const handleCloseModelo = () => {
         setOpenModelo(false);
+    };
+
+    const handleOpenEdit = (contractId: number, productId: number) => {
+        setSelectedProduct(productId);
+        setContractToEdit(contractId);
+        setOpenEdit(true);
+    };
+
+    const handleCloseEdit = () => {
+        setContractToEdit(0);
+        setSelectedProduct(0);
+        setCmdt(1);
+        setOpenEdit(false);
     };
 
     const handleShowReport = () => {
@@ -271,6 +287,60 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
         }
     };
 
+    const handleInsertModelContract = async (modelId: number) => {
+        const modelContracts = await getModelContracts(modelId);
+        if (!modelContracts) {
+            return;
+        }
+        const createPromises = modelContracts.map(async (modelContract) => {
+            const newContract: ContractDTOInsert = {
+                Cont_ID_Cli: client?.id || 0,
+                Cont_ID_Prod: modelContract.Cont_ID_Prod,
+                Cont_Comodato: modelContract.Cont_Comodato,
+                Cont_Qtde: 0,
+                Cont_ValorTotal: 0.00
+            };
+
+            return createContract(newContract).then (() => {
+                setContractsInsert(newContract);
+            });
+        });
+
+        try {
+            await Promise.all(createPromises);
+        } catch (err) {
+            console.error("Erro ao criar contratos a partir do modelo:", err);
+        } finally {
+            handleCloseModelo();
+        }
+    }
+
+    const handleUpdateComodato = async (productId: number, newComodato: number) => {
+        const contractToUpdate = contracts.find(c => c.Cont_ID_Prod === productId);
+        if (contractToUpdate) {
+            try {
+                await updateContract(contractToUpdate.ID_Contrato, newComodato, contractToUpdate.Cont_Qtde, contractToUpdate.Cont_ValorTotal);
+                setContracts(currentContracts =>
+                    currentContracts.map(c => 
+                        c.ID_Contrato === contractToUpdate.ID_Contrato ? { ...c, Cont_Comodato: newComodato } : c
+                    )
+                );
+                handleCloseEdit();
+            } catch (err) {
+                console.error("Erro ao atualizar o comodato:", err);
+            }
+        }
+    };
+  
+    useEffect(() => {
+        if (openEdit && contractToEdit !== 0) {
+            const contract = contracts.find(c => c.ID_Contrato === contractToEdit);
+            if (contract) {
+                setCmdt(contract.Cont_Comodato);
+            }
+        }
+    }, [openEdit, contractToEdit]);
+
     useEffect(() => {
         handleSearch(debouncedSearchTerm);
     }, [debouncedSearchTerm]);
@@ -388,7 +458,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                             <Button
                                 variant="contained"
                                 color="primary"
-                                onClick={() => handleInsertContract(selectedProduct, cmdt)}
+                                onClick={() => handleInsertModelContract(selectedModelContract)}
                             >
                                 <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 600px)': { fontSize: '12px' } }}> Confirmar</Typography>
                             </Button>
@@ -401,9 +471,9 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
             </Modal>
 
 
-            {/* <Modal
-            open={open}
-            onClose={handleClose}
+            <Modal
+            open={openEdit}
+            onClose={handleCloseEdit}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
             >
@@ -411,24 +481,12 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                     <Typography id="modal-modal-title" variant="h6" component="h2" textAlign={"center"}>
                         Editar Produto
                     </Typography>
-                    <Typography id="modal-modal-description" sx={{ mt: 2 }} />
-                    <Box sx={{ maxHeight: "20vh", overflowY: "scroll", marginTop: 2 }}>
-                        <Typography>Valor do novo comodato:</Typography>
-                        <TextField variant="outlined" value={cmdt} onChange={(e) => setCmdt(Number(e.target.value))} />
-                    </Box>
-                    <TablePagination
-                        component="div"
-                        count={filteredProduct.length}
-                        page={page}
-                        onPageChange={handleChangePage}
-                        rowsPerPage={rowsPerPage}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
-                        rowsPerPageOptions={[5, 10, 15]}
-                    />
-                    <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} gap={2}>
-                        <Box display={"flex"} alignItems={"center"} justifyContent={"space-evenly"} width={"60%"} height={"100%"}>
+                    <Typography id="modal-modal-description" sx={{ mt: 2 }}>Produto Selecionado: {productsClient.find(p => p.ID_Prod === selectedProduct)?.Prod_CodProduto}</Typography>
+                    <Typography id="modal-modal-description" sx={{ mt: 0.5 }}>Comodato atual: {contracts.find(c => c.ID_Contrato === contractToEdit)?.Cont_Comodato}</Typography>
+                    <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} gap={2} mt={2}>
+                        <Box display={"flex"} alignItems={"center"} justifyContent={"space-evenly"}  height={"100%"} gap={2}>
                             <Typography component="label" htmlFor={`quantity`} variant="h6">
-                                Comodato:
+                                Novo comodato:
                             </Typography>
                             <TextField
                                 id={`quantity`}
@@ -442,21 +500,21 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                                 inputProps = {{ style: { padding: "8px" } }}
                             />
                         </Box>
-                        <Box width={"40%"} display={"flex"} justifyContent={"center"} height={"100%"} gap={1}>
+                        <Box display={"flex"} justifyContent={"center"} height={"100%"} gap={1}>
                             <Button
                                 variant="contained"
                                 color="primary"
-                                onClick={() => handleInsertContract(selectedProduct, cmdt)}
+                                onClick={() => handleUpdateComodato(selectedProduct, cmdt)}
                             >
-                                <Typography variant="h6" fontSize={16}> Adicionar</Typography>
+                                <Typography variant="h6" fontSize={16}> Editar</Typography>
                             </Button>
-                            <Button onClick={handleClose} variant="contained" color="primary">
+                            <Button onClick={handleCloseEdit} variant="contained" color="primary">
                                 <Typography variant="h6" fontSize={16}>Voltar</Typography>
                             </Button>
                         </Box>
                     </Box>
                 </Box>
-            </Modal> */}
+            </Modal>
             <Typography variant="h4" color="text.primary" textAlign={"center"} paddingTop={10} sx={{ "@media (max-width: 600px)": { fontSize: "1.5rem" } }}>
                         {client?.cli_razaoSocial ? `Contrato de ${client.cli_razaoSocial}` : "Carregando Contrato..."}
             </Typography>
@@ -469,6 +527,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                         onAddProduct={handleAddProduct}    
                         onRemoveProduct={handleRemoveProduct}
                         onRemoveContract={handleRemoveContract}
+                        openEditContract={handleOpenEdit}
                     />
 
                     <Box>

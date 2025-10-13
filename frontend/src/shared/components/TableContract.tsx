@@ -7,9 +7,10 @@ interface CustomTableContractProps extends TableContractProps {
     onAddProduct: (productId: number, cmdt: number) => void;
     onRemoveProduct: (productId: number) => void;
     onRemoveContract: (contractId: number, productId: number) => void;
+    openEditContract: (contractId: number, productId: number) => void;
 }
 
-export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, products, onAddProduct, onRemoveProduct, onRemoveContract }) => {
+export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, products, onAddProduct, onRemoveProduct, onRemoveContract, openEditContract }) => {
     const sortedContracts = [...contracts].sort((a, b) => {
         const productA = products.find(p => p.ID_Prod === a.Cont_ID_Prod);
         const productB = products.find(p => p.ID_Prod === b.Cont_ID_Prod);
@@ -22,13 +23,15 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
         <TableContainer component={Paper} sx={{ margin: "auto", cursor: "default", width: "100%" }}>
             <Table width="100%">
                 <TableHead>
-                    <TableCell  sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>CMDT</TableCell>
-                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>PRODUTOS</TableCell>
-                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px", display: "none" } }}>VALOR</TableCell>
-                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>REPOSIÇÃO</TableCell>
-                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>ESTOQUE</TableCell>
-                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>VALOR TOTAL</TableCell>
-                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>REMOVER</TableCell>
+                    <TableCell  sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>Cmdt</TableCell>
+                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>Produtos</TableCell>
+                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px", display: "none" } }}>Valor</TableCell>
+                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>Reposição</TableCell>
+                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>Estoque</TableCell>
+                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>Valor Total</TableCell>
+                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>Editar</TableCell>
+                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>Remover</TableCell>
+
                 </TableHead>
                 <TableBody>
                     {
@@ -56,13 +59,12 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
                                     </TableCell>
                                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_Estoque}</TableCell>
                                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>R$ {contract.Cont_ValorTotal.toFixed(2)}</TableCell>
+                                    <TableCell sx={{ fontSize: 20, textAlign: "center" }}>
+                                        <Button onClick={() => openEditContract(contract.ID_Contrato, product.ID_Prod)}><Icon sx={{ fontSize: 40 }}>edit</Icon></Button>
+                                    </TableCell>
                                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { padding: "0px" } }}>
                                         <Button onClick={() => onRemoveContract(contract.ID_Contrato, contract.Cont_ID_Prod)} sx={{ '@media (max-width: 600px)': { padding: "0px" } }}><Icon sx={{ fontSize: 30, '@media (max-width: 600px)': { padding: "0px" } }}>delete_forever</Icon></Button>
-                                    </TableCell>
-                                    {/* <TableCell sx={{ fontSize: 20, textAlign: "center" }}>
-                                        <Button onClick={() => onEditContract(contract.ID_Contrato, 15)}><Icon sx={{ fontSize: 40 }}>edit</Icon></Button>
-                                    </TableCell> */}
-                                    
+                                    </TableCell>  
                                 </TableRow>
                             );
                         })

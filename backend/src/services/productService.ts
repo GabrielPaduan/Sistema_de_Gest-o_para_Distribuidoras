@@ -2,7 +2,7 @@ import supabase from '../config/supabase.js'; // Ajuste o caminho conforme neces
 import type { ProductDTO } from '../types/dtos.js'; // Supondo que você tenha seus tipos definidos
 
 export const findAllProduct = async (): Promise<ProductDTO[]> => {
-    const { data, error } = await supabase.from('Produtos').select('*').range(0, 7329);
+    const { data, error } = await supabase.from('Produtos').select('*').range(0, 8000);
     if (error) throw error;
     return data;
 };
@@ -64,6 +64,20 @@ export const searchProductsByName = async (nameQuery: string): Promise<any[]> =>
         return data || [];
     } catch (error) {
         console.error("Exceção na busca de produtos:", error);
+        throw error;
+    }
+};
+
+export const deleteProductById = async (id: number): Promise<void> => {
+  const { error: errorContrato } = await supabase.from('Contratos').delete().eq('Cont_ID_Prod', id);  
+  if (errorContrato) {
+      console.error('Erro ao remover contratos associados ao produto:', errorContrato);
+      throw errorContrato;
+  }  
+  
+  const { error } = await supabase.from('Produtos').delete().eq('ID_Prod', id);
+    if (error) {
+        console.error('Erro ao remover produto:', error);
         throw error;
     }
 };

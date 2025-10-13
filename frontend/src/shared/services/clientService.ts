@@ -1,5 +1,5 @@
 import api from '../services/api'; // Importa nossa instância centralizada do axios
-import { ClientDTO } from '../utils/DTOS'; // Supondo que você também tenha um arquivo de tipos no frontend
+import { ClientDTO, ContractDTO } from '../utils/DTOS'; // Supondo que você também tenha um arquivo de tipos no frontend
 
 // Função para buscar TODOS os clientes
 export const getAllClients = async (): Promise<ClientDTO[]> => {
@@ -28,3 +28,8 @@ export const getModelClients = async (): Promise<ClientDTO[]> => {
   const response = await api.get('/clientes/modelos/list');
   return response.data;
 };
+
+export const getModelContracts = async (modelId: number): Promise<ContractDTO[]> => {
+  const response = await api.get(`/clientes/modelos/${modelId}`);
+  return response.data;
+}

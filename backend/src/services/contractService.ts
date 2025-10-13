@@ -40,3 +40,4 @@ export const updateContract = async (
     if (error) throw error;
     return data;
 };
+
