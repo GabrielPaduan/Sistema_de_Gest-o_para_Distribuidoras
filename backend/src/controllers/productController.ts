@@ -19,6 +19,15 @@ export const createProduct = async (req: express.Request, res: express.Response)
     }
 };
 
+export const updateProduct = async (req: express.Request, res: express.Response) => {
+    try {
+        const updateProduct = await productService.updateProduct(req.body);
+        res.status(201).json(updateProduct)       
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
 export const getProductById = async (req: express.Request, res: express.Response) => {
     try {
         const product = await productService.findProductById(Number(req.params.id));
@@ -75,3 +84,4 @@ export const deleteProduct = async (req: express.Request, res: express.Response)
         res.status(500).json({ error: error.message });
     }
 };
+

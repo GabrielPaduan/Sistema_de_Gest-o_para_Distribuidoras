@@ -13,6 +13,11 @@ export const createNewProduct = async (productData: Omit<ProductDTO, 'id'>): Pro
     return data;
 };
 
+export const updateProduct = async (productData: ProductDTO): Promise<void> => {
+  const { error} = await supabase.from('Produtos').update([productData]).eq('ID_Prod', productData.ID_Prod);
+  if (error) throw error;
+}
+
 export const findProductById = async (id: number): Promise<ProductDTO | null> => {
   const { data, error } = await supabase.from('Produtos').select('*').eq('ID_Prod', id).single();
   if (error) {

@@ -32,3 +32,7 @@ export const searchProductsByName = async (nameQuery: string): Promise<ProductDT
 export const removeProduct = async (idProd: number): Promise<void> => {
   await api.delete(`/produtos/${idProd}`);
 }
+
+export const updateProduct = async (productData: ProductDTO): Promise<void> => {
+  await api.put(`/produtos/editar`, productData);
+}

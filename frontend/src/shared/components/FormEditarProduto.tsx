@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { ProductDTO, ProductDTOInsert } from "../utils/DTOS";
 import { useEffect, useState } from "react";
-import { createProduct, getProductById } from "../services/productService";
+import { createProduct, getProductById, updateProduct } from "../services/productService";
 import { Box, TextField, Select, MenuItem, Typography, Checkbox, Button, InputAdornment } from "@mui/material";
 import { GenericButton } from "./GenericButton";
 
@@ -10,7 +10,7 @@ export const FormEditarProduto: React.FC = () => {
     let idProd = parseInt(useParams().id || "0");
     const [product, setProduct] = useState<ProductDTO | null>(null);
     const [formData, setFormData] = useState<ProductDTO | null>({
-        ID_Prod: 0,
+        ID_Prod: idProd,
         Prod_Valor: 0,
         Prod_CustoCompra: 0,
         Prod_CFOP: '',
@@ -41,7 +41,8 @@ export const FormEditarProduto: React.FC = () => {
         event.preventDefault();
         try {
             const formData = new FormData(event.currentTarget);
-            const newProduct: ProductDTOInsert = {
+            const updatedProduct: ProductDTO = {
+                ID_Prod: idProd,
                 Prod_Valor: valor,
                 Prod_CustoCompra: formData.get("prodCustoCompra") as unknown as number || 0,
                 Prod_CFOP: formData.get("prodCFOP") as string,
@@ -52,12 +53,12 @@ export const FormEditarProduto: React.FC = () => {
                 Prod_Nome: formData.get("nomeProduto") as string,
                 Prod_Estoque: formData.get("prodEstoque") as unknown as number || 0,
             }
-            await createProduct(newProduct);
+            await updateProduct(updatedProduct);
         } catch (error) {
             console.error("Error creating product:", error);
         }
 
-        navigate("/estoque-produtos");
+       // navigate("/estoque-produtos");
     }
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
