@@ -110,18 +110,6 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
                     </Box>
                 </Box>
             </Paper>
-
-            {/* BOTÃO DE AÇÃO */}
-            {/* <Box sx={{ textAlign: 'center', my: 4 }}>
-                <Button
-                    variant="contained"
-                    size="large"
-                    startIcon={<FileDownloadIcon />}
-                    onClick={handleGeneratePdf}
-                >
-                    Gerar Relatório em PDF
-                </Button>
-            </Box> */}
         </Container>
     );
 };

@@ -13,3 +13,4 @@ export { FormCadastroUser } from "./FormCadastroUser";
 export { TableProducts } from "./TableProducts";
 export { FormCadastroProduto } from "./FormCadastroProduto";
 export { FormEditarProduto } from "./FormEditarProduto";
+export { BoxNavigationClientes } from "./BoxNavigationClientes";

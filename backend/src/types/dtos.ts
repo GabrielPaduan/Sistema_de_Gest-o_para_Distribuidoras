@@ -48,6 +48,7 @@ export interface ProductDTO {
     Prod_CodBarras: string;
     Prod_Nome: string;
     Prod_Estoque: number;
+    Prod_PorcLucro: number;
 }
 
 export interface ContractDTO {
@@ -57,6 +58,7 @@ export interface ContractDTO {
     Cont_Comodato: number;
     Cont_Qtde: number;
     Cont_ValorTotal: number;
+    Cont_PorcLucro: number;
 }
 
 export interface PdfStructDTO {

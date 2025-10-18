@@ -1,13 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { ProductDTOInsert } from "../utils/DTOS";
-import { useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { createProduct } from "../services/productService";
-import { Box, TextField, Select, MenuItem, Typography, Checkbox, Button } from "@mui/material";
+import { Box, TextField, Select, MenuItem, Typography, Checkbox, Button, InputAdornment } from "@mui/material";
 import { GenericButton } from "./GenericButton";
 
 export const FormCadastroProduto: React.FC = () => {
     const [product, setProduct] = useState<ProductDTOInsert | null>(null);
-    const valor = 0;
+    const [custoCompra, setCustoCompra] = useState<number | 0>(0);
+    const [porcentagemLucro, setPorcentagemLucro] = useState<number | 0>(0);
+    const [valor, setValor] = useState<number | 0>(0);
+    const [disabled, setDisabled] = useState<boolean>(false);
     const navigate = useNavigate();
     const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -23,6 +26,7 @@ export const FormCadastroProduto: React.FC = () => {
                 Prod_CodBarras: formData.get("codigoBarras") as unknown as number || 0,
                 Prod_Nome: formData.get("nomeProduto") as string,
                 Prod_Estoque: formData.get("prodEstoque") as unknown as number || 0,
+                Prod_PorcLucro: formData.get("prodPorcLucro") as unknown as number || 0,
             }
             await createProduct(newProduct);
         } catch (error) {
@@ -31,6 +35,29 @@ export const FormCadastroProduto: React.FC = () => {
 
         navigate("/estoque-produtos");
     }
+
+    useEffect(() => {
+        if (custoCompra === 0) {
+            setDisabled(true);
+        } else {
+            setDisabled(false);
+        }
+
+        if (custoCompra > 0 && porcentagemLucro > 0) {
+            const valorVenda = custoCompra + (custoCompra * porcentagemLucro) / 100;
+            setValor(parseFloat(valorVenda.toFixed(2)));
+        }
+    }, [custoCompra, porcentagemLucro]);
+
+    useEffect(() => {
+        if (valor > 0 && custoCompra > 0) {
+            const porcLucro = ((valor - custoCompra) / custoCompra) * 100;
+            setPorcentagemLucro(parseFloat(porcLucro.toFixed(2)));
+        } else if (valor < custoCompra) {
+            setValor(0);
+        }
+    }, [valor]);
+
     return (
         <Box
             component="form"
@@ -47,20 +74,95 @@ export const FormCadastroProduto: React.FC = () => {
         >
             <Box display={"flex"} flexDirection={"column"} width={"100%"} gap={2}>
                 <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 600px)': { flexDirection: "column", gap: 2 } }}>
-                    <TextField id="codigoBarras" name="codigoBarras" variant="outlined" placeholder="Digite o código de barras" sx={{ width: "33.33%", '@media (max-width: 600px)': { width: "100%" } }} />
+                    <TextField label="Em desenvolvimento..." id="codigoBarras" name="codigoBarras" variant="outlined" placeholder="Em desenvolvimento..." sx={{ width: "33.33%", '@media (max-width: 600px)': { width: "100%" }, '& .MuiInputLabel-root': {
+                        color: 'gray', // Cor do label normal
+                    }, '& .MuiInputLabel-root.Mui-focused': {
+                        color: '#181393', // Cor do label quando em foco
+                    } }}
+                    type="number"
+                    disabled/>
 
-                    <TextField id="codigoProduto" name="codigoProduto" variant="outlined" placeholder="Digite o código de produto" sx={{ width: "33.33%" }} />
-                    <TextField id="nomeProduto" name="nomeProduto" variant="outlined" placeholder="Digite o nome do produto" sx={{ width: "33.33%" }} />
-             
+                    <TextField label="Código do Produto" id="codigoProduto" name="codigoProduto" variant="outlined" placeholder="Digite o código de produto" sx={{ width: "33.33%", '& .MuiInputLabel-root': {
+                        color: 'gray', // Cor do label normal
+                    }, '& .MuiInputLabel-root.Mui-focused': {
+                        color: '#181393', // Cor do label quando em foco
+                    } }} />
+                    <TextField label="Nome do Produto" id="nomeProduto" name="nomeProduto" variant="outlined" placeholder="Digite o nome do produto" sx={{ width: "33.33%", '& .MuiInputLabel-root': {
+                        color: 'gray', // Cor do label normal
+                    }, '& .MuiInputLabel-root.Mui-focused': {
+                        color: '#181393', // Cor do label quando em foco
+                    } }} />
+
                 </Box>
                 <Box display={"flex"} justifyContent={"space-between"} gap={2}>
-                    <TextField id="prodUN" name="prodUN" variant="outlined" placeholder="Digite a unidade de medida" sx={{ width: "33.33%" }} />
-                    <TextField id="prodNCM" name="prodNCM" variant="outlined" placeholder="Digite o NCM" sx={{ width: "33.33%", '@media (max-width: 600px)': { width: "15%" } }} />
-                    <TextField id="prodEstoque" name="prodEstoque" variant="outlined" placeholder="Digite o estoque" sx={{ width: "33.33%" }} />
+                    <TextField label="Unidade de Medida" id="prodUN" name="prodUN" variant="outlined" placeholder="Digite a unidade de medida" sx={{ width: "25%", '& .MuiInputLabel-root': {
+                        color: 'gray', // Cor do label normal
+                    }, '& .MuiInputLabel-root.Mui-focused': {
+                        color: '#181393', // Cor do label quando em foco
+                    } }} />
+                    <TextField label="NCM" id="prodNCM" name="prodNCM" variant="outlined" placeholder="Digite o NCM" sx={{ width: "25%", '@media (max-width: 600px)': { width: "15%" }, '& .MuiInputLabel-root': {
+                        color: 'gray', // Cor do label normal
+                    }, '& .MuiInputLabel-root.Mui-focused': {
+                        color: '#181393', // Cor do label quando em foco
+                    } }} 
+                    type="number"
+                    />
+                    <TextField label="Estoque" id="prodEstoque" name="prodEstoque" variant="outlined" placeholder="Digite o estoque" sx={{ width: "25%", '& .MuiInputLabel-root': {
+                        color: 'gray', // Cor do label normal
+                    }, '& .MuiInputLabel-root.Mui-focused': {
+                        color: '#181393', // Cor do label quando em foco
+                    } }}
+                    type="number"
+                    />
+                    <TextField label="CFOP" id="prodCFOP" name="prodCFOP" variant="outlined" placeholder="Digite o CFOP" sx={{ width: "25%", '& .MuiInputLabel-root': {
+                        color: 'gray', // Cor do label normal
+                    }, '& .MuiInputLabel-root.Mui-focused': {
+                        color: '#181393', // Cor do label quando em foco
+                    } }} />
                 </Box>
                 <Box display={"flex"} justifyContent={"space-between"} gap={2}>
-                    <TextField id="prodCFOP" name="prodCFOP" variant="outlined" placeholder="Digite o CFOP" sx={{ width: "50%" }} />
-                    <TextField id="prodCustoCompra" name="prodCustoCompra" variant="outlined" placeholder="Digite o custo de compra" sx={{ width: "50%", '@media (max-width: 600px)': { width: "15%" } }} />
+                    <TextField label="Custo de Compra" id="prodCustoCompra" name="prodCustoCompra" variant="outlined" placeholder="Digite o custo de compra" slotProps={{
+                        input: {
+                        startAdornment: <InputAdornment position="start">R$</InputAdornment>,
+                        },
+                    }} sx={{ width: "50%", '@media (max-width: 600px)': { width: "15%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': {
+                        color: 'gray', // Cor do label normal
+                    }, '& .MuiInputLabel-root.Mui-focused': {
+                        color: '#181393', // Cor do label quando em foco
+                    } }}
+                    value={custoCompra}
+                    onChange={(e) => setCustoCompra(Number(e.target.value))}
+                    type="number"
+                    />
+                    <TextField label="Porcentagem de Lucro" id="prodPorcLucro" name="prodPorcLucro" variant="outlined" placeholder="Digite a porcentagem de lucro" slotProps={{
+                        input: {
+                            endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                        },
+                    }} sx={{ width: "50%", '@media (max-width: 600px)': { width: "15%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': {
+                        color: 'gray', // Cor do label normal
+                    }, '& .MuiInputLabel-root.Mui-focused': {
+                        color: '#181393', // Cor do label quando em foco
+                    } }}  
+                    value={porcentagemLucro}
+                    onChange={(e) => setPorcentagemLucro(Number(e.target.value))}
+                    disabled={disabled}
+                    type="number"
+                    />
+                    <TextField label="Custo de Venda" id="prodCustoVenda" name="prodCustoVenda" variant="outlined" placeholder="Digite o custo de venda" slotProps={{
+                        input: {
+                            startAdornment: <InputAdornment position="start">R$</InputAdornment>,
+                        },
+                    }} sx={{ width: "50%", '@media (max-width: 600px)': { width: "15%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': {
+                        color: 'gray', // Cor do label normal
+                    }, '& .MuiInputLabel-root.Mui-focused': {
+                        color: '#181393', // Cor do label quando em foco
+                    }}}
+                    value={valor}
+                    onChange={(e) => setValor(Number(e.target.value))}    
+                    disabled={disabled}
+                    type="number"
+                    />
+                
                 </Box>
             </Box>
 

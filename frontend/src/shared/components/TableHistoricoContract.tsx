@@ -1,7 +1,7 @@
 import { Box, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { SearchField } from "./searchField";
-import { ClientDTO, PdfStructCompleteDTO, PdfStructDTO, ProductDTO } from "../utils/DTOS";
+import { PdfStructCompleteDTO, PdfStructDTO, ProductDTO } from "../utils/DTOS";
 import { getAllPDFContracts, updatePdf } from "../services/pdfContract";
 import { getClientById } from "../services/clientService";
 import { getContractByClientId } from "../services/contractService";
@@ -151,7 +151,7 @@ export const TableHistoricoContract: React.FC = () => {
                             rowsPerPageOptions={[5, 10, 15]}
                         />
                     </TableContainer>
-                    <GenericButton name="Voltar" type="button" link="/pagina-inicial" />
+                    <GenericButton name="Voltar" type="button" link="/gerenciar-clientes" />
                 </Box>
             )}
             {selectedPdf && selectedPdf?.PDF_Client && showReport && (

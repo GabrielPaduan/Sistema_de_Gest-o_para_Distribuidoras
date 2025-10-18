@@ -128,7 +128,7 @@ export const Form: React.FC = () => {
                     </Button>
                 </Box>
                 <Box>
-                    <GenericButton name="Voltar" type="button" link="/pagina-inicial" />
+                    <GenericButton name="Voltar" type="button" link="/gerenciar-clientes" />
                 </Box>
             </Box>
         </Box>

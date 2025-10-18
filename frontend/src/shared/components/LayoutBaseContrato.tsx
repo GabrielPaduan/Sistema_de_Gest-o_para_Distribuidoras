@@ -35,6 +35,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
     const [open, setOpen] = React.useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [cmdt, setCmdt] = useState<number | 1>(1);
+    const [porcLucro, setPorcLucro] = useState<number | 0.1>(0.1);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(3);
     const [selectedProduct, setSelectedProduct] = useState<number>(0);
@@ -167,7 +168,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
     const handleGeneratePdf = async () => {
         try {
             for (const contract of contracts) {
-                await updateContract(contract.ID_Contrato, contract.Cont_Comodato, contract.Cont_Qtde, contract.Cont_ValorTotal);
+                await updateContract(contract.ID_Contrato, contract.Cont_Comodato, contract.Cont_Qtde, contract.Cont_ValorTotal, contract.Cont_PorcLucro);
             }
             const clientPDF = await getPdfByClientId(id);
             if (clientPDF == null) {
@@ -228,7 +229,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
         }
     };
 
-    const handleInsertContract = async (productId: number, cmdt: number) => {
+    const handleInsertContract = async (productId: number, cmdt: number, porcLucro: number) => {
         const contractExists = contracts.find(c => c.Cont_ID_Prod === productId);
 
         if (!contractExists || contracts.length === 0) {
@@ -237,7 +238,8 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                 Cont_ID_Prod: productId,
                 Cont_Comodato: cmdt,
                 Cont_Qtde: 0,
-                Cont_ValorTotal: 0.00
+                Cont_ValorTotal: 0.00,
+                Cont_PorcLucro: 0.00
             };
 
             try {
@@ -250,7 +252,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
             const updateContractData = { ...contractExists, Cont_Comodato: cmdt };
             
             try {
-                await updateContract(updateContractData.ID_Contrato, cmdt, updateContractData.Cont_Qtde, updateContractData.Cont_ValorTotal);
+                await updateContract(updateContractData.ID_Contrato, cmdt, updateContractData.Cont_Qtde, updateContractData.Cont_ValorTotal, porcLucro);
             } catch (err) {
                 console.error("Erro ao atualizar contrato:", err);
             }
@@ -298,7 +300,8 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                 Cont_ID_Prod: modelContract.Cont_ID_Prod,
                 Cont_Comodato: modelContract.Cont_Comodato,
                 Cont_Qtde: 0,
-                Cont_ValorTotal: 0.00
+                Cont_ValorTotal: 0.00,
+                Cont_PorcLucro: 0.00
             };
 
             return createContract(newContract).then (() => {
@@ -315,14 +318,14 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
         }
     }
 
-    const handleUpdateComodato = async (productId: number, newComodato: number) => {
+    const handleUpdateComodato = async (productId: number, newComodato: number, newPorcLucro: number) => {
         const contractToUpdate = contracts.find(c => c.Cont_ID_Prod === productId);
         if (contractToUpdate) {
             try {
-                await updateContract(contractToUpdate.ID_Contrato, newComodato, contractToUpdate.Cont_Qtde, contractToUpdate.Cont_ValorTotal);
+                await updateContract(contractToUpdate.ID_Contrato, newComodato, contractToUpdate.Cont_Qtde, contractToUpdate.Cont_ValorTotal, newPorcLucro);
                 setContracts(currentContracts =>
                     currentContracts.map(c => 
-                        c.ID_Contrato === contractToUpdate.ID_Contrato ? { ...c, Cont_Comodato: newComodato } : c
+                        c.ID_Contrato === contractToUpdate.ID_Contrato ? { ...c, Cont_Comodato: newComodato, Cont_PorcLucro: newPorcLucro } : c
                     )
                 );
                 handleCloseEdit();
@@ -404,7 +407,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                             <Button
                                 variant="contained"
                                 color="primary"
-                                onClick={() => handleInsertContract(selectedProduct, cmdt)}
+                                onClick={() => handleInsertContract(selectedProduct, cmdt, porcLucro)}
                             >
                                 <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 600px)': { fontSize: '12px' } }}> Adicionar</Typography>
                             </Button>
@@ -481,30 +484,50 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                     <Typography id="modal-modal-title" variant="h6" component="h2" textAlign={"center"}>
                         Editar Produto
                     </Typography>
-                    <Typography id="modal-modal-description" sx={{ mt: 2 }}>Produto Selecionado: {productsClient.find(p => p.ID_Prod === selectedProduct)?.Prod_CodProduto}</Typography>
-                    <Typography id="modal-modal-description" sx={{ mt: 0.5 }}>Comodato atual: {contracts.find(c => c.ID_Contrato === contractToEdit)?.Cont_Comodato}</Typography>
-                    <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} gap={2} mt={2}>
-                        <Box display={"flex"} alignItems={"center"} justifyContent={"space-evenly"}  height={"100%"} gap={2}>
-                            <Typography component="label" htmlFor={`quantity`} variant="h6">
-                                Novo comodato:
-                            </Typography>
-                            <TextField
-                                id={`quantity`}
-                                name={`quantity`}
-                                variant="outlined"
-                                value={cmdt}
-                                onChange={(e) => {
-                                    const value = Number(e.target.value);
-                                    setCmdt(isNaN(value) ? 1 : value);
-                                }}
-                                inputProps = {{ style: { padding: "8px" } }}
-                            />
+                    <Box display={"flex"} alignItems={"center"} justifyContent={"center"} flexDirection={"column"} mt={2}>
+                        <Typography id="modal-modal-description" variant="h6">Produto Selecionado: {productsClient.find(p => p.ID_Prod === selectedProduct)?.Prod_CodProduto}</Typography>
+                        <Typography id="modal-modal-description" variant="h6">Comodato atual: {contracts.find(c => c.ID_Contrato === contractToEdit)?.Cont_Comodato}</Typography>
+                    </Box>
+                    <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} flexDirection={"column"} gap={2} mt={2}>
+                        <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} gap={2} flexDirection={"column"}>
+                            <Box display={"flex"} alignItems={"center"} justifyContent={"space-evenly"}  height={"100%"} gap={2}>
+                                <Typography component="label" htmlFor={`quantity`} variant="h6">
+                                    Comodato:
+                                </Typography>
+                                <TextField
+                                    id={`quantity`}
+                                    name={`quantity`}
+                                    variant="outlined"
+                                    value={cmdt}
+                                    onChange={(e) => {
+                                        const value = Number(e.target.value);
+                                        setCmdt(isNaN(value) ? 1 : value);
+                                    }}
+                                    inputProps = {{ style: { padding: "8px" } }}
+                                />
+                            </Box>
+                            <Box display={"flex"} alignItems={"center"} justifyContent={"space-evenly"}  height={"100%"} gap={2}>
+                                <Typography component="label" htmlFor={`quantity`} variant="h6">
+                                    % de lucro:
+                                </Typography>
+                                <TextField
+                                    id={`quantity`}
+                                    name={`quantity`}
+                                    variant="outlined"
+                                    value={porcLucro}
+                                    onChange={(e) => {
+                                        const value = Number(e.target.value);
+                                        setPorcLucro(isNaN(value) ? 0.1 : value);
+                                    }}
+                                    inputProps = {{ style: { padding: "8px" } }}
+                                />
+                            </Box>
                         </Box>
                         <Box display={"flex"} justifyContent={"center"} height={"100%"} gap={1}>
                             <Button
                                 variant="contained"
                                 color="primary"
-                                onClick={() => handleUpdateComodato(selectedProduct, cmdt)}
+                                onClick={() => handleUpdateComodato(selectedProduct, cmdt, porcLucro)}
                             >
                                 <Typography variant="h6" fontSize={16}> Editar</Typography>
                             </Button>
@@ -519,7 +542,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                         {client?.cli_razaoSocial ? `Contrato de ${client.cli_razaoSocial}` : "Carregando Contrato..."}
             </Typography>
             {!showReport && (
-                <Box width={"70%"} margin={"auto"} sx={{ "@media (max-width: 600px)": { width: "95%" } }}>
+                <Box width={"80%"} margin={"auto"} sx={{ "@media (max-width: 600px)": { width: "95%" } }}>
                     <TableContract
                         client={client}
                         contracts={contracts}

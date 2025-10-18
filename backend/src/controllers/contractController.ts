@@ -48,12 +48,13 @@ export const updateContract = async (req: express.Request, res: express.Response
         if (!req.params.id) {
             return res.status(400).json({ error: 'Contract ID is required' });
         }
-        const { cmdt, qtde, valorTotal } = req.body; // Replace field1 and field2 with actual field names
+        const { cmdt, qtde, valorTotal, porcLucro } = req.body; // Replace field1 and field2 with actual field names
         const updatedContract = await contractService.updateContract(
             Number(req.params.id),
             cmdt,
             qtde,
-            valorTotal
+            valorTotal,
+            porcLucro
         );
         res.status(200).json(updatedContract);
     } catch (error: any) {

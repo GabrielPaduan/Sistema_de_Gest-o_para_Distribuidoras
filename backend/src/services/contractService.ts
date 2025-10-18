@@ -29,15 +29,16 @@ export const updateContract = async (
     contractId: number,
     cmdt: number,
     qtde: number,
-    valorTotal: number
-): Promise<{ Cont_Comodato: number; Cont_Qtde: number; Cont_ValorTotal: number }> => {
+    valorTotal: number,
+    porcLucro: number
+): Promise<{ Cont_Comodato: number; Cont_Qtde: number; Cont_ValorTotal: number; Cont_PorcLucro: number }> => {
     const { data, error } = await supabase
         .from('Contratos')
-        .update({ Cont_Comodato: cmdt, Cont_Qtde: qtde, Cont_ValorTotal: valorTotal })
+        .update({ Cont_Comodato: cmdt, Cont_Qtde: qtde, Cont_ValorTotal: valorTotal, Cont_PorcLucro: porcLucro })
         .eq('ID_Contrato', contractId)
-        .select('Cont_Comodato, Cont_Qtde, Cont_ValorTotal')
+        .select('Cont_Comodato, Cont_Qtde, Cont_ValorTotal, Cont_PorcLucro')
         .single();
     if (error) throw error;
     return data;
 };
-
+ 

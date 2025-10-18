@@ -25,7 +25,9 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
                 <TableHead>
                     <TableCell  sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>Cmdt</TableCell>
                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>Produtos</TableCell>
-                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px", display: "none" } }}>Valor</TableCell>
+                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px", display: "none" } }}>Custo Compra</TableCell>
+                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px", display: "none" } }}>Porcentagem Lucro</TableCell>
+                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px", display: "none" } }}>Valor Venda</TableCell>
                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>Reposição</TableCell>
                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>Estoque</TableCell>
                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>Valor Total</TableCell>
@@ -48,8 +50,10 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
                             return (
                                 <TableRow key={contract.ID_Contrato} hover>
                                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>{contract.Cont_Comodato}</TableCell>
-                                        <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_CodProduto}</TableCell>
-                                        <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", display: "none" } }}>R$ {product.Prod_Valor.toFixed(2)}</TableCell>
+                                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_CodProduto}</TableCell>
+                                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", display: "none" } }}>R$ {product.Prod_CustoCompra.toFixed(2)}</TableCell>
+                                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", display: "none" } }}>{contract.Cont_PorcLucro}%</TableCell>
+                                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", display: "none" } }}>R$ {product.Prod_Valor.toFixed(2)}</TableCell>
                                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>
                                         <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
                                             <Button onClick={() => onRemoveProduct(contract.ID_Contrato)} sx={{ '@media (max-width: 600px)': { padding: "0px", minWidth: "40px" } }}><Icon sx={{ fontSize: 30, '@media (max-width: 600px)': { fontSize: "20px", padding: "0px" } }}>remove_circle</Icon></Button>

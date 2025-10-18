@@ -19,10 +19,14 @@ export const FormEditarProduto: React.FC = () => {
         Prod_CodProduto: '',
         Prod_CodBarras: 0,
         Prod_Nome: '',
-        Prod_Estoque: 0
+        Prod_Estoque: 0,
+        Prod_PorcLucro: 0,
     });
-    const valor = 0;
+    const [valor, setValor] = useState<number>(0);
+    const [custoCompra, setCustoCompra] = useState<number | 0>(0);
+    const [porcentagemLucro, setPorcentagemLucro] = useState<number | 0>(0);
     const navigate = useNavigate();
+    const [disabled, setDisabled] = useState<boolean>(true);
     
     useEffect(() => {
         const fetchProduct = async () => {
@@ -30,6 +34,13 @@ export const FormEditarProduto: React.FC = () => {
             if (productData) {
                 setFormData(productData);
                 setProduct(productData);
+                setCustoCompra(productData.Prod_CustoCompra);
+                setPorcentagemLucro(productData.Prod_PorcLucro);
+                setValor(productData.Prod_Valor);
+                if (productData.Prod_CustoCompra > 0 && productData.Prod_Valor > 0) {
+                    const calculatedPorcentagemLucro = ((productData.Prod_Valor - productData.Prod_CustoCompra) / productData.Prod_CustoCompra) * 100;
+                    setPorcentagemLucro(parseFloat(calculatedPorcentagemLucro.toFixed(2)));
+                }
             }
             
         };
@@ -44,21 +55,22 @@ export const FormEditarProduto: React.FC = () => {
             const updatedProduct: ProductDTO = {
                 ID_Prod: idProd,
                 Prod_Valor: valor,
-                Prod_CustoCompra: formData.get("prodCustoCompra") as unknown as number || 0,
-                Prod_CFOP: formData.get("prodCFOP") as string,
-                Prod_NCM: formData.get("prodNCM") as unknown as number || 0,
-                Prod_UnMedida: formData.get("prodUN") as string,
-                Prod_CodProduto: formData.get("codigoProduto") as string,
-                Prod_CodBarras: formData.get("codigoBarras") as unknown as number || 0,
-                Prod_Nome: formData.get("nomeProduto") as string,
-                Prod_Estoque: formData.get("prodEstoque") as unknown as number || 0,
+                Prod_CustoCompra: formData.get("Prod_CustoCompra") as unknown as number || 0,
+                Prod_CFOP: formData.get("Prod_CFOP") as string,
+                Prod_NCM: formData.get("Prod_NCM") as unknown as number || 0,
+                Prod_UnMedida: formData.get("Prod_UnMedida") as string,
+                Prod_CodProduto: formData.get("Prod_CodProduto") as string,
+                Prod_CodBarras: formData.get("Prod_CodBarras") as unknown as number || 0,
+                Prod_Nome: formData.get("Prod_Nome") as string,
+                Prod_Estoque: formData.get("Prod_Estoque") as unknown as number || 0,
+                Prod_PorcLucro: formData.get("Prod_PorcLucro") as unknown as number || 0,
             }
             await updateProduct(updatedProduct);
         } catch (error) {
             console.error("Error creating product:", error);
         }
 
-       // navigate("/estoque-produtos");
+       navigate("/estoque-produtos");
     }
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,6 +83,28 @@ export const FormEditarProduto: React.FC = () => {
             } as ProductDTO;
         });
     };
+
+    useEffect(() => {
+        if (custoCompra === 0) {
+            setDisabled(true);
+        } else {
+            setDisabled(false);
+        }
+
+        if (custoCompra > 0 && porcentagemLucro > 0) {
+            const valorVenda = custoCompra + (custoCompra * porcentagemLucro) / 100;
+            setValor(parseFloat(valorVenda.toFixed(2)));
+        }
+    }, [custoCompra, porcentagemLucro]);
+
+    useEffect(() => {
+        if (valor > 0 && custoCompra > 0) {
+            const porcLucro = ((valor - custoCompra) / custoCompra) * 100;
+            setPorcentagemLucro(parseFloat(porcLucro.toFixed(2)));
+        } else if (valor < custoCompra) {
+            setValor(0);
+        }
+    }, [valor]);
 
     return (
         <Box
@@ -88,7 +122,7 @@ export const FormEditarProduto: React.FC = () => {
         >
             <Box display={"flex"} flexDirection={"column"} width={"100%"} gap={2}>
                 <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 600px)': { flexDirection: "column", gap: 2 } }}>
-                    <TextField label="Código de Barras" id="codigoBarras" name="Prod_CodBarras" variant="outlined" placeholder="Digite o código de barras" value={formData?.Prod_CodBarras} onChange={handleChange} sx={{ width: "33.33%", '& .MuiInputLabel-root': {
+                    <TextField label="Código de Barras" id="codigoBarras" name="Prod_CodBarras" variant="outlined" placeholder="Digite o código de barras" disabled value={formData?.Prod_CodBarras} onChange={handleChange} sx={{ width: "33.33%", '& .MuiInputLabel-root': {
                         color: 'gray', // Cor do label normal
                     }, '@media (max-width: 600px)': { width: "100%" } }} />
 
@@ -104,29 +138,31 @@ export const FormEditarProduto: React.FC = () => {
                     } }} />
                 </Box>
                 <Box display={"flex"} justifyContent={"space-between"} gap={2}>
-                    <TextField label="Unidade de Medida" id="prodUN" name="Prod_UnMedida" variant="outlined" placeholder="Digite a unidade de medida" value={formData?.Prod_UnMedida} onChange={handleChange} sx={{ width: "33.33%", '& .MuiInputLabel-root': {
+                    <TextField label="Unidade de Medida" id="prodUN" name="Prod_UnMedida" variant="outlined" placeholder="Digite a unidade de medida" value={formData?.Prod_UnMedida} onChange={handleChange} sx={{ width: "25%", '& .MuiInputLabel-root': {
                         color: 'gray', // Cor do label normal
                     }, '& .MuiInputLabel-root.Mui-focused': {
                         color: '#181393', // Cor do label quando em foco
                     } }} />
-                    <TextField label="NCM" id="prodNCM" name="Prod_NCM" variant="outlined" placeholder="Digite o NCM" value={formData?.Prod_NCM} onChange={handleChange} sx={{ width: "33.33%", '& .MuiInputLabel-root': {
+                    <TextField label="NCM" id="prodNCM" name="Prod_NCM" variant="outlined" placeholder="Digite o NCM" value={formData?.Prod_NCM} onChange={handleChange} sx={{ width: "25%", '& .MuiInputLabel-root': {
                         color: 'gray', // Cor do label normal
                     }, '& .MuiInputLabel-root.Mui-focused': {
                         color: '#181393', // Cor do label quando em foco
                     }, '@media (max-width: 600px)': { width: "15%" } }} />
-                    <TextField label="Estoque" id="prodEstoque" name="Prod_Estoque" variant="outlined" placeholder="Digite o estoque" value={formData?.Prod_Estoque} onChange={handleChange} sx={{ width: "33.33%", '& .MuiInputLabel-root': {
+                    <TextField label="Estoque" id="prodEstoque" name="Prod_Estoque" variant="outlined" placeholder="Digite o estoque" value={formData?.Prod_Estoque} onChange={handleChange} sx={{ width: "25%", '& .MuiInputLabel-root': {
+                        color: 'gray', // Cor do label normal
+                    }, '& .MuiInputLabel-root.Mui-focused': {
+                        color: '#181393', // Cor do label quando em foco
+                    } }} />
+                    <TextField label="CFOP" id="prodCFOP" name="Prod_CFOP" variant="outlined" placeholder="Digite o CFOP" value={formData?.Prod_CFOP} onChange={handleChange} sx={{ width: "25%", '& .MuiInputLabel-root': {
                         color: 'gray', // Cor do label normal
                     }, '& .MuiInputLabel-root.Mui-focused': {
                         color: '#181393', // Cor do label quando em foco
                     } }} />
                 </Box>
                 <Box display={"flex"} justifyContent={"space-between"} gap={2}>
-                    <TextField label="CFOP" id="prodCFOP" name="Prod_CFOP" variant="outlined" placeholder="Digite o CFOP" value={formData?.Prod_CFOP} onChange={handleChange} sx={{ width: "50%", '& .MuiInputLabel-root': {
-                        color: 'gray', // Cor do label normal
-                    }, '& .MuiInputLabel-root.Mui-focused': {
-                        color: '#181393', // Cor do label quando em foco
-                    } }} />
-                    <TextField label="Custo de Compra" id="prodCustoCompra" name="Prod_CustoCompra" variant="outlined" placeholder="Digite o custo de compra" value={formData?.Prod_CustoCompra} onChange={handleChange}  slotProps={{
+                    <TextField label="Custo de Compra" id="prodCustoCompra" name="Prod_CustoCompra" variant="outlined" placeholder="Digite o custo de compra" value={custoCompra} onChange={(e) => setCustoCompra(parseFloat(e.target.value))}
+                    type="number"  
+                    slotProps={{
                         input: {
                         startAdornment: <InputAdornment position="start">R$</InputAdornment>,
                         },
@@ -135,6 +171,36 @@ export const FormEditarProduto: React.FC = () => {
                     }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root.Mui-focused': {
                         color: '#181393', // Cor do label quando em foco
                     },'@media (max-width: 600px)': { width: "15%" } }} />
+                    <TextField label="Porcentagem de Lucro" id="prodPorcLucro" name="Prod_PorcLucro" variant="outlined" placeholder="Digite a porcentagem de lucro" slotProps={{
+                        input: {
+                            endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                        },
+                    }}
+                    sx={{ width: "50%", '@media (max-width: 600px)': { width: "15%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': {
+                        color: 'gray', // Cor do label normal
+                    }, '& .MuiInputLabel-root.Mui-focused': {
+                        color: '#181393', // Cor do label quando em foco
+                    } }}  
+                    value={porcentagemLucro}
+                    onChange={(e) => setPorcentagemLucro(parseFloat(e.target.value))}
+                    disabled={disabled}
+                    type="number"
+                    />
+                    <TextField label="Custo de Venda" id="prodCustoVenda" name="Prod_CustoVenda" variant="outlined" placeholder="Digite o custo de venda" slotProps={{
+                        input: {
+                            startAdornment: <InputAdornment position="start">R$</InputAdornment>,
+                        },
+                    }}
+                    sx={{ width: "50%", '@media (max-width: 600px)': { width: "15%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': {
+                        color: 'gray', // Cor do label normal
+                    }, '& .MuiInputLabel-root.Mui-focused': {
+                        color: '#181393', // Cor do label quando em foco
+                    }}}
+                    value={valor}
+                    onChange={(e) => setValor(Number(e.target.value))}    
+                    disabled={disabled}
+                    type="number"
+                    />
                 </Box>
             </Box>
 
