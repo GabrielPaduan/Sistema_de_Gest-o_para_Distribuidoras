@@ -33,3 +33,7 @@ export const getModelContracts = async (modelId: number): Promise<ContractDTO[]>
   const response = await api.get(`/clientes/modelos/${modelId}`);
   return response.data;
 }
+
+export const updateClient = async (clientData: ClientDTO): Promise<void> => {
+  await api.put(`/clientes/${clientData.id}`, clientData);
+}

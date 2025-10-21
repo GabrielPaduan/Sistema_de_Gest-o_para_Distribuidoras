@@ -4,12 +4,12 @@ import { verifyToken } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
-router.get('/', getAllProducts);
-router.post('/', createProduct);
-router.get('/search/:id', getProductById);
-router.get('/product-contract/:id', getProductByContractId);
-router.get('/search-name', searchProducts);
-router.put('/:id', updateProduct);
-router.delete('/:id', deleteProduct);
+router.get('/', verifyToken, getAllProducts);
+router.post('/', verifyToken, createProduct);
+router.get('/search/:id', verifyToken, getProductById);
+router.get('/product-contract/:id', verifyToken, getProductByContractId);
+router.get('/search-name', verifyToken, searchProducts);
+router.put('/:id', verifyToken, updateProduct);
+router.delete('/:id', verifyToken, deleteProduct);
 
 export default router;

@@ -66,12 +66,14 @@ export interface PdfStructDTO {
     PDF_Client_Id: number;
     PDF_Status: number;
     PDF_Generated_Date: string;
+    PDF_Observacoes: string;
 }
 
 export interface PdfStructInsertDTO {
     PDF_Client_Id: number;
     PDF_Status: number;
     PDF_Generated_Date: string;
+    PDF_Observacoes: string;
 }
 
 export interface UserDTO {

@@ -76,7 +76,7 @@ export const TableHistoricoContract: React.FC = () => {
     function handleConfirmPdf(): void {
         if (selectedPdf) {           
             selectedPdf.PDF_Status = 1; // Atualiza o status para confirmado
-            const selectedPDF: PdfStructDTO = { id: selectedPdf.id, PDF_Client_Id: selectedPdf.PDF_Client ? selectedPdf.PDF_Client.id : 0, PDF_Status: selectedPdf.PDF_Status, PDF_Generated_Date: selectedPdf.PDF_Generated_Date, PDF_Observacoes: selectedPdf.PDF_Observacoes };
+            const selectedPDF: PdfStructDTO = { id: selectedPdf.id, PDF_Client_Id: selectedPdf.PDF_Client ? selectedPdf.PDF_Client.id : 0, PDF_Status: selectedPdf.PDF_Status, PDF_Generated_Date: selectedPdf.PDF_Generated_Date, PDF_Observacoes: "" };
             const fetchUpdatePdf = async () => {
                 try {
                     await updatePdf(selectedPDF.id, selectedPDF);
@@ -90,6 +90,7 @@ export const TableHistoricoContract: React.FC = () => {
             const selectedCompletePDF = pdfsCompleteData.find(pdf => pdf.id === selectedPdf.id);
             if (selectedCompletePDF && selectedCompletePDF.PDF_Client) {
                 generateReport(selectedCompletePDF.PDF_Client, selectedCompletePDF.PDF_Contracts, selectedCompletePDF.PDF_Products);
+                selectedCompletePDF.PDF_Observacoes = ""
             }
 
             handleCloseReport();

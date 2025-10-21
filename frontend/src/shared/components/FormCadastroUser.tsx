@@ -72,7 +72,7 @@ export const FormCadastroUser: React.FC = () => {
                 <Typography component="label" htmlFor={"senha"} width={"15%"} variant="h6" textAlign={"left"}>
                     Senha:
                 </Typography>
-                <TextField id={"senha"} name={"senha"} variant="outlined" sx={{ width: "84%" }} />
+                <TextField id={"senha"} name={"senha"} type="password" variant="outlined" sx={{ width: "84%" }} />
             </Box>
 
             <Box textAlign="center">

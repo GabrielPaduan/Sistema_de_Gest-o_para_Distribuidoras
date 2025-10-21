@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import React from "react";
-import { DefaultHeader, GenericButton } from "../../shared/components";
+import { DefaultHeader, FormEditarCliente, GenericButton } from "../../shared/components";
 
 export class EditarCliente extends React.Component {
     render() {
@@ -9,6 +9,7 @@ export class EditarCliente extends React.Component {
                 <DefaultHeader />
                 <Box textAlign="center" paddingTop={10}>
                     <Typography variant="h4">Editar Cliente</Typography>
+                    <FormEditarCliente />
                 </Box>
             </>
         );

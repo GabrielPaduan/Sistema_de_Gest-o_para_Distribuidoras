@@ -21,12 +21,13 @@ export const createPdf = async (req: express.Request, res: express.Response) => 
 
 export const updatePdf = async (req: express.Request, res: express.Response) => {
   try {
-    const { PDF_Client_Id, PDF_Status, PDF_Generated_Date } = req.body;
+    const { PDF_Client_Id, PDF_Status, PDF_Generated_Date, PDF_Observacoes } = req.body;
     const updatedPdf = await pdfService.updatePdf(
       Number(req.params.id),
       PDF_Client_Id,
       PDF_Status,
-      PDF_Generated_Date
+      PDF_Generated_Date,
+      PDF_Observacoes
     );
     res.status(200).json(updatedPdf);
   } catch (error: any) {

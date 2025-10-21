@@ -21,7 +21,7 @@ export const getPdfByClientId = async (clientId: number): Promise<PdfStructDTO |
     .single();
   
   if (error) {
-    if (error.code === 'PGRST116') { // No rows found
+    if (error.code === 'PGRST116') {
       return data;
     } else {
       throw error;
@@ -34,29 +34,15 @@ export const updatePdf = async (
     id: number,
     PDF_Client_Id: number,
     PDF_Status: number,
-    PDF_Generated_Date: string
-): Promise<{ PDF_Client_Id: number; PDF_Status: number; PDF_Generated_Date: string }> => {
+    PDF_Generated_Date: string,
+    PDF_Observacoes: string
+): Promise<{ PDF_Client_Id: number; PDF_Status: number; PDF_Generated_Date: string; PDF_Observacoes: string }> => {
     const { data, error } = await supabase
         .from('ContratosPDF')
-        .update({ PDF_Client_Id: PDF_Client_Id, PDF_Status: PDF_Status, PDF_Generated_Date: PDF_Generated_Date })
+        .update({ PDF_Client_Id: PDF_Client_Id, PDF_Status: PDF_Status, PDF_Generated_Date: PDF_Generated_Date, PDF_Observacoes: PDF_Observacoes })
         .eq('id', id)
-        .select('PDF_Client_Id, PDF_Status, PDF_Generated_Date')
+        .select('PDF_Client_Id, PDF_Status, PDF_Generated_Date, PDF_Observacoes')
         .single();
     if (error) throw error;
     return data;
 };
-
-
-
-// export const findClientByContractPDFId = async (contractId: number): Promise<ClientDTO | null> => {
-//     const { data, error } = await supabase
-//       .from('ContratosPDF')
-//       .select(`
-//         Client ( * )
-//       `)
-//       .eq('PDF_Client_ID', contractId)
-//       .single();
-
-//     if (error) throw error;
-//     return data;
-// };

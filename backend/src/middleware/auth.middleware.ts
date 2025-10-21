@@ -1,4 +1,4 @@
-import express, { type NextFunction } from 'express';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import jwt from 'jsonwebtoken';
 import 'dotenv/config'; 
 
@@ -25,4 +25,23 @@ export const verifyToken = (req: express.Request, res: express.Response, next: N
   } catch (error) {
     return res.status(403).json({ message: 'Token inválido ou expirado.' });
   }
+};
+
+export const authorizeRoles = (...allowedRoles: string[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    // Primeiro, verifica se o usuário foi autenticado e anexado à requisição
+    if (!req.user) {
+      return res.status(403).json({ message: 'Acesso negado. Usuário não autenticado.' });
+    }
+
+    const { role } = req.user;
+
+    // Verifica se a role do usuário está na lista de roles permitidas
+    if (!allowedRoles.includes(role)) {
+      return res.status(403).json({ message: 'Acesso negado. Você não tem permissão para acessar este recurso.' });
+    }
+
+    // Se a role for permitida, continua para a próxima função (o controller da rota)
+    next();
+  };
 };

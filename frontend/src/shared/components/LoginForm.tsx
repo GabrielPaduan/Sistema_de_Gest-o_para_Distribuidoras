@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box"
 import { LoginDTO, LoginResponse } from "../utils/DTOS";
 import { FormField } from "./FormField";
-import { Button, Typography } from "@mui/material";
+import { Button, Modal, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { loginUser } from "../services/userService";
 import { useNavigate } from "react-router-dom";
@@ -9,8 +9,9 @@ import { useAuth } from "../context";
 
 export const LoginForm: React.FC = () => {
     const { isAuthenticated } = useAuth();
-    const [erro, setErro] = useState<boolean>(false);
+    const [erro, setErro] = useState<number>(0);
     const navigate = useNavigate();
+
 
     useEffect(() => {
         // Se o usuário já estiver autenticado, redireciona para a página inicial
@@ -27,7 +28,11 @@ export const LoginForm: React.FC = () => {
                     nome: formData.get("nome") as string,
                     senha: formData.get("senha") as string,
                 };
-                console.log("Submitting login:", login);
+                if (!login.nome || !login.senha) {
+                    setErro(1);
+                    return;
+                }
+
                 loginUser(login)
                     .then((response: LoginResponse) => {
                         const token = response.token;
@@ -36,42 +41,53 @@ export const LoginForm: React.FC = () => {
                         
                         navigate("/pagina-inicial");
                         window.location.reload();
-                        setErro(false);
+                        setErro(0);
                     })
                     .catch((error) => {
-                        // window.location.reload();
                         console.log(error)
-                        setErro(true);
+                        setErro(2);
                         console.error("Login failed:", error);
                     });
             } catch (error) {
                 window.location.reload();
-                setErro(true);
+                setErro(3);
                 console.error("Error submitting form:", error);
             }
         };
 
     return (
-        <Box
-            component="form"
-            noValidate
-            autoComplete="off"
-            padding={4}
-            display="flex"
-            flexDirection="column"
-            onSubmit={submitForm}
-            maxWidth={"45%"}
-            sx={{ '@media (max-width:600px)': { maxWidth: "90%" } }}
-            margin={"auto"}
-            gap={2}
-        >
-            <FormField mTopTxt={2} flex={1} mr={2} width={"75%"} label={"Nome"} name="nome" content="space-evenly" type="text"/>
-            <FormField mTopTxt={2} flex={1} mr={2} width={"75%"} label={"Senha"} name="senha" content="space-evenly" type="password" />
-            <Box>
-                <Button type="submit" variant="contained" color="primary">
-                    <Typography variant="h6">Login</Typography>
-                </Button>
+        <>
+            <Box
+                component="form"
+                noValidate
+                autoComplete="off"
+                padding={4}
+                display="flex"
+                flexDirection="column"
+                onSubmit={submitForm}
+                maxWidth={"45%"}
+                sx={{ '@media (max-width:600px)': { maxWidth: "90%" } }}
+                margin={"auto"}
+                gap={2}
+            >
+                <FormField mTopTxt={2} flex={1} mr={2} width={"75%"} label={"Nome"} name="nome" content="space-evenly" type="text" required/>
+                <FormField mTopTxt={2} flex={1} mr={2} width={"75%"} label={"Senha"} name="senha" content="space-evenly" type="password" required/>
+                {erro === 1 && (
+                    <Typography color="error" variant="body2">
+                        Os campos devem estar preenchidos. Tente novamente.
+                    </Typography>
+                )}
+                {erro === 2 && (
+                    <Typography color="error" variant="body2">
+                        Nome ou senha incorretos. Tente novamente.
+                    </Typography>
+                )}
+                <Box>
+                    <Button type="submit" variant="contained" color="primary">
+                        <Typography variant="h6">Login</Typography>
+                    </Button>
+                </Box>
             </Box>
-        </Box>
+        </>
     );
 };

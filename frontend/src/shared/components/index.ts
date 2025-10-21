@@ -14,3 +14,5 @@ export { TableProducts } from "./TableProducts";
 export { FormCadastroProduto } from "./FormCadastroProduto";
 export { FormEditarProduto } from "./FormEditarProduto";
 export { BoxNavigationClientes } from "./BoxNavigationClientes";
+export { FormEditarCliente } from "./FormEditarCliente";
+export { ProtectedComponent } from "./ProtectedComponent";

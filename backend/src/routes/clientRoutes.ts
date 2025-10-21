@@ -1,14 +1,15 @@
 import express from 'express';
-import { getAllClients, createClient, getClientById, deleteClient, getModelClients, getModelContracts } from '../controllers/clientController.js';
+import { getAllClients, createClient, getClientById, deleteClient, getModelClients, getModelContracts, updateClient } from '../controllers/clientController.js';
+import { verifyToken } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
-router.get('/', getAllClients);
-router.post('/', createClient);
-router.get('/:id', getClientById);
-// router.put('/:id', updateClient);
-router.delete('/:id', deleteClient);
-router.get('/modelos/list', getModelClients);
-router.get('/modelos/:modelId', getModelContracts);
+router.get('/', verifyToken, getAllClients);
+router.post('/', verifyToken, createClient);
+router.get('/:id', verifyToken, getClientById);
+router.put('/:id', verifyToken, updateClient);
+router.delete('/:id', verifyToken, deleteClient);
+router.get('/modelos/list', verifyToken, getModelClients);
+router.get('/modelos/:modelId', verifyToken, getModelContracts);
 
 export default router;

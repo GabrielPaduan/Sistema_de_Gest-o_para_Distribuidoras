@@ -5,7 +5,7 @@ import { TableContract } from "./TableContract";
 import { generateReport } from "../utils/Report";
 import { getClientById, getModelClients, getModelContracts } from "../services/clientService"; // Supondo que você tenha este serviço
 import { GenericButton } from "./GenericButton";
-import { getAllProducts, getProductByContractId, getProductById, searchProductsByName } from "../services/productService";
+import { getAllProducts, getProductByContractId, getProductById, searchProductsByName, updateProduct } from "../services/productService";
 import { SearchField } from "./searchField";
 import { createContract, getContractByClientId, removeContract, updateContract } from "../services/contractService";
 import Checkbox from "@mui/material/Checkbox";
@@ -13,6 +13,7 @@ import { createPDFContracts, getPdfByClientId, updatePdf } from "../services/pdf
 import { PreviewReport } from "./PreviewReport";
 import { useNavigate } from "react-router-dom";
 import { useDebounce } from 'use-debounce';
+import { ProtectedComponent } from "./ProtectedComponent";
 
 const style = {
   position: 'absolute',
@@ -110,6 +111,20 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                     productData.filter(p => p.Prod_Valor > 0);
                     setProducts(productData);
                     console.log(productData)
+
+                    Array.isArray(productData) && productData.forEach(async product => {
+                        if (product.Prod_PorcLucro == 0) {
+                            if (product.Prod_CustoCompra > 0 && product.Prod_Valor > 0 && product.Prod_Valor >= product.Prod_CustoCompra) {
+                                product.Prod_PorcLucro = (((product.Prod_Valor - product.Prod_CustoCompra) / product.Prod_CustoCompra) * 100).toFixed(2) as unknown as number;
+                            } else if (product.Prod_Valor < product.Prod_CustoCompra) {
+                                product.Prod_PorcLucro = 0;
+                            }
+
+                            await updateProduct(product);
+                        }
+                    });
+
+
                     const contractData = await getContractByClientId(id);
                     
                     Array.isArray(contractData) && contractData.forEach(contract => {
@@ -171,6 +186,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                 await updateContract(contract.ID_Contrato, contract.Cont_Comodato, contract.Cont_Qtde, contract.Cont_ValorTotal, contract.Cont_PorcLucro);
             }
             const clientPDF = await getPdfByClientId(id);
+            console.log("Observation: ", observation);
             if (clientPDF == null) {
                 await createPDFContracts({ PDF_Client_Id: id, PDF_Status: 0, PDF_Generated_Date: new Date().toISOString(), PDF_Observacoes: observation });
             } else {
@@ -191,6 +207,14 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
         setContracts(currentContracts =>
             currentContracts.map(c => {
                 const product = productsClient.find(p => p.ID_Prod === c.Cont_ID_Prod);
+                let totalValue = 0;
+
+                if (c.Cont_PorcLucro > 0) {
+                    totalValue = product ? product.Prod_CustoCompra + (product.Prod_CustoCompra * (c.Cont_PorcLucro / 100)) : 0;
+                } else {
+                    totalValue = product ? product.Prod_CustoCompra + (product.Prod_CustoCompra * (product.Prod_PorcLucro / 100)) : 0;
+                }
+                
                 if (
                     c.ID_Contrato === contractId &&
                     c.Cont_Qtde < cmdt &&
@@ -199,7 +223,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                 ) {
                     const newQuantity = c.Cont_Qtde + 1;
                     // Retorna um NOVO objeto (imutabilidade)
-                    return { ...c, Cont_Qtde: newQuantity, Cont_ValorTotal: newQuantity * (product?.Prod_Valor || 0) };
+                    return { ...c, Cont_Qtde: newQuantity, Cont_ValorTotal: newQuantity * totalValue };
                 }
                 return c;
             })
@@ -210,9 +234,15 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
         setContracts(currentContracts =>
             currentContracts.map(c => {
                 const product = productsClient.find(p => p.ID_Prod === c.Cont_ID_Prod);
+                let totalValue = 0;
+                if (c.Cont_PorcLucro > 0) {
+                    totalValue = product ? product.Prod_CustoCompra + (product.Prod_CustoCompra * (c.Cont_PorcLucro / 100)) : 0;
+                } else {
+                    totalValue = product ? product.Prod_CustoCompra + (product.Prod_CustoCompra * (product.Prod_PorcLucro / 100)) : 0;
+                }
                 if (c.ID_Contrato === contractId && c.Cont_Qtde > 0 && product?.Prod_Valor !== undefined) {
                     const newQuantity = c.Cont_Qtde - 1;
-                    return { ...c, Cont_Qtde: newQuantity, Cont_ValorTotal: newQuantity * product.Prod_Valor };
+                    return { ...c, Cont_Qtde: newQuantity, Cont_ValorTotal: newQuantity * totalValue };
                 }
                 return c;
             })
@@ -239,7 +269,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                 Cont_Comodato: cmdt,
                 Cont_Qtde: 0,
                 Cont_ValorTotal: 0.00,
-                Cont_PorcLucro: 0.00
+                Cont_PorcLucro: porcLucro
             };
 
             try {
@@ -320,6 +350,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
 
     const handleUpdateComodato = async (productId: number, newComodato: number, newPorcLucro: number) => {
         const contractToUpdate = contracts.find(c => c.Cont_ID_Prod === productId);
+
         if (contractToUpdate) {
             try {
                 await updateContract(contractToUpdate.ID_Contrato, newComodato, contractToUpdate.Cont_Qtde, contractToUpdate.Cont_ValorTotal, newPorcLucro);
@@ -403,6 +434,22 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                                 inputProps = {{ style: { padding: "8px" } }}
                             />
                         </Box>
+                        <Box display={"flex"} alignItems={"center"} justifyContent={"space-evenly"}  height={"100%"} gap={2}>
+                                <Typography component="label" htmlFor={`quantity`} variant="h6">
+                                    % de lucro:
+                                </Typography>
+                                <TextField
+                                    id={`quantity`}
+                                    name={`quantity`}
+                                    variant="outlined"
+                                    value={porcLucro}
+                                    onChange={(e) => {
+                                        const value = Number(e.target.value);
+                                        setPorcLucro(isNaN(value) ? 0.1 : value);
+                                    }}
+                                    inputProps = {{ style: { padding: "8px" } }}
+                                />
+                            </Box>
                         <Box width={"40%"} display={"flex"} justifyContent={"center"} height={"100%"} gap={1} sx={{ '@media (max-width: 600px)': { width: "100%" } }}>
                             <Button
                                 variant="contained"
@@ -564,16 +611,20 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                     </Box>
 
                     <Box display={"flex"} alignItems="center" justifyContent="center" gap={2} mt={4} sx={{ '@media (max-width: 600px)': { flexDirection: "column" } }}>
-                        <Box sx={{width: "25%", '@media (max-width: 600px)': { width: '100%' } }}>
-                            <Button variant="contained" color="primary" sx={{ padding: "15px", width: "100%", '@media (max-width: 600px)': { padding: "15px" } }} onClick={handleOpen}>
-                                <Typography variant="h6" sx={{ '@media (max-width: 600px)': { fontSize: "1rem" } }}>Adicionar Produto</Typography>
-                            </Button>
-                        </Box>
-                        <Box sx={{width: "25%", '@media (max-width: 600px)': { width: '100%' } }}>
-                            <Button onClick={handleOpenModelo} variant="contained" color="primary" sx={{ padding: "15px", width: "100%", '@media (max-width: 600px)': { padding: "15px" } }}>
-                                <Typography variant="h6" sx={{ '@media (max-width: 600px)': { fontSize: "1rem" } }}>Modelos Contrato</Typography>
-                            </Button>
-                        </Box>
+                        <ProtectedComponent allowedRoles={['1']}>                        
+                            <Box sx={{width: "25%", '@media (max-width: 600px)': { width: '100%' } }}>
+                                <Button variant="contained" color="primary" sx={{ padding: "15px", width: "100%", '@media (max-width: 600px)': { padding: "15px" } }} onClick={handleOpen}>
+                                    <Typography variant="h6" sx={{ '@media (max-width: 600px)': { fontSize: "1rem" } }}>Adicionar Produto</Typography>
+                                </Button>
+                            </Box>
+                        </ProtectedComponent>
+                        <ProtectedComponent allowedRoles={['1']}>    
+                            <Box sx={{width: "25%", '@media (max-width: 600px)': { width: '100%' } }}>
+                                <Button onClick={handleOpenModelo} variant="contained" color="primary" sx={{ padding: "15px", width: "100%", '@media (max-width: 600px)': { padding: "15px" } }}>
+                                    <Typography variant="h6" sx={{ '@media (max-width: 600px)': { fontSize: "1rem" } }}>Modelos Contrato</Typography>
+                                </Button>
+                            </Box>
+                        </ProtectedComponent>
                         <Box sx={{width: "25%", '@media (max-width: 600px)': { width: '100%' } }}>
                             <Button
                                 variant="contained"

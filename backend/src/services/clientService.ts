@@ -1,3 +1,4 @@
+import { error } from 'console';
 import supabase from '../config/supabase.js'; // Ajuste o caminho conforme necessário
 import type { ClientDTO, ClientDTOInsert, ContractDTO } from '../types/dtos.js'; // Supondo que você tenha seus tipos definidos
 
@@ -5,6 +6,16 @@ export const findAllClients = async (): Promise<ClientDTO[]> => {
     const { data, error } = await supabase.from('Clientes').select('*');
     if (error) throw error;
     return data;
+};
+
+export const updateClientById = async (clientData: ClientDTO): Promise<boolean> => {
+    const { error } = await supabase
+        .from('Clientes')
+        .update(clientData)
+        .eq('id', clientData.id);
+
+    if (error) throw error;
+    return true;
 };
 
 export const findModelClients = async (): Promise<ClientDTO[]> => {

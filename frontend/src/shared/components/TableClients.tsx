@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { getAllClients, removeClient } from "../services/clientService";
 import { SearchField } from "./searchField";
 import { useNavigate } from "react-router-dom";
+import { ProtectedComponent } from "./ProtectedComponent";
 
 export const TableClients: React.FC = () => {
     const [clientsData, setClientsData] = React.useState<ClientDTO[]>([]);
@@ -55,8 +56,10 @@ export const TableClients: React.FC = () => {
                             <TableCell  sx={{ fontSize: 20, textAlign: "center" }}>Cliente</TableCell>
                             <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { display: 'none' } }}>E-mail</TableCell>
                             <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { display: 'none' } }}>Endereço</TableCell>
-                            <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>Editar</TableCell>
-                            <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>Remover</TableCell>
+                            <ProtectedComponent allowedRoles={['1']}>
+                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>Editar</TableCell>
+                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>Remover</TableCell>
+                            </ProtectedComponent>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -79,12 +82,14 @@ export const TableClients: React.FC = () => {
                                         <TableCell onClick={() => window.location.href = `/contrato-cliente/${client.id}`} sx={{ fontSize: 16, textAlign: "center" }}>{client.cli_razaoSocial}</TableCell>
                                         <TableCell onClick={() => window.location.href = `/contrato-cliente/${client.id}`} sx={{ fontSize: 16, textAlign: "center", '@media (max-width: 600px)': { display: 'none' } }}>{client.cli_email === "" ? "Não informado" : client.cli_email}</TableCell>
                                         <TableCell onClick={() => window.location.href = `/contrato-cliente/${client.id}`} sx={{ fontSize: 16, textAlign: "center", '@media (max-width: 600px)': { display: 'none' } }}>{client.cli_end === "" ? "Não informado" : client.cli_end}</TableCell>
-                                        <TableCell sx={{ fontSize: 20, textAlign: "center" }}>
-                                            <Button onClick={() => navigate(`/editar-cliente/${client.id}`)}><Icon sx={{ fontSize: 40 }}>edit</Icon></Button>
-                                        </TableCell>
-                                        <TableCell  sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { padding: "0px" } }}>
-                                            <Button onClick={() => onRemoveContract(client.id)} sx={{ '@media (max-width: 600px)': { padding: "0px" } }}><Icon sx={{ fontSize: 30, '@media (max-width: 600px)': { padding: "0px" } }}>delete_forever</Icon></Button>
-                                        </TableCell>
+                                        <ProtectedComponent allowedRoles={['1']}>
+                                            <TableCell sx={{ fontSize: 20, textAlign: "center" }}>
+                                                <Button onClick={() => navigate(`/editar-cliente/${client.id}`)}><Icon sx={{ fontSize: 40 }}>edit</Icon></Button>
+                                            </TableCell>
+                                            <TableCell  sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { padding: "0px" } }}>
+                                                <Button onClick={() => onRemoveContract(client.id)} sx={{ '@media (max-width: 600px)': { padding: "0px" } }}><Icon sx={{ fontSize: 30, '@media (max-width: 600px)': { padding: "0px" } }}>delete_forever</Icon></Button>
+                                            </TableCell>
+                                        </ProtectedComponent>
                                     </TableRow>
                                 ))
                             )

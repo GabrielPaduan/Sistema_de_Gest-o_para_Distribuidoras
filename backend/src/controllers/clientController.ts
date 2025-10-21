@@ -69,3 +69,15 @@ export const getModelContracts = async (req: express.Request, res: express.Respo
         res.status(500).json({ error: error.message });
     }
 };
+
+export const updateClient = async (req: express.Request, res: express.Response) => {
+    try {
+        const updatedClient = await clientService.updateClientById(req.body);
+        if (!updatedClient) {
+            return res.status(404).json({ error: "Client not found" });
+        }
+        res.status(200).json(updatedClient);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+};
