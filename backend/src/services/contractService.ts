@@ -32,6 +32,8 @@ export const updateContract = async (
     valorTotal: number,
     porcLucro: number
 ): Promise<{ Cont_Comodato: number; Cont_Qtde: number; Cont_ValorTotal: number; Cont_PorcLucro: number }> => {
+    console.log("Atualizando contrato ID:", contractId);
+    console.log("Novos valores - Comodato:", cmdt, "Qtde:", qtde, "ValorTotal:", valorTotal, "PorcLucro:", porcLucro);
     const { data, error } = await supabase
         .from('Contratos')
         .update({ Cont_Comodato: cmdt, Cont_Qtde: qtde, Cont_ValorTotal: valorTotal, Cont_PorcLucro: porcLucro })

@@ -4,8 +4,8 @@ import { SearchField } from "./searchField";
 import { PdfStructCompleteDTO, PdfStructDTO, ProductDTO } from "../utils/DTOS";
 import { getAllPDFContracts, updatePdf } from "../services/pdfContract";
 import { getClientById } from "../services/clientService";
-import { getContractByClientId } from "../services/contractService";
-import { getProductById } from "../services/productService";
+import { getContractByClientId, updateContract } from "../services/contractService";
+import { getProductById, updateProduct } from "../services/productService";
 import { PreviewReport } from "./PreviewReport";
 import { GenericButton } from "./GenericButton";
 import { generateReport } from "../utils/Report";
@@ -73,29 +73,79 @@ export const TableHistoricoContract: React.FC = () => {
         fetchPDFContracts();
     }, []);
 
-    function handleConfirmPdf(): void {
-        if (selectedPdf) {           
-            selectedPdf.PDF_Status = 1; // Atualiza o status para confirmado
-            const selectedPDF: PdfStructDTO = { id: selectedPdf.id, PDF_Client_Id: selectedPdf.PDF_Client ? selectedPdf.PDF_Client.id : 0, PDF_Status: selectedPdf.PDF_Status, PDF_Generated_Date: selectedPdf.PDF_Generated_Date, PDF_Observacoes: "" };
-            const fetchUpdatePdf = async () => {
-                try {
-                    await updatePdf(selectedPDF.id, selectedPDF);
-                    console.log("PDF atualizado com sucesso:", selectedPDF);
-                } catch (error) {
-                    console.error("Erro ao atualizar PDF:", error);
-                }
-            };
-            fetchUpdatePdf();
+    async function handleConfirmPdf(): Promise<void> {
+    if (!selectedPdf) {
+        return; 
+    }
+    const pdfToUpdate: PdfStructDTO = {
+        id: selectedPdf.id,
+        PDF_Client_Id: selectedPdf.PDF_Client ? selectedPdf.PDF_Client.id : 0,
+        PDF_Status: 1,
+        PDF_Generated_Date: selectedPdf.PDF_Generated_Date,
+        PDF_Observacoes: "", 
+    };
+
+    try {
+        await updatePdf(pdfToUpdate.id, pdfToUpdate);
+        console.log("PDF atualizado com sucesso:", pdfToUpdate);
+
+        
+        const selectedCompletePDF = pdfsCompleteData.find(pdf => pdf.id === selectedPdf.id);
+
+        if (selectedCompletePDF && selectedCompletePDF.PDF_Client) {
+        
+            generateReport(selectedCompletePDF.PDF_Client, selectedCompletePDF.PDF_Contracts, selectedCompletePDF.PDF_Products);
             
-            const selectedCompletePDF = pdfsCompleteData.find(pdf => pdf.id === selectedPdf.id);
-            if (selectedCompletePDF && selectedCompletePDF.PDF_Client) {
-                generateReport(selectedCompletePDF.PDF_Client, selectedCompletePDF.PDF_Contracts, selectedCompletePDF.PDF_Products);
-                selectedCompletePDF.PDF_Observacoes = ""
+            
+            const contractData = await getContractByClientId(selectedCompletePDF.PDF_Client.id);
+            
+           
+            const contractsArray = Array.isArray(contractData) ? contractData : [contractData];
+
+            const productData: ProductDTO[] = await Promise.all(
+                contractsArray.map(async contract => await getProductById(contract.Cont_ID_Prod))
+            );
+
+            const productArray = Array.isArray(productData) ? productData : [productData];
+
+            contractsArray.forEach(async contract => {
+                const product = productArray.find(prod => prod.ID_Prod === contract.Cont_ID_Prod);
+                if (!product) return;
+                product.Prod_Estoque = product.Prod_Estoque - contract.Cont_Qtde;
+                await updateProduct(product);
+            });
+
+
+            for (const contract of contractsArray) {
+                contract.Cont_Qtde = 0;
+                contract.Cont_ValorTotal = 0;
+         
+                await updateContract(
+                    contract.ID_Contrato, 
+                    contract.Cont_Comodato, 
+                    contract.Cont_Qtde, 
+                    contract.Cont_ValorTotal, 
+                    contract.Cont_PorcLucro
+                );
             }
 
-            handleCloseReport();
+            
+
+           
+
+            console.log("Contratos zerados e atualizados com sucesso.");
         }
+
+    } catch (error) {
+        // Um único 'catch' trata erros do updatePdf, getContractByClientId ou updateContract
+        console.error("Erro ao confirmar o PDF ou atualizar contratos:", error);
+        // Aqui você pode adicionar um feedback visual para o usuário (ex: toast de erro)
+    
+    } finally {
+        // 'finally' garante que o modal será fechado, mesmo se ocorrer um erro
+        handleCloseReport();
     }
+}
 
     const filteredClients = pdfsCompleteData.filter(pdfComplete =>
         pdfComplete.PDF_Client?.cli_razaoSocial.toLowerCase().includes(searchTerm.toLowerCase())

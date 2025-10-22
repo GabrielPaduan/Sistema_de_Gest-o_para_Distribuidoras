@@ -11,7 +11,7 @@ export const LoginForm: React.FC = () => {
     const { isAuthenticated } = useAuth();
     const [erro, setErro] = useState<number>(0);
     const navigate = useNavigate();
-
+    const { login } = useAuth();
 
     useEffect(() => {
         // Se o usuário já estiver autenticado, redireciona para a página inicial
@@ -24,20 +24,19 @@ export const LoginForm: React.FC = () => {
             event.preventDefault();
             try {
                 const formData = new FormData(event.currentTarget);
-                const login: LoginDTO = {
+                const loginData: LoginDTO = {
                     nome: formData.get("nome") as string,
                     senha: formData.get("senha") as string,
                 };
-                if (!login.nome || !login.senha) {
+                if (!loginData.nome || !loginData.senha) {
                     setErro(1);
                     return;
                 }
 
-                loginUser(login)
+                loginUser(loginData)
                     .then((response: LoginResponse) => {
                         const token = response.token;
-                        console.log("Login successful:", token);
-                        localStorage.setItem('authToken', token); // Salva o token
+                        login(token);
                         
                         navigate("/pagina-inicial");
                         window.location.reload();

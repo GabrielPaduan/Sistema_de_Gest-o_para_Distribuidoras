@@ -1,11 +1,13 @@
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 
 // Interface para as informações que você guarda no token (o payload)
 interface TokenPayload {
   sub: string; // Geralmente o ID do usuário
+  name: string; // Nome do usuário
   role: string; // O tipo de usuário
+  exp?: number; // Tempo de expiração (segundos desde epoch) — opcional
   // Adicione aqui outras informações que seu token possa ter
 }
 
@@ -26,38 +28,43 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<TokenPayload | null>(null);
   const navigate = useNavigate();
 
+  const logout = useCallback(() => {
+    setToken(null);
+    localStorage.removeItem('authToken'); // Garanta que removeu aqui também
+    setUser(null);
+    navigate('/login');
+  }, [navigate]); // navigate é estável
+
+  // Também é uma boa prática fazer o mesmo com o login
+  const login = useCallback((newToken: string) => {
+    setToken(newToken);
+    localStorage.setItem('authToken', newToken); // Defina o token aqui
+  }, []);   
+
   useEffect(() => {
     if (token) {
       try {
-        // Se o token existir, decodifica para extrair as informações do usuário
         const decodedToken = jwtDecode<TokenPayload>(token);
-        setUser(decodedToken);
-        localStorage.setItem('authToken', token); // Garante que está salvo
-      } catch (error) {
-        console.error("Token inválido ou corrompido:", error);
-        // Se o token for inválido (malformado, etc.), limpa tudo
-        logout();
-      }
+          if (!decodedToken.exp) return;
+          if (decodedToken.exp * 1000 < Date.now()) {
+            console.warn("Token expirado. Deslogando...");
+            logout(); 
+          } else {
+            setUser(decodedToken);
+            localStorage.setItem('authToken', token); 
+          }
+        } catch (error) {
+          console.error("Token inválido ou corrompido:", error);
+          logout();
+        }
     } else {
-      // Se não há token, limpa o localStorage e o estado do usuário
-      localStorage.removeItem('authToken');
-      setUser(null);
+        localStorage.removeItem('authToken');
+        setUser(null);
     }
-  }, [token]); // Este código roda sempre que o token mudar
-
-  // Função para fazer login
-  const login = (newToken: string) => {
-    setToken(newToken);
-  };
-
-  // Função para fazer logout
-  const logout = () => {
-    setToken(null);
-    navigate('/login'); // Após o logout, redireciona para a página de login
-  };
+  }, [token, logout]);
 
   const value = {
-    isAuthenticated: !!token, // Se existe token, está autenticado
+    isAuthenticated: !!token,
     user,
     login,
     logout,
@@ -66,8 +73,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// 3. Cria um Hook customizado para facilitar o uso do contexto
-// Dica: Usar um hook customizado evita ter que importar useContext e AuthContext em todo componente.
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

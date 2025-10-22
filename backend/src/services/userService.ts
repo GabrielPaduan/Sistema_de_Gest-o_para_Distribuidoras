@@ -47,6 +47,7 @@ export const loginUser = async (loginData: LoginDTO): Promise<any> => {
 
         const payload = {
             sub: user.usu_id,
+            name: user.usu_nome,
             role: user.usu_typeUser
         }
 

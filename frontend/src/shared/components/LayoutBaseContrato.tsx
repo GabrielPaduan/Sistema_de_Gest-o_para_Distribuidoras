@@ -127,11 +127,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
 
                     const contractData = await getContractByClientId(id);
                     
-                    Array.isArray(contractData) && contractData.forEach(contract => {
-                        contract.Cont_Qtde = 0;
-                        contract.Cont_ValorTotal = 0;
-                    });
-
+           
                     setContracts(Array.isArray(contractData) ? contractData : [contractData]);
                     
 

@@ -5,7 +5,7 @@ import 'dotenv/config';
 declare global {
   namespace Express {
     interface Request {
-      user?: { sub: string; role: string }; // Use a estrutura do seu payload aqui
+      user?: { sub: string; name: string; role: string }; // Use a estrutura do seu payload aqui
     }
   }
 }
@@ -20,7 +20,7 @@ export const verifyToken = (req: express.Request, res: express.Response, next: N
 
   try {
     const userPayload = jwt.verify(token, process.env.JWT_SECRET as string);
-    req.user = userPayload as { sub: string; role: string }; // Adiciona o payload decodificado à requisição
+    req.user = userPayload as { sub: string; name: string; role: string }; // Adiciona o payload decodificado à requisição
     next(); // Se o token for válido, continua para a rota
   } catch (error) {
     return res.status(403).json({ message: 'Token inválido ou expirado.' });

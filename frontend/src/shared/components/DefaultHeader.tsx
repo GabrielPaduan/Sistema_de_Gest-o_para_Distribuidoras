@@ -1,9 +1,12 @@
 import { Box, Button, Collapse, Icon, Typography } from "@mui/material";
 import React from "react";
+import { useAuth } from "../context";
 
 export const DefaultHeader: React.FC = () => {
   const [openMenuLogin, setOpenMenuLogin] = React.useState(false);
-
+  const { user } = useAuth();
+  const { logout } = useAuth();
+  console.log(user?.name);
   const handleMenuLogin = () => {
     if (openMenuLogin){
       setOpenMenuLogin(false);
@@ -12,8 +15,10 @@ export const DefaultHeader: React.FC = () => {
     }
   }
 
+  
+
   const handleLogout = () => {
-    console.log("Logout clicked");
+    logout();
   }
 
    return (
@@ -37,7 +42,7 @@ export const DefaultHeader: React.FC = () => {
               <Box display={"flex"} justifyContent={"center"} alignItems={"center"}  flexDirection={"column"} padding={1}>
                 <Icon sx={{ fontSize: 70, color: 'text.primary', '@media (max-width: 600px)': { padding: "0px" } }}>person</Icon>
                 <Typography variant="body2" color="text.primary" sx={{ '@media ( min-width: 320px) and (max-width: 600px)': { fontSize: '1.2rem' } }}>
-                    Olá, Tiago!
+                    Olá, {user?.name}!
                 </Typography>
               </Box>
               <Collapse in={openMenuLogin} timeout={900} sx={{ width: '100%' }}>

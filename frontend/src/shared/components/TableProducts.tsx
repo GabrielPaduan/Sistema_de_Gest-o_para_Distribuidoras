@@ -38,7 +38,7 @@ export const TableProducts: React.FC = () => {
     }, []);
 
     const filteredProducts = productsData.filter(product =>
-        product.Prod_CodProduto.toLowerCase().includes(searchTerm.toLowerCase())
+        product.Prod_Nome.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const handleSearch = async (query: string) => {
