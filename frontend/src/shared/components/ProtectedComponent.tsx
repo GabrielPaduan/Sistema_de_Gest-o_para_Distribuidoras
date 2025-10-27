@@ -4,9 +4,6 @@ export const ProtectedComponent: React.FC<{ allowedRoles?: string[], children: R
     const { user } = useAuth();
 
     if (!user) return null;
-    
-    console.log(user?.role);
-    console.log(allowedRoles.includes(user?.role.toString()));
 
     if (user && allowedRoles.includes(user.role.toString())) {
         return <>{children}</>;

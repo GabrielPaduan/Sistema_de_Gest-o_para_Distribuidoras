@@ -68,13 +68,13 @@ export const FormCadastroProduto: React.FC = () => {
             flexDirection="column"
             gap={2}
             maxWidth={"70%"}
-            sx={{ '@media (max-width: 600px)': { maxWidth: "95%", padding: "10px" } }}
+            sx={{ '@media (max-width: 800px)': { maxWidth: "95%", padding: "10px" } }}
             margin="auto"
             onSubmit={submitForm}
         >
             <Box display={"flex"} flexDirection={"column"} width={"100%"} gap={2}>
-                <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 600px)': { flexDirection: "column", gap: 2 } }}>
-                    <TextField label="Em desenvolvimento..." id="codigoBarras" name="codigoBarras" variant="outlined" placeholder="Em desenvolvimento..." sx={{ width: "33.33%", '@media (max-width: 600px)': { width: "100%" }, '& .MuiInputLabel-root': {
+                <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column", gap: 2 } }}>
+                    <TextField label="Em desenvolvimento..." id="codigoBarras" name="codigoBarras" variant="outlined" placeholder="Em desenvolvimento..." sx={{ width: "33.33%", '@media (max-width: 800px)': { width: "100%" }, '& .MuiInputLabel-root': {
                         color: 'gray', // Cor do label normal
                     }, '& .MuiInputLabel-root.Mui-focused': {
                         color: '#181393', // Cor do label quando em foco
@@ -100,7 +100,7 @@ export const FormCadastroProduto: React.FC = () => {
                     }, '& .MuiInputLabel-root.Mui-focused': {
                         color: '#181393', // Cor do label quando em foco
                     } }} />
-                    <TextField label="NCM" id="prodNCM" name="prodNCM" variant="outlined" placeholder="Digite o NCM" sx={{ width: "25%", '@media (max-width: 600px)': { width: "15%" }, '& .MuiInputLabel-root': {
+                    <TextField label="NCM" id="prodNCM" name="prodNCM" variant="outlined" placeholder="Digite o NCM" sx={{ width: "25%", '@media (max-width: 800px)': { width: "15%" }, '& .MuiInputLabel-root': {
                         color: 'gray', // Cor do label normal
                     }, '& .MuiInputLabel-root.Mui-focused': {
                         color: '#181393', // Cor do label quando em foco
@@ -125,7 +125,7 @@ export const FormCadastroProduto: React.FC = () => {
                         input: {
                         startAdornment: <InputAdornment position="start">R$</InputAdornment>,
                         },
-                    }} sx={{ width: "50%", '@media (max-width: 600px)': { width: "15%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': {
+                    }} sx={{ width: "50%", '@media (max-width: 800px)': { width: "15%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': {
                         color: 'gray', // Cor do label normal
                     }, '& .MuiInputLabel-root.Mui-focused': {
                         color: '#181393', // Cor do label quando em foco
@@ -138,7 +138,7 @@ export const FormCadastroProduto: React.FC = () => {
                         input: {
                             endAdornment: <InputAdornment position="end">%</InputAdornment>,
                         },
-                    }} sx={{ width: "50%", '@media (max-width: 600px)': { width: "15%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': {
+                    }} sx={{ width: "50%", '@media (max-width: 800px)': { width: "15%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': {
                         color: 'gray', // Cor do label normal
                     }, '& .MuiInputLabel-root.Mui-focused': {
                         color: '#181393', // Cor do label quando em foco
@@ -152,7 +152,7 @@ export const FormCadastroProduto: React.FC = () => {
                         input: {
                             startAdornment: <InputAdornment position="start">R$</InputAdornment>,
                         },
-                    }} sx={{ width: "50%", '@media (max-width: 600px)': { width: "15%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': {
+                    }} sx={{ width: "50%", '@media (max-width: 800px)': { width: "15%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': {
                         color: 'gray', // Cor do label normal
                     }, '& .MuiInputLabel-root.Mui-focused': {
                         color: '#181393', // Cor do label quando em foco
@@ -168,8 +168,8 @@ export const FormCadastroProduto: React.FC = () => {
 
             <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2}>
                 <Box>
-                    <Button variant="contained" color="primary" type="submit" sx={{ margin: "10px auto", padding: "15px", '@media (max-width: 600px)': { width: "100%" } }}>
-                        <Typography variant="h6" color="text.secondary" sx={{ '@media (max-width: 600px)': { fontSize: "1rem" } }} >
+                    <Button variant="contained" color="primary" type="submit" sx={{ margin: "10px auto", padding: "15px", '@media (max-width: 800px)': { width: "100%" } }}>
+                        <Typography variant="h6" color="text.secondary" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }} >
                             Cadastrar
                         </Typography>
                     </Button>

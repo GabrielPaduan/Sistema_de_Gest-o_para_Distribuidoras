@@ -43,7 +43,6 @@ export const LoginForm: React.FC = () => {
                         setErro(0);
                     })
                     .catch((error) => {
-                        console.log(error)
                         setErro(2);
                         console.error("Login failed:", error);
                     });

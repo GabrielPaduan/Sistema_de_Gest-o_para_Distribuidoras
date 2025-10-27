@@ -10,6 +10,17 @@ export const getAllProducts = async (req: express.Request, res: express.Response
     }
 };
 
+export const getProductsWithPagination = async (req: express.Request, res: express.Response) => {
+    try {
+        const page = parseInt(req.query.page as string) || 1;
+        const pageSize = parseInt(req.query.pageSize as string) || 10;
+        const { products, total } = await productService.findAllProductWithPagination(page, pageSize);
+        res.status(200).json({ products, total });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 export const createProduct = async (req: express.Request, res: express.Response) => {
     try {
         const newProduct = await productService.createNewProduct(req.body);

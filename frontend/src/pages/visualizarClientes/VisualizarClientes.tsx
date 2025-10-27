@@ -13,7 +13,7 @@ export class VisualizarClientes extends React.Component {
               Listagem de Clientes
             </Typography>
             <TableClients />
-            <Box sx={{ width: '10%', '@media (max-width: 600px)': { width: '90%' }, margin: "auto" }}>
+            <Box sx={{ width: '10%', '@media (max-width: 800px)': { width: '90%' }, margin: "auto" }}>
               <GenericButton name="Voltar" type="button" link="/gerenciar-clientes" />
             </Box>
           </Box>

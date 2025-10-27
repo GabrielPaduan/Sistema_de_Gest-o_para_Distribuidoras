@@ -20,10 +20,8 @@ export const FormCadastroUser: React.FC = () => {
                 usu_senha: formData.get("senha") as string,
                 usu_typeUser: formData.get("typeUser") as unknown as number,
             };
-            console.log("Submitting login:", cadastro);
             cadastrarUser(cadastro)
                 .then((response) => {
-                    console.log("Cadastro bem-sucedido:", response);
                     navigate("/login");
                 })
                 .catch((error) => {

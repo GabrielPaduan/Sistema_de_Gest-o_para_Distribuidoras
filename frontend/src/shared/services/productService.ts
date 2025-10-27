@@ -36,3 +36,10 @@ export const removeProduct = async (idProd: number): Promise<void> => {
 export const updateProduct = async (productData: ProductDTO): Promise<void> => {
   await api.put(`/produtos/editar`, productData);
 }
+
+export const getProductsWithPagination = async (page: number, limit: number): Promise<ProductDTO[]> => {
+  const response = await api.get('/produtos/pagination', {
+    params: { page, limit }
+  });
+  return response.data;
+}

@@ -16,17 +16,14 @@ import {
 import { Grid } from '@mui/material';
 import React, { useState } from 'react';
 import { ClientDTO, ContractDTO, ProductDTO } from "../utils/DTOS";
-import logo from '../assets/logo_empresa.jpg';
+import logo from '../assets/logo_empresa.png';
 
 import { useTheme } from '@mui/material/styles';
-import { createPDFContracts } from '../services/pdfContract';
-import { updateContract } from '../services/contractService';
 
 interface RelatorioPreviewProps {
     client: ClientDTO;
     contracts: ContractDTO[];
     products: ProductDTO[];
-    // handleGeneratePdf: () => void;
 }
 
 // 3. O COMPONENTE
@@ -39,8 +36,8 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
     }, 0);
 
     return (
-        <Container maxWidth="lg" sx={{ my: 4, p: { xs: 0 } }}>
-            <Paper elevation={3} sx={{ p: { xs: 1, md: 4 } }}>
+        <Container sx={{ width: '100%', my: 4, p: { xs: 0 } }}>
+            <Paper elevation={3} sx={{ width: '100%', margin: 'auto', p: { xs: 1, md: 4 } }}>
                 <Grid container justifyContent="space-between" alignItems="flex-start" sx={{ mb: 2, p: {xs: 0} }}>
                     <Grid sx={{ xs: 12, md: 6 }}>
                         <Typography variant="subtitle2" color="text.secondary">CLIENTE</Typography>

@@ -25,8 +25,6 @@ export const findModelClients = async (): Promise<ClientDTO[]> => {
 };
 
 export const createNewClient = async (clientData: ClientDTOInsert): Promise<ClientDTO[]> => {
-    // Não inclua o campo 'id' no objeto inserido, pois ele será gerado automaticamente pelo banco
-    console.log(clientData)
     const { data, error } = await supabase
         .from('Clientes')
         .insert([clientData])

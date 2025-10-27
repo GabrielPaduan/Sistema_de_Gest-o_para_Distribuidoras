@@ -47,18 +47,18 @@ export const TableClients: React.FC = () => {
     }
 
     return (
-        <Box sx={{ maxWidth: "70%", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", marginTop: 3, marginBottom: 2, '@media (max-width: 600px)': { maxWidth: "90%" } }}>
+        <Box sx={{ maxWidth: "70%", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", marginTop: 3, marginBottom: 2, '@media (max-width: 800px)': { maxWidth: "90%" } }}>
             <SearchField onSearchChange={setSearchTerm} />
             <TableContainer component={Paper} sx={{margin: "auto", cursor: "default", overflowY: "scroll", maxHeight: "57vh", marginTop: 3 }}>
                 <Table stickyHeader>
                     <TableHead >
                         <TableRow sx={{ background: '#00008B' }}>
                             <TableCell  sx={{ fontSize: 20, textAlign: "center" }}>Cliente</TableCell>
-                            <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { display: 'none' } }}>E-mail</TableCell>
-                            <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { display: 'none' } }}>Endereço</TableCell>
+                            <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { display: 'none' } }}>E-mail</TableCell>
+                            <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { display: 'none' } }}>Endereço</TableCell>
                             <ProtectedComponent allowedRoles={['1']}>
-                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>Editar</TableCell>
-                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { fontSize: "15px", padding: "10px" } }}>Remover</TableCell>
+                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Editar</TableCell>
+                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Remover</TableCell>
                             </ProtectedComponent>
                         </TableRow>
                     </TableHead>
@@ -80,14 +80,14 @@ export const TableClients: React.FC = () => {
                                         
                                     >
                                         <TableCell onClick={() => window.location.href = `/contrato-cliente/${client.id}`} sx={{ fontSize: 16, textAlign: "center" }}>{client.cli_razaoSocial}</TableCell>
-                                        <TableCell onClick={() => window.location.href = `/contrato-cliente/${client.id}`} sx={{ fontSize: 16, textAlign: "center", '@media (max-width: 600px)': { display: 'none' } }}>{client.cli_email === "" ? "Não informado" : client.cli_email}</TableCell>
-                                        <TableCell onClick={() => window.location.href = `/contrato-cliente/${client.id}`} sx={{ fontSize: 16, textAlign: "center", '@media (max-width: 600px)': { display: 'none' } }}>{client.cli_end === "" ? "Não informado" : client.cli_end}</TableCell>
+                                        <TableCell onClick={() => window.location.href = `/contrato-cliente/${client.id}`} sx={{ fontSize: 16, textAlign: "center", '@media (max-width: 800px)': { display: 'none' } }}>{client.cli_email === "" ? "Não informado" : client.cli_email}</TableCell>
+                                        <TableCell onClick={() => window.location.href = `/contrato-cliente/${client.id}`} sx={{ fontSize: 16, textAlign: "center", '@media (max-width: 800px)': { display: 'none' } }}>{client.cli_end === "" ? "Não informado" : client.cli_end}</TableCell>
                                         <ProtectedComponent allowedRoles={['1']}>
                                             <TableCell sx={{ fontSize: 20, textAlign: "center" }}>
                                                 <Button onClick={() => navigate(`/editar-cliente/${client.id}`)}><Icon sx={{ fontSize: 40 }}>edit</Icon></Button>
                                             </TableCell>
-                                            <TableCell  sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 600px)': { padding: "0px" } }}>
-                                                <Button onClick={() => onRemoveContract(client.id)} sx={{ '@media (max-width: 600px)': { padding: "0px" } }}><Icon sx={{ fontSize: 30, '@media (max-width: 600px)': { padding: "0px" } }}>delete_forever</Icon></Button>
+                                            <TableCell  sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { padding: "0px" } }}>
+                                                <Button onClick={() => onRemoveContract(client.id)} sx={{ '@media (max-width: 800px)': { padding: "0px" } }}><Icon sx={{ fontSize: 30, '@media (max-width: 800px)': { padding: "0px" } }}>delete_forever</Icon></Button>
                                             </TableCell>
                                         </ProtectedComponent>
                                     </TableRow>
@@ -104,7 +104,7 @@ export const TableClients: React.FC = () => {
                     rowsPerPage={rowsPerPage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                     rowsPerPageOptions={[5, 10, 15]}
-                    sx={{ '@media (max-width: 600px)': { 
+                    sx={{ '@media (max-width: 800px)': { 
                         '& .MuiTablePagination-selectLabel': {
                             display: 'none'
                         }

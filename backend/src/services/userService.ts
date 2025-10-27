@@ -16,7 +16,6 @@ export const createUserService = async (userData: UserInsertDTO): Promise<any> =
             .single();
 
         if (error) {
-            console.log("Erro na criação do usuário:", error);
             throw new Error(`Error creating user: ${error.message}`);
         }
         return data;
@@ -28,7 +27,6 @@ export const createUserService = async (userData: UserInsertDTO): Promise<any> =
 
 export const loginUser = async (loginData: LoginDTO): Promise<any> => {
     try {
-        console.log("Tentando logar usuário:", loginData);
         const { data: user, error } = await supabase
             .from('Usuarios')
             .select('*') 

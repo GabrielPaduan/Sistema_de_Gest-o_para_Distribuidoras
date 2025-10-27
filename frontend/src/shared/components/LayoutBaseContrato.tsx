@@ -5,7 +5,7 @@ import { TableContract } from "./TableContract";
 import { generateReport } from "../utils/Report";
 import { getClientById, getModelClients, getModelContracts } from "../services/clientService"; // Supondo que você tenha este serviço
 import { GenericButton } from "./GenericButton";
-import { getAllProducts, getProductByContractId, getProductById, searchProductsByName, updateProduct } from "../services/productService";
+import { getAllProducts, getProductByContractId, getProductById, getProductsWithPagination, searchProductsByName, updateProduct } from "../services/productService";
 import { SearchField } from "./searchField";
 import { createContract, getContractByClientId, removeContract, updateContract } from "../services/contractService";
 import Checkbox from "@mui/material/Checkbox";
@@ -61,7 +61,6 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
     };
 
     const handleOpen = () => {
-        console.log(products)
         setOpen(true);
     };
     const handleClose = () => {
@@ -106,23 +105,9 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                     // Busca dados reais do cliente
                     const clientData = await getClientById(id);
                     setClient(clientData);
-                    console.log(clientData)
                     const productData = await getAllProducts();
                     productData.filter(p => p.Prod_Valor > 0);
                     setProducts(productData);
-                    console.log(productData)
-
-                    Array.isArray(productData) && productData.forEach(async product => {
-                        if (product.Prod_PorcLucro == 0) {
-                            if (product.Prod_CustoCompra > 0 && product.Prod_Valor > 0 && product.Prod_Valor >= product.Prod_CustoCompra) {
-                                product.Prod_PorcLucro = (((product.Prod_Valor - product.Prod_CustoCompra) / product.Prod_CustoCompra) * 100).toFixed(2) as unknown as number;
-                            } else if (product.Prod_Valor < product.Prod_CustoCompra) {
-                                product.Prod_PorcLucro = 0;
-                            }
-
-                            await updateProduct(product);
-                        }
-                    });
 
 
                     const contractData = await getContractByClientId(id);
@@ -158,7 +143,6 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                 setContracts(Array.isArray(contractData) ? contractData : [contractData]);
                 if (contractsInsert && contractsInsert.Cont_ID_Prod !== undefined) {
                     const productData = await getProductById(contractsInsert.Cont_ID_Prod);
-                    console.log("Produto inserido: ", productData)
                     if (productData != null) {
                         if (productsClient.map(p => p.ID_Prod).includes(productData.ID_Prod)) {
                             setProductsClient(prevProducts => prevProducts.map(p => p.ID_Prod === productData.ID_Prod ? productData : p));
@@ -182,7 +166,6 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                 await updateContract(contract.ID_Contrato, contract.Cont_Comodato, contract.Cont_Qtde, contract.Cont_ValorTotal, contract.Cont_PorcLucro);
             }
             const clientPDF = await getPdfByClientId(id);
-            console.log("Observation: ", observation);
             if (clientPDF == null) {
                 await createPDFContracts({ PDF_Client_Id: id, PDF_Status: 0, PDF_Generated_Date: new Date().toISOString(), PDF_Observacoes: observation });
             } else {
@@ -194,10 +177,6 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
             console.error(err);
         }
     };
-
-    useEffect(() => {
-        console.log("Contracts updated: ", contracts);
-    }, [contracts]);
 
     const handleAddProduct = (contractId: number, cmdt: number) => {
         setContracts(currentContracts =>
@@ -376,14 +355,14 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
     }, [debouncedSearchTerm]);
 
     return (
-        <Box padding={10} sx={{ "@media (max-width: 600px)": { padding: 2, margin: "auto" } }}>
+        <Box padding={10} sx={{ "@media (max-width: 800px)": { padding: 0, margin: "auto", width: "80%" } }}>
             <Modal
             open={open}
             onClose={handleClose}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
             >
-                <Box sx={{ ...style, '@media (max-width: 600px)': { width: "80%" } }}>
+                <Box sx={{ ...style, '@media (max-width: 800px)': { width: "80%" } }}>
                     <Typography id="modal-modal-title" variant="h6" component="h2" textAlign={"center"}>
                         Adicionar Novo Produto
                     </Typography>
@@ -413,9 +392,9 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                         onRowsPerPageChange={handleChangeRowsPerPage}
                         rowsPerPageOptions={[3, 7, 12]}
                     />
-                    <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} gap={2} mt={2} sx={{ '@media (max-width: 600px)': { flexDirection: "column" } }}>
-                        <Box display={"flex"} alignItems={"center"} justifyContent={"space-evenly"} width={"60%"} height={"100%"} sx={{ '@media (max-width: 600px)': { width: "100%" } }}>
-                            <Typography component="label" htmlFor={`quantity`} variant="h6" sx={{ '@media (max-width: 600px)': { fontSize: '16px' } }}>
+                    <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} gap={2} mt={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column" } }}>
+                        <Box display={"flex"} alignItems={"center"} justifyContent={"space-evenly"} width={"60%"} height={"100%"} sx={{ '@media (max-width: 800px)': { width: "100%" } }}>
+                            <Typography component="label" htmlFor={`quantity`} variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: '16px' } }}>
                                 Comodato:
                             </Typography>
                             <TextField
@@ -446,16 +425,16 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                                     inputProps = {{ style: { padding: "8px" } }}
                                 />
                             </Box>
-                        <Box width={"40%"} display={"flex"} justifyContent={"center"} height={"100%"} gap={1} sx={{ '@media (max-width: 600px)': { width: "100%" } }}>
+                        <Box width={"40%"} display={"flex"} justifyContent={"center"} height={"100%"} gap={1} sx={{ '@media (max-width: 800px)': { width: "100%" } }}>
                             <Button
                                 variant="contained"
                                 color="primary"
                                 onClick={() => handleInsertContract(selectedProduct, cmdt, porcLucro)}
                             >
-                                <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 600px)': { fontSize: '12px' } }}> Adicionar</Typography>
+                                <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}> Adicionar</Typography>
                             </Button>
                             <Button onClick={handleClose} variant="contained" color="primary">
-                                <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 600px)': { fontSize: '12px' } }}>Voltar</Typography>
+                                <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}>Voltar</Typography>
                             </Button>
                         </Box>
                     </Box>
@@ -470,7 +449,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
             >
-                <Box sx={{ ...style, '@media (max-width: 600px)': { width: "80%" } }}>
+                <Box sx={{ ...style, '@media (max-width: 800px)': { width: "80%" } }}>
                     <Typography id="modal-modal-title" variant="h6" component="h2" textAlign={"center"}>
                         Modelos de Contrato
                     </Typography>
@@ -499,17 +478,17 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                         onRowsPerPageChange={handleChangeRowsPerPage}
                         rowsPerPageOptions={[3, 7, 12]}
                     />
-                    <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} gap={2} mt={2} sx={{ '@media (max-width: 600px)': { flexDirection: "column" } }}>
-                        <Box width={"100%"} display={"flex"} justifyContent={"space-evenly"} height={"100%"} gap={1} sx={{ '@media (max-width: 600px)': { width: "100%" } }}>
+                    <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} gap={2} mt={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column" } }}>
+                        <Box width={"100%"} display={"flex"} justifyContent={"space-evenly"} height={"100%"} gap={1} sx={{ '@media (max-width: 800px)': { width: "100%" } }}>
                             <Button
                                 variant="contained"
                                 color="primary"
                                 onClick={() => handleInsertModelContract(selectedModelContract)}
                             >
-                                <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 600px)': { fontSize: '12px' } }}> Confirmar</Typography>
+                                <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}> Confirmar</Typography>
                             </Button>
                             <Button onClick={handleCloseModelo} variant="contained" color="primary">
-                                <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 600px)': { fontSize: '12px' } }}>Fechar</Typography>
+                                <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}>Fechar</Typography>
                             </Button>
                         </Box>
                     </Box>
@@ -581,11 +560,11 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                     </Box>
                 </Box>
             </Modal>
-            <Typography variant="h4" color="text.primary" textAlign={"center"} paddingTop={10} sx={{ "@media (max-width: 600px)": { fontSize: "1.5rem" } }}>
+            <Typography variant="h4" color="text.primary" textAlign={"center"} paddingTop={10} sx={{ "@media (max-width: 800px)": { fontSize: "1.5rem" } }}>
                         {client?.cli_razaoSocial ? `Contrato de ${client.cli_razaoSocial}` : "Carregando Contrato..."}
             </Typography>
             {!showReport && (
-                <Box width={"80%"} margin={"auto"} sx={{ "@media (max-width: 600px)": { width: "95%" } }}>
+                <Box width={"80%"} margin={"auto"} sx={{ "@media (max-width: 800px)": { width: "95%" } }}>
                     <TableContract
                         client={client}
                         contracts={contracts}
@@ -606,22 +585,22 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                         />
                     </Box>
 
-                    <Box display={"flex"} alignItems="center" justifyContent="center" gap={2} mt={4} sx={{ '@media (max-width: 600px)': { flexDirection: "column" } }}>
+                    <Box display={"flex"} alignItems="center" justifyContent="center" gap={2} mt={4}>
                         <ProtectedComponent allowedRoles={['1']}>                        
-                            <Box sx={{width: "25%", '@media (max-width: 600px)': { width: '100%' } }}>
-                                <Button variant="contained" color="primary" sx={{ padding: "15px", width: "100%", '@media (max-width: 600px)': { padding: "15px" } }} onClick={handleOpen}>
-                                    <Typography variant="h6" sx={{ '@media (max-width: 600px)': { fontSize: "1rem" } }}>Adicionar Produto</Typography>
+                            <Box sx={{width: "25%", '@media (max-width: 800px)': { width: '100%' } }}>
+                                <Button variant="contained" color="primary" sx={{ padding: "15px", width: "100%", '@media (max-width: 800px)': { padding: "15px" } }} onClick={handleOpen}>
+                                    <Typography variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }}>Adicionar Produto</Typography>
                                 </Button>
                             </Box>
                         </ProtectedComponent>
                         <ProtectedComponent allowedRoles={['1']}>    
-                            <Box sx={{width: "25%", '@media (max-width: 600px)': { width: '100%' } }}>
-                                <Button onClick={handleOpenModelo} variant="contained" color="primary" sx={{ padding: "15px", width: "100%", '@media (max-width: 600px)': { padding: "15px" } }}>
-                                    <Typography variant="h6" sx={{ '@media (max-width: 600px)': { fontSize: "1rem" } }}>Modelos Contrato</Typography>
+                            <Box sx={{width: "25%", '@media (max-width: 800px)': { width: '100%' } }}>
+                                <Button onClick={handleOpenModelo} variant="contained" color="primary" sx={{ padding: "15px", width: "100%", '@media (max-width: 800px)': { padding: "15px" } }}>
+                                    <Typography variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }}>Modelos Contrato</Typography>
                                 </Button>
                             </Box>
                         </ProtectedComponent>
-                        <Box sx={{width: "25%", '@media (max-width: 600px)': { width: '100%' } }}>
+                        <Box sx={{width: "25%", '@media (max-width: 800px)': { width: '100%' } }}>
                             <Button
                                 variant="contained"
                                 color="primary"
@@ -629,10 +608,10 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                                 disabled={!client}
                                 onClick={() => handleShowReport()}
                             >
-                                <Typography variant="h6" sx={{ '@media (max-width: 600px)': { fontSize: "1rem" } }}>Prévia Relatório</Typography>
+                                <Typography variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }}>Prévia Relatório</Typography>
                             </Button>
                         </Box>
-                        <Box sx={{ width: "25%", '@media (max-width: 600px)': { width: '100%' } }}>
+                        <Box sx={{ width: "25%", '@media (max-width: 800px)': { width: '100%' } }}>
                             <GenericButton name="Voltar" type="button" link="/visualizar-clientes" />
                         </Box>
                     </Box>
@@ -642,24 +621,24 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                 <Box>
                     <PreviewReport client={client} contracts={contracts} products={productsClient} />
 
-                    <Box display={"flex"} justifyContent={"space-evenly"} sx={{ textAlign: 'center', my: 4, '@media (max-width: 600px)': { flexDirection: 'column', gap: 2 } }}>
+                    <Box display={"flex"} justifyContent={"center"} sx={{ width: '80%', margin: 'auto', textAlign: 'center', my: 4, gap: 4, '@media (max-width: 800px)': { gap: 2 } }}>
                         <Button
                             variant="contained"
                             color="primary"
-                            sx={{ padding: "15px" }}
+                            sx={{ padding: "15px", width: "50%" }}
                             onClick={() => handleShowReport()}
                             disabled={!client}
 
                         >
-                            <Typography variant="h6" sx={{ '@media (max-width: 600px)': { fontSize: "15px" } }}>Ocultar Relatório</Typography>
+                            <Typography variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: "15px" } }}>Ocultar Relatório</Typography>
                         </Button>
                         <Button
                             variant="contained"
                             color="primary"
-                            sx={{ padding: "15px" }}
+                            sx={{ padding: "15px", width: "50%" }}
                             onClick={() => handleGeneratePdf()}
                         >
-                            <Typography variant="h6" sx={{ '@media (max-width: 600px)': { fontSize: "15px" } }}>Enviar Relatório</Typography>
+                            <Typography variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: "15px" } }}>Enviar Relatório</Typography>
                         </Button>
                     </Box>
                 </Box>

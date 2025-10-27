@@ -37,15 +37,12 @@ export const Form: React.FC = () => {
                 cli_cidade: formData.get("cidade") as string,
                 cli_celular: formData.get("cel") as string,
                 cli_endNum: formData.get("endNum") as string,
-                cli_modelo: isChecked, // Default value; adjust as needed
+                cli_modelo: isChecked,
             };
             setClient(newClient);
-            console.log("Submitting client:", newClient);
-            // Here you would typically send the newClient to your backend
             const idCliente = await createClient(newClient);
-            console.log("Created client with ID:", idCliente[0].id);
             setClient(null);
-            navigate(`/contrato-cliente/${idCliente[0].id}`); // Redirect to the desired page after submission
+            navigate(`/contrato-cliente/${idCliente[0].id}`);
         } catch (error) {
             console.error("Error submitting form:", error);
         }
@@ -61,13 +58,13 @@ export const Form: React.FC = () => {
             flexDirection="column"
             gap={2}
             maxWidth={"70%"}
-            sx={{ '@media (max-width: 600px)': { maxWidth: "95%", padding: "10px" } }}
+            sx={{ '@media (max-width: 800px)': { maxWidth: "95%", padding: "10px" } }}
             margin="auto"
             onSubmit={submitForm}
         >
-            <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 600px)': { flexDirection: "column" } }}>
-                <TextField id="razaoSocial" name="razaoSocial" variant="outlined" placeholder="Digite a razão social" sx={{ width: "50%", '@media (max-width: 600px)': { width: "100%" } }} />
-                <TextField id="inscricaoEstadual" name="inscricaoEstadual" variant="outlined" placeholder="Digite a inscrição estadual" sx={{ width: "50%", '@media (max-width: 600px)': { width: "100%" } }} />
+            <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column" } }}>
+                <TextField id="razaoSocial" name="razaoSocial" variant="outlined" placeholder="Digite a razão social" sx={{ width: "50%", '@media (max-width: 800px)': { width: "100%" } }} />
+                <TextField id="inscricaoEstadual" name="inscricaoEstadual" variant="outlined" placeholder="Digite a inscrição estadual" sx={{ width: "50%", '@media (max-width: 800px)': { width: "100%" } }} />
             </Box>
             <Box display={"flex"} alignItems={"center"}>
                 <TextField id="documentos" name="documentos" variant="outlined" placeholder="Digite o documento" sx={{ width: "80%" }} />
@@ -86,16 +83,16 @@ export const Form: React.FC = () => {
                 </Box>
             </Box>
             <Box display={"flex"} flexDirection={"column"} width={"100%"} gap={2}>
-                <Box display={"flex"} justifyContent={"space-between"} sx={{ '@media (max-width: 600px)': { flexDirection: "column", gap: 2 } }}>
-                    <TextField id="endereco" name="endereco" variant="outlined" placeholder="Digite o endereço" sx={{ width: "50%", '@media (max-width: 600px)': { width: "100%" } }} />
-                    <Box width="49%" display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 600px)': { width: "100%" } }}>
+                <Box display={"flex"} justifyContent={"space-between"} sx={{ '@media (max-width: 800px)': { flexDirection: "column", gap: 2 } }}>
+                    <TextField id="endereco" name="endereco" variant="outlined" placeholder="Digite o endereço" sx={{ width: "50%", '@media (max-width: 800px)': { width: "100%" } }} />
+                    <Box width="49%" display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 800px)': { width: "100%" } }}>
                         <TextField id="endNum" name="endNum" variant="outlined" placeholder="Digite o número" sx={{ width: "35%" }} />
                         <TextField id="cep" name="cep" variant="outlined" placeholder="Digite o CEP" sx={{ width: "64%" }} />
                     </Box>
                 </Box>
                 <Box display={"flex"} justifyContent={"space-between"}>
                     <TextField id="cidade" name="cidade" variant="outlined" placeholder="Digite a cidade" sx={{ width: "50%" }} />
-                    <TextField id="uf" name="uf" variant="outlined" placeholder="UF" sx={{ width: "19%", '@media (max-width: 600px)': { width: "15%" } }} />
+                    <TextField id="uf" name="uf" variant="outlined" placeholder="UF" sx={{ width: "19%", '@media (max-width: 800px)': { width: "15%" } }} />
                     <TextField id="bairro" name="bairro" variant="outlined" placeholder="Digite o bairro" sx={{ width: "29%" }} />
                 </Box>
             </Box>
@@ -104,15 +101,15 @@ export const Form: React.FC = () => {
 
             <Box display={"flex"} flexDirection={"column"} gap={2}>
                 <Box display={"flex"} justifyContent={"space-between"}>
-                    <TextField id="dddTel" name="dddTel" variant="outlined" placeholder="DDD" sx={{ width: "9%", '@media (max-width: 600px)': { width: "15%" } }} />
-                    <TextField id="tel" name="tel" variant="outlined" placeholder="Digite o telefone" sx={{ width: "90%", '@media (max-width: 600px)': { width: "83%" } }} />
+                    <TextField id="dddTel" name="dddTel" variant="outlined" placeholder="DDD" sx={{ width: "9%", '@media (max-width: 800px)': { width: "15%" } }} />
+                    <TextField id="tel" name="tel" variant="outlined" placeholder="Digite o telefone" sx={{ width: "90%", '@media (max-width: 800px)': { width: "83%" } }} />
                 </Box>
                 <Box display={"flex"} justifyContent={"space-between"}>
-                    <TextField id="dddCel" name="dddCel" variant="outlined" placeholder="DDD" sx={{ width: "9%", '@media (max-width: 600px)': { width: "15%" } }} />
-                    <TextField id="cel" name="cel" variant="outlined" placeholder="Digite o celular" sx={{ width: "90%", '@media (max-width: 600px)': { width: "83%" } }} />
+                    <TextField id="dddCel" name="dddCel" variant="outlined" placeholder="DDD" sx={{ width: "9%", '@media (max-width: 800px)': { width: "15%" } }} />
+                    <TextField id="cel" name="cel" variant="outlined" placeholder="Digite o celular" sx={{ width: "90%", '@media (max-width: 800px)': { width: "83%" } }} />
                 </Box>
             </Box>
-            <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2} sx={{ '@media (max-width: 600px)': { flexDirection: "column" } }}>
+            <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column" } }}>
                 <Typography variant="h6" textAlign={"center"}>Selecione essa opção caso queira definir esse cliente como modelo de contrato: </Typography>
                 <Checkbox id="modelo" name="modelo" style={{ color: "black" }} checked={isChecked === 1} // Use o estado para controlar a propriedade 'checked'
                     onChange={handleCheckboxChange}/>
@@ -121,8 +118,8 @@ export const Form: React.FC = () => {
 
             <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2}>
                 <Box>
-                    <Button variant="contained" color="primary" type="submit" sx={{ margin: "10px auto", padding: "15px", '@media (max-width: 600px)': { width: "100%" } }}>
-                        <Typography variant="h6" color="text.secondary" sx={{ '@media (max-width: 600px)': { fontSize: "1rem" } }} >
+                    <Button variant="contained" color="primary" type="submit" sx={{ margin: "10px auto", padding: "15px", '@media (max-width: 800px)': { width: "100%" } }}>
+                        <Typography variant="h6" color="text.secondary" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }} >
                             Cadastrar
                         </Typography>
                     </Button>

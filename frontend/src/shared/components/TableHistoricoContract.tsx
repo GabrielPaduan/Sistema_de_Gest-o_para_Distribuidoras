@@ -21,7 +21,17 @@ export const TableHistoricoContract: React.FC = () => {
     const [selectedPdf, setSelectedPdf] = useState<PdfStructCompleteDTO | null>(null);
     const navigate = useNavigate();
 
-    const handleShowReport = (pdf: PdfStructCompleteDTO) => {
+    const handleShowReport = async (pdf: PdfStructCompleteDTO) => {
+        if (pdf.PDF_Contracts.length === 0) {
+            const contractData = await getContractByClientId(pdf.PDF_Client?.id || 0);
+            pdf.PDF_Contracts = Array.isArray(contractData) ? contractData : [contractData];
+        }
+        if (pdf.PDF_Products.length === 0) {
+            const productData: ProductDTO[] = await Promise.all(
+                pdf.PDF_Contracts.map(async contract => await getProductById(contract.Cont_ID_Prod))
+            );  
+            pdf.PDF_Products = productData;
+        }
         setSelectedPdf(pdf);
         setShowReport(true);
     };
@@ -48,18 +58,15 @@ export const TableHistoricoContract: React.FC = () => {
                 const pdfsComplete: PdfStructCompleteDTO[] = await Promise.all(
                     dataPdfs.map(async pdf => {
                         const dataClient = await getClientById(pdf.PDF_Client_Id);
-                        const contractData = await getContractByClientId(pdf.PDF_Client_Id);
-                        const contractsArray = Array.isArray(contractData) ? contractData : [contractData];
-                        const productData: ProductDTO[] = await Promise.all(
-                            contractsArray.map(async contract => await getProductById(contract.Cont_ID_Prod))
-                        );
+                        // const contractData = await getContractByClientId(pdf.PDF_Client_Id);
+                        // const contractsArray = Array.isArray(contractData) ? contractData : [contractData];
                         return {
                             id: pdf.id,
                             PDF_Status: pdf.PDF_Status,
                             PDF_Generated_Date: pdf.PDF_Generated_Date,
                             PDF_Client: dataClient,
-                            PDF_Contracts: contractsArray,
-                            PDF_Products: productData,
+                            PDF_Contracts: [],
+                            PDF_Products: [],
                             PDF_Observacoes: pdf.PDF_Observacoes
                         };
                     })
@@ -87,8 +94,6 @@ export const TableHistoricoContract: React.FC = () => {
 
     try {
         await updatePdf(pdfToUpdate.id, pdfToUpdate);
-        console.log("PDF atualizado com sucesso:", pdfToUpdate);
-
         
         const selectedCompletePDF = pdfsCompleteData.find(pdf => pdf.id === selectedPdf.id);
 
@@ -128,21 +133,11 @@ export const TableHistoricoContract: React.FC = () => {
                     contract.Cont_PorcLucro
                 );
             }
-
-            
-
-           
-
-            console.log("Contratos zerados e atualizados com sucesso.");
         }
 
     } catch (error) {
-        // Um único 'catch' trata erros do updatePdf, getContractByClientId ou updateContract
         console.error("Erro ao confirmar o PDF ou atualizar contratos:", error);
-        // Aqui você pode adicionar um feedback visual para o usuário (ex: toast de erro)
-    
     } finally {
-        // 'finally' garante que o modal será fechado, mesmo se ocorrer um erro
         handleCloseReport();
     }
 }
@@ -216,7 +211,7 @@ export const TableHistoricoContract: React.FC = () => {
                         </Typography>
                     </Box>
                     
-                    <Box display={"flex"} justifyContent={"center"} gap={2} sx={{ textAlign: 'center', my: 4, '@media (max-width: 600px)': { flexDirection: "column", gap: 2 } }}>
+                    <Box display={"flex"} justifyContent={"center"} gap={2} sx={{ textAlign: 'center', my: 4, '@media (max-width: 800px)': { flexDirection: "column", gap: 2 } }}>
                         <Button
                             variant="contained"
                             size="large"

@@ -3,7 +3,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { ClientDTO, ContractDTO, ProductDTO } from "../utils/DTOS";
-import logo from '../assets/logo_empresa.jpg'; // Verifique se o caminho da logo está correto
+import logo from '../assets/logo_empresa.png'// Verifique se o caminho da logo está correto
 
 export const generateReport = (client: ClientDTO, contracts: ContractDTO[], products: ProductDTO[]) => {
     const doc = new jsPDF();

@@ -215,7 +215,7 @@ export const FormEditarProduto: React.FC = () => {
             flexDirection="column"
             gap={2}
             maxWidth={"70%"}
-            sx={{ '@media (max-width: 600px)': { maxWidth: "95%", padding: "10px" } }}
+            sx={{ '@media (max-width: 800px)': { maxWidth: "95%", padding: "10px" } }}
             margin="auto"
             onSubmit={submitForm}
         >
@@ -223,7 +223,7 @@ export const FormEditarProduto: React.FC = () => {
             {error && <Alert severity="error">{error}</Alert>}
 
             <Box display={"flex"} flexDirection={"column"} width={"100%"} gap={2}>
-                <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 600px)': { flexDirection: "column", gap: 2 } }}>
+                <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column", gap: 2 } }}>
                     <TextField 
                         label="Código de Barras" 
                         name="Prod_CodBarras" 
@@ -232,7 +232,7 @@ export const FormEditarProduto: React.FC = () => {
                         disabled // Campo código de barras desabilitado como no original
                         value={formData.Prod_CodBarras} 
                         onChange={handleChange} 
-                        sx={{ width: "33.33%", '& .MuiInputLabel-root': { color: 'gray' }, '@media (max-width: 600px)': { width: "100%" } }} 
+                        sx={{ width: "33.33%", '& .MuiInputLabel-root': { color: 'gray' }, '@media (max-width: 800px)': { width: "100%" } }} 
                     />
 
                     <TextField 
@@ -242,7 +242,7 @@ export const FormEditarProduto: React.FC = () => {
                         placeholder="Digite o código de produto" 
                         value={formData.Prod_CodProduto} 
                         onChange={handleChange} 
-                        sx={{ width: "33.33%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 600px)': { width: "100%" } }} 
+                        sx={{ width: "33.33%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
                         required
                     />
                     <TextField 
@@ -252,11 +252,11 @@ export const FormEditarProduto: React.FC = () => {
                         placeholder="Digite o nome do produto" 
                         value={formData.Prod_Nome} 
                         onChange={handleChange} 
-                        sx={{ width: "33.33%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 600px)': { width: "100%" } }} 
+                        sx={{ width: "33.33%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
                         required
                     />
                 </Box>
-                <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 600px)': { flexDirection: "column", gap: 2 } }}>
+                <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column", gap: 2 } }}>
                     <TextField 
                         label="Unidade de Medida" 
                         name="Prod_UnMedida" 
@@ -264,7 +264,7 @@ export const FormEditarProduto: React.FC = () => {
                         placeholder="Digite a unidade de medida" 
                         value={formData.Prod_UnMedida} 
                         onChange={handleChange} 
-                        sx={{ width: "25%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 600px)': { width: "100%" } }} 
+                        sx={{ width: "25%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
                     />
                     <TextField 
                         label="NCM" 
@@ -274,7 +274,7 @@ export const FormEditarProduto: React.FC = () => {
                         type="number"
                         value={formData.Prod_NCM} 
                         onChange={handleChange} 
-                        sx={{ width: "25%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 600px)': { width: "100%" } }} 
+                        sx={{ width: "25%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
                     />
                     <TextField 
                         label="Estoque" 
@@ -284,7 +284,7 @@ export const FormEditarProduto: React.FC = () => {
                         type="number"
                         value={formData.Prod_Estoque} 
                         onChange={handleChange} 
-                        sx={{ width: "25%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 600px)': { width: "100%" } }} 
+                        sx={{ width: "25%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
                     />
                     <TextField 
                         label="CFOP" 
@@ -293,10 +293,10 @@ export const FormEditarProduto: React.FC = () => {
                         placeholder="Digite o CFOP" 
                         value={formData.Prod_CFOP} 
                         onChange={handleChange} 
-                        sx={{ width: "25%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 600px)': { width: "100%" } }} 
+                        sx={{ width: "25%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
                     />
                 </Box>
-                <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 600px)': { flexDirection: "column", gap: 2 } }}>
+                <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column", gap: 2 } }}>
                     <TextField 
                         label="Custo de Compra" 
                         name="Prod_CustoCompra" 
@@ -309,7 +309,7 @@ export const FormEditarProduto: React.FC = () => {
                             startAdornment: <InputAdornment position="start">R$</InputAdornment>,
                             inputProps: { min: 0 } // Evita valores negativos
                         }} 
-                        sx={{ width: "33.33%", '& .MuiInputLabel-root': { color: 'gray' }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' },'@media (max-width: 600px)': { width: "100%" } }} 
+                        sx={{ width: "33.33%", '& .MuiInputLabel-root': { color: 'gray' }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' },'@media (max-width: 800px)': { width: "100%" } }} 
                         onFocus={(event) => event.target.select()}
                     />
 
@@ -323,7 +323,7 @@ export const FormEditarProduto: React.FC = () => {
                             endAdornment: <InputAdornment position="end">%</InputAdornment>,
                             inputProps: { min: 0 } 
                         }}
-                        sx={{ width: "33.33%", '@media (max-width: 600px)': { width: "100%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' } }}  
+                        sx={{ width: "33.33%", '@media (max-width: 800px)': { width: "100%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' } }}  
                         value={formData.Prod_PorcLucro}
                         onChange={handlePorcChange} // Handler específico
                         disabled={fieldsDisabled} // Lógica de disabled simplificada
@@ -340,7 +340,7 @@ export const FormEditarProduto: React.FC = () => {
                             startAdornment: <InputAdornment position="start">R$</InputAdornment>,
                             inputProps: { min: 0 } 
                         }}
-                        sx={{ width: "33.33%", '@media (max-width: 600px)': { width: "100%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }}}
+                        sx={{ width: "33.33%", '@media (max-width: 800px)': { width: "100%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }}}
                         value={formData.Prod_Valor}
                         onChange={handleValorChange} // Handler específico  
                         disabled={fieldsDisabled} // Lógica de disabled simplificada
@@ -351,8 +351,8 @@ export const FormEditarProduto: React.FC = () => {
 
             <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2}>
                 <Box>
-                    <Button variant="contained" color="primary" type="submit" sx={{ margin: "10px auto", padding: "15px", '@media (max-width: 600px)': { width: "100%" }  }}>
-                        <Typography variant="h6" color="text.secondary" sx={{ '@media (max-width: 600px)': { fontSize: "1rem" } }} >
+                    <Button variant="contained" color="primary" type="submit" sx={{ margin: "10px auto", padding: "15px", '@media (max-width: 800px)': { width: "100%" }  }}>
+                        <Typography variant="h6" color="text.secondary" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }} >
                             Salvar Alterações
                         </Typography>
                     </Button>
