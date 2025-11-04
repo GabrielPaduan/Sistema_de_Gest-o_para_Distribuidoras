@@ -2,7 +2,7 @@ import { Box, Button, Paper, Tab, Table, TableBody, TableCell, TableContainer, T
 import React, { useEffect, useState } from "react";
 import { SearchField } from "./searchField";
 import { ClientDTO, PdfStructCompleteDTO, PdfStructDTO, ProductDTO } from "../utils/DTOS";
-import { getPdfByStatus, updatePdf } from "../services/pdfContract";
+import { getPdfByStatus, updatePdf, getPdfById } from "../services/pdfContract";
 import { getClientById, getClientByPDF } from "../services/clientService";
 import { getContractByClientId, updateContract } from "../services/contractService";
 import { getProductById, updateProduct } from "../services/productService";
@@ -60,7 +60,6 @@ export const TableHistoricoContract: React.FC = () => {
     };
 
     const handleShowReport = async (pdf: PdfStructCompleteDTO) => {
-        console.log("TESTEEEE")
         if (pdf.PDF_Contracts.length === 0) {
             const contractData = await getContractByClientId(pdf.PDF_Client?.id || 0);
             pdf.PDF_Contracts = Array.isArray(contractData) ? contractData : [contractData];
@@ -120,7 +119,6 @@ export const TableHistoricoContract: React.FC = () => {
                 const clients = await getClientByPDF();
                 const filterClients = Array.isArray(clients) ? clients : [clients];
                 setClientsData(filterClients);
-                console.log(filterClients);
             } catch (err) {
                 console.error(err);
             }
@@ -148,6 +146,7 @@ export const TableHistoricoContract: React.FC = () => {
             if (selectedCompletePDF && selectedCompletePDF.PDF_Client) {
             
                 generateReport(selectedCompletePDF.PDF_Client, selectedCompletePDF.PDF_Contracts, selectedCompletePDF.PDF_Products);
+                selectedCompletePDF.PDF_Status = 1
                 
                 
                 const contractData = await getContractByClientId(selectedCompletePDF.PDF_Client.id);
@@ -309,11 +308,9 @@ export const TableHistoricoContract: React.FC = () => {
                                 <Table stickyHeader>
                                     <TableHead>
                                     <TableRow>
-                                        <TableCell sx={{ fontSize: 20, textAlign: "Center"}}>*</TableCell>
+                                        <TableCell sx={{ fontSize: 20, textAlign: "Center"}}/>
                                         <TableCell  sx={{ fontSize: 20, textAlign: "center" }}>Nome</TableCell>
-                                        {/* <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>Data</TableCell> */}
                                         <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>Endereço</TableCell>
-                                        {/* <TableCell sx={{ fontSize: 20, textAlign: "center" }}>Ações</TableCell> */}
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -329,10 +326,21 @@ export const TableHistoricoContract: React.FC = () => {
                                                 <ClientRow
                                                     key={client.id}
                                                     client={client}
-                                                    handleViewPdf={(pdf: PdfStructDTO) => {
-                                                        const pdfData = pdfsCompleteData.find(p => p.id === pdf.id);
-                                                        if (pdfData) {
-                                                            handleShowReport(pdfData);
+                                                    handleViewPdf={async (pdf: PdfStructDTO) => {
+                                                        const dataClientSingle = await getClientById(pdf.PDF_Client_Id);
+                                                        const pdfComplete: PdfStructCompleteDTO = {
+                                                            id: pdf.id,
+                                                            PDF_Status: pdf.id,
+                                                            PDF_Generated_Date: pdf.PDF_Generated_Date,
+                                                            PDF_Client: dataClientSingle,
+                                                            PDF_Contracts: [],
+                                                            PDF_Products: [],
+                                                            PDF_Observacoes: pdf.PDF_Observacoes
+                                                        };
+                             
+                                                        if (pdfComplete) {
+                                                            
+                                                            handleShowReport(pdfComplete);
                                                         }
                                                     }}
                                                 />

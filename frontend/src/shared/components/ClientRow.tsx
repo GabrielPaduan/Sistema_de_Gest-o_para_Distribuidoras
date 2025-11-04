@@ -34,10 +34,6 @@ export const ClientRow: React.FC<ClientRowProps> = ({ client, handleViewPdf }) =
      
     }, [client.id, isOpen, pdfContracts.length]);
 
-    useEffect(() => {
-        console.log("PDF Contracts:", pdfContracts);
-    }, [pdfContracts]);
-
     return (
         <React.Fragment>
             <TableRow hover style={{ cursor: "pointer", backgroundColor: isOpen ? "#f0f0f0" : "inherit" }} onClick={() => setIsOpen(!isOpen)}>
@@ -69,22 +65,22 @@ export const ClientRow: React.FC<ClientRowProps> = ({ client, handleViewPdf }) =
                                 <Table size="small" aria-label="pdf-contracts">
                                     <TableHead>
                                         <TableRow>
-                                                <TableCell sx={{ fontSize: 16, textAlign: "center" }}>AÇÕES</TableCell>
-                                                <TableCell sx={{ fontSize: 16, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>STATUS</TableCell>
-                                                <TableCell sx={{ fontSize: 16, textAlign: "center" }}>DATA</TableCell> 
+                                            <TableCell sx={{ fontSize: 16, textAlign: "center" }}>DATA</TableCell> 
+                                            <TableCell sx={{ fontSize: 16, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>STATUS</TableCell>
+                                            <TableCell sx={{ fontSize: 16, textAlign: "center" }}>AÇÕES</TableCell>
                                         </TableRow> 
                                     </TableHead>
                                     <TableBody>
                                         {pdfContracts.map((pdf) => (
                                             <TableRow key={pdf.id}>
+                                                <TableCell sx={{ fontSize: 16, textAlign: "center" }}>{pdf.PDF_Generated_Date ? new Date(pdf.PDF_Generated_Date).toLocaleDateString('pt-BR') : ""}</TableCell>
+                                                <TableCell sx={{ fontSize: 16, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>{pdf.PDF_Status}</TableCell>
                                                 <TableCell sx={{ fontSize: 16, textAlign: "center" }}>
                                                     <Button variant="contained" color="primary" onClick={(e) => {
                                                         e.stopPropagation(); 
                                                         handleViewPdf(pdf); 
                                                     }}>Visualizar</Button>
                                                 </TableCell>
-                                                <TableCell sx={{ fontSize: 16, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>{pdf.PDF_Status}</TableCell>
-                                                <TableCell sx={{ fontSize: 16, textAlign: "center" }}>{pdf.PDF_Generated_Date ? new Date(pdf.PDF_Generated_Date).toLocaleDateString('pt-BR') : ""}</TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>

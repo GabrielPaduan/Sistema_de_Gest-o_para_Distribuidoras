@@ -10,6 +10,6 @@ router.post("/", verifyToken, createPdf);
 router.put("/:id", verifyToken, updatePdf);
 router.get("/client/pendentPdf/:clientId", verifyToken, getPendentPdfByClientId);
 router.get("/client/:clientId", verifyToken, getPdfByClientId);
-
+router.get("/id/:id", verifyToken, getPdfByClientId)
 
 export default router;

@@ -23,6 +23,20 @@ export const getPdfByStatus = async (req: express.Request, res: express.Response
   }
 }
 
+export const getPdfById = async (req: express.Request, res: express.Response) => {
+  try {
+    const id = Number(req.params.status);
+    if (isNaN(id) || id !== 0 && id !== 1) {
+      return res.status(400).json({ error: "Invalid id parameter"});
+    }
+
+    const pdfs = await pdfService.getPdfById(id);
+    res.status(200).json(pdfs);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+}
+
 export const createPdf = async (req: express.Request, res: express.Response) => {
   try {
     const newPdf = await pdfService.createPdf(req.body);
