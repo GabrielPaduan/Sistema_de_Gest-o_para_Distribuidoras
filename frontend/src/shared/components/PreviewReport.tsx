@@ -12,13 +12,13 @@ import {
     TableHead,
     TableRow,
     Typography,
+    Grid,
+    useTheme
 } from '@mui/material';
-import { Grid } from '@mui/material';
 import React, { useState } from 'react';
 import { ClientDTO, ContractDTO, ProductDTO } from "../utils/DTOS";
 import logo from '../assets/logo_empresa.png';
 
-import { useTheme } from '@mui/material/styles';
 
 interface RelatorioPreviewProps {
     client: ClientDTO;
@@ -34,6 +34,44 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
         const product = products.find(p => p.ID_Prod === contract.Cont_ID_Prod);
         return sum + ((contract.Cont_Qtde ?? 0) * (product?.Prod_Valor ?? 0));
     }, 0);
+
+    const SPLIT_THRESHOLD = 10; 
+    const shouldSplit = contracts.length > SPLIT_THRESHOLD;
+
+    const midpoint = Math.ceil(contracts.length / 2);
+    const firstHalfContracts = shouldSplit ? contracts.slice(0, midpoint) : contracts;
+    const secondHalfContracts = shouldSplit ? contracts.slice(midpoint) : [];
+
+    const ProductTable: React.FC<{ contractList: ContractDTO[] }> = ({ contractList }) => (
+        <TableContainer component={Paper} variant="outlined" sx={{ height: '100%' }}>
+            <Table>
+                <TableHead>
+                    <TableRow sx={{ bgcolor: 'primary.main' }}>
+                        <TableCell sx={{ color: 'common.white', fontWeight: 'bold' }}>CMDT</TableCell>
+                        <TableCell sx={{ color: 'common.white', fontWeight: 'bold' }}>PRODUTOS</TableCell>
+                        <TableCell align="right" sx={{ color: 'common.white', fontWeight: 'bold' }}>VALOR UNIT.</TableCell>
+                        <TableCell align="center" sx={{ color: 'common.white', fontWeight: 'bold' }}>QTD</TableCell>
+                        <TableCell align="right" sx={{ color: 'common.white', fontWeight: 'bold' }}>VALOR TOTAL</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {contractList.map(contract => {
+                        const product = products.find(p => p.ID_Prod === contract.Cont_ID_Prod);
+                        const valorTotal = (contract.Cont_Qtde ?? 0) * (product?.Prod_Valor ?? 0);
+                        return (
+                            <TableRow key={contract.ID_Contrato} sx={{ '&:nth-of-type(odd)': { backgroundColor: theme.palette.action.hover } }}>
+                                <TableCell align="center">{contract.Cont_Comodato}</TableCell>
+                                <TableCell>{product?.Prod_CodProduto || 'Produto não encontrado'}</TableCell>
+                                <TableCell align="right">R$ {product?.Prod_Valor?.toFixed(2) || '0.00'}</TableCell>
+                                <TableCell align="center">{contract.Cont_Qtde || 0}</TableCell>
+                                <TableCell align="right">R$ {valorTotal.toFixed(2)}</TableCell>
+                            </TableRow>
+                        );
+                    })}
+                </TableBody>
+            </Table>
+        </TableContainer>
+    );
 
     return (
         <Container sx={{ width: '100%', my: 4, p: { xs: 0 } }}>
@@ -64,34 +102,24 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
                 </Typography>
 
                 {/* TABELA DE PRODUTOS */}
-                <TableContainer component={Paper} variant="outlined" sx={{ my: 4 }}>
-                    <Table>
-                        <TableHead>
-                            <TableRow sx={{ bgcolor: 'primary.main' }}>
-                                <TableCell sx={{ color: 'common.white', fontWeight: 'bold' }}>CMDT</TableCell>
-                                <TableCell sx={{ color: 'common.white', fontWeight: 'bold' }}>PRODUTOS</TableCell>
-                                <TableCell align="right" sx={{ color: 'common.white', fontWeight: 'bold' }}>VALOR UNIT.</TableCell>
-                                <TableCell align="center" sx={{ color: 'common.white', fontWeight: 'bold' }}>QTD</TableCell>
-                                <TableCell align="right" sx={{ color: 'common.white', fontWeight: 'bold' }}>VALOR TOTAL</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {contracts.map(contract => {
-                                const product = products.find(p => p.ID_Prod === contract.Cont_ID_Prod);
-                                const valorTotal = (contract.Cont_Qtde ?? 0) * (product?.Prod_Valor ?? 0);
-                                return (
-                                    <TableRow key={contract.ID_Contrato} sx={{ '&:nth-of-type(odd)': { backgroundColor: theme.palette.action.hover } }}>
-                                        <TableCell align="center">{contract.Cont_Comodato}</TableCell>
-                                        <TableCell>{product?.Prod_CodProduto || 'Produto não encontrado'}</TableCell>
-                                        <TableCell align="right">R$ {product?.Prod_Valor?.toFixed(2) || '0.00'}</TableCell>
-                                        <TableCell align="center">{contract.Cont_Qtde || 0}</TableCell>
-                                        <TableCell align="right">R$ {valorTotal.toFixed(2)}</TableCell>
-                                    </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                <Box sx={{ my: 4 }}>
+                    {!shouldSplit && (
+                        // 1. Renderiza UMA tabela se a lista for CURTA
+                        <ProductTable contractList={firstHalfContracts} />
+                    )}
+
+                    {shouldSplit && (
+                        // 2. Renderiza DUAS tabelas lado a lado se a lista for LONGA
+                        <Grid container spacing={2} sx={{ alignItems: 'flex-start', justifyContent: 'center' }}>
+                            <Grid>
+                                <ProductTable contractList={firstHalfContracts} />
+                            </Grid>
+                            <Grid>
+                                <ProductTable contractList={secondHalfContracts} />
+                            </Grid>
+                        </Grid>
+                    )}
+                </Box>
 
                 {/* RODAPÉ E TOTAL */}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mt: 4 }}>

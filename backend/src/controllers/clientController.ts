@@ -10,6 +10,19 @@ export const getAllClients = async (req: express.Request, res: express.Response)
     }
 };
 
+export const getClientByPDF = async (req: express.Request, res: express.Response) => {
+    try {  
+        const client = await clientService.findClientByPDF();
+        if (!client) {
+            return res.status(404).json({ error: "Client not found" });
+        }
+        res.status(200).json(client);
+    }
+    catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 export const createClient = async (req: express.Request, res: express.Response) => {
     try {
         console.log(req.body);

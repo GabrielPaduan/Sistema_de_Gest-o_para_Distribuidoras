@@ -8,6 +8,31 @@ export const findAllClients = async (): Promise<ClientDTO[]> => {
     return data;
 };
 
+export const findClientByPDF = async (): Promise<ClientDTO[]> => {
+    const { data, error } = await supabase.from('ContratosPDF').select(` Clientes ( * ) `);
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+        return [];
+    }
+
+    const dataClients: ClientDTO[] = data
+        .flatMap(contrato => contrato.Clientes)
+        .filter(cliente => cliente);
+
+    const uniqueClientsMap = new Map<number, ClientDTO>();
+    for (const client of dataClients) {
+        if (client && client.id) { // Garante que o cliente e o ID existem
+            uniqueClientsMap.set(client.id, client);
+        }
+    }
+
+    // 3. Converta os valores do Map de volta para um array
+    const uniqueClients: ClientDTO[] = Array.from(uniqueClientsMap.values());
+
+    return uniqueClients;
+};
+
 export const updateClientById = async (clientData: ClientDTO): Promise<boolean> => {
     const { error } = await supabase
         .from('Clientes')
@@ -35,6 +60,7 @@ export const createNewClient = async (clientData: ClientDTOInsert): Promise<Clie
 };
 
 export const findClientById = async (id: number): Promise<ClientDTO | null> => {
+    
     const { data, error } = await supabase.from('Clientes').select('*').eq('id', id).single();
     if (error) throw error;
     return data;

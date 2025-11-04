@@ -10,6 +10,19 @@ export const getPdfs = async (req: express.Request, res: express.Response) => {
   }
 };
 
+export const getPdfByStatus = async (req: express.Request, res: express.Response) => {
+  try {
+    const status = Number(req.params.status);
+    if (isNaN(status) || status !== 0 && status !== 1) {
+      return res.status(400).json({ error: "Invalid status parameter" });
+    } 
+    const pdfs = await pdfService.getPdfByStatus(status);
+    res.status(200).json(pdfs);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 export const createPdf = async (req: express.Request, res: express.Response) => {
   try {
     const newPdf = await pdfService.createPdf(req.body);
@@ -35,11 +48,21 @@ export const updatePdf = async (req: express.Request, res: express.Response) => 
   }
 };
 
-export const getPdfByClientId = async (req: express.Request, res: express.Response) => {
+export const getPendentPdfByClientId = async (req: express.Request, res: express.Response) => {
   try {
-    const pdf = await pdfService.getPdfByClientId(Number(req.params.clientId));
+    const pdf = await pdfService.getPendentPdfByClientId(Number(req.params.clientId));
     res.status(200).json(pdf);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
+};
+
+export const getPdfByClientId = async (req: express.Request, res: express.Response) => {
+  try {
+    const pdf = await pdfService.getPdfByClientId(Number(req.params.clientId));
+    res.status(200).json(pdf);
+  }
+  catch (error: any) {
+    res.status(500).json({ error: error.message });
+  } 
 };

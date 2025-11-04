@@ -13,6 +13,11 @@ export const getClientById = async (id: number): Promise<ClientDTO> => {
   return response.data;
 };
 
+export const getClientByPDF = async (): Promise<ClientDTO> => {
+  const response = await api.get(`/clientes/pdfClientes/list`);
+  return response.data;
+};
+
 // Função para CRIAR um novo cliente
 // Omit<ClientDTO, 'id'> significa que pegamos todos os campos do ClientDTO, exceto o 'id'
 export const createClient = async (clientData: Omit<ClientDTO, 'id'>): Promise<ClientDTO[]> => {

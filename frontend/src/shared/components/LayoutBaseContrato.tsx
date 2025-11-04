@@ -2,14 +2,13 @@ import { Box, Button, Modal, TablePagination, TextareaAutosize, TextField, Typog
 import { ClientDTO, ContractDTO, ContractDTOInsert, DadosProdutoComodatoDTO, LayoutBaseContratoProps, ProductDTO } from "../utils/DTOS";
 import React, { use, useEffect, useState } from "react";
 import { TableContract } from "./TableContract";
-import { generateReport } from "../utils/Report";
 import { getClientById, getModelClients, getModelContracts } from "../services/clientService"; // Supondo que você tenha este serviço
 import { GenericButton } from "./GenericButton";
 import { getAllProducts, getProductByContractId, getProductById, getProductsWithPagination, searchProductsByName, updateProduct } from "../services/productService";
 import { SearchField } from "./searchField";
 import { createContract, getContractByClientId, removeContract, updateContract } from "../services/contractService";
 import Checkbox from "@mui/material/Checkbox";
-import { createPDFContracts, getPdfByClientId, updatePdf } from "../services/pdfContract";
+import { createPDFContracts, getPendentPdfByClientId, updatePdf } from "../services/pdfContract";
 import { PreviewReport } from "./PreviewReport";
 import { useNavigate } from "react-router-dom";
 import { useDebounce } from 'use-debounce';
@@ -165,7 +164,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
             for (const contract of contracts) {
                 await updateContract(contract.ID_Contrato, contract.Cont_Comodato, contract.Cont_Qtde, contract.Cont_ValorTotal, contract.Cont_PorcLucro);
             }
-            const clientPDF = await getPdfByClientId(id);
+            const clientPDF = await getPendentPdfByClientId(id);
             if (clientPDF == null) {
                 await createPDFContracts({ PDF_Client_Id: id, PDF_Status: 0, PDF_Generated_Date: new Date().toISOString(), PDF_Observacoes: observation });
             } else {

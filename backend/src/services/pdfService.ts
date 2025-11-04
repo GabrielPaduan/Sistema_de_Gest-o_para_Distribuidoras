@@ -7,17 +7,27 @@ export const getAllPdfs = async (): Promise<PdfStructDTO[]> => {
   return data;
 };
 
+export const getPdfByStatus = async (status: number): Promise<PdfStructDTO[]> => {
+  const { data, error } = await supabase
+    .from("ContratosPDF")
+    .select("*")
+    .eq("PDF_Status", status);
+  if (error) throw error;
+  return data;
+}
+
 export const createPdf = async (pdfData: PdfStructInsertDTO) => {
   const { data, error } = await supabase.from("ContratosPDF").insert(pdfData).select();
   if (error) throw error;
   return data;
 };
 
-export const getPdfByClientId = async (clientId: number): Promise<PdfStructDTO | null> => {
+export const getPendentPdfByClientId = async (clientId: number): Promise<PdfStructDTO | null> => {
   const { data, error } = await supabase
     .from("ContratosPDF")
     .select("*")
     .eq("PDF_Client_Id", clientId)
+    .eq("PDF_Status", 0)
     .single();
   
   if (error) {
@@ -28,6 +38,16 @@ export const getPdfByClientId = async (clientId: number): Promise<PdfStructDTO |
     }
   }
   return data;
+};
+
+export const getPdfByClientId = async (clientId: number): Promise<PdfStructDTO[]> => {
+    const { data, error } = await supabase
+        .from('ContratosPDF')
+        .select('*')
+        .eq('PDF_Client_Id', clientId)
+        .eq('PDF_Status', 1);
+    if (error) throw error;
+    return data;
 };
 
 export const updatePdf = async (
