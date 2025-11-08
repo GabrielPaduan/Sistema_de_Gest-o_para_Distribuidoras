@@ -86,3 +86,7 @@ export const deleteProductById = async (id: number): Promise<void> => {
         throw error;
     }
 };
+
+export function findAllProductWithPagination(page: number, pageSize: number): { products: any; total: any; } | PromiseLike<{ products: any; total: any; }> {
+    throw new Error('Function not implemented.');
+}

@@ -1,6 +1,5 @@
-import { error } from 'console';
-import supabase from '../config/supabase.js'; // Ajuste o caminho conforme necessário
-import type { ClientDTO, ClientDTOInsert, ContractDTO } from '../types/dtos.js'; // Supondo que você tenha seus tipos definidos
+import supabase from '../config/supabase.js'; 
+import type { ClientDTO, ClientDTOInsert, ContractDTO } from '../types/dtos.js';
 
 export const findAllClients = async (): Promise<ClientDTO[]> => {
     const { data, error } = await supabase.from('Clientes').select('*');
@@ -22,12 +21,11 @@ export const findClientByPDF = async (): Promise<ClientDTO[]> => {
 
     const uniqueClientsMap = new Map<number, ClientDTO>();
     for (const client of dataClients) {
-        if (client && client.id) { // Garante que o cliente e o ID existem
+        if (client && client.id) { 
             uniqueClientsMap.set(client.id, client);
         }
     }
 
-    // 3. Converta os valores do Map de volta para um array
     const uniqueClients: ClientDTO[] = Array.from(uniqueClientsMap.values());
 
     return uniqueClients;

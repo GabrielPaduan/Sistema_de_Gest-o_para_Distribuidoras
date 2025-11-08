@@ -12,7 +12,7 @@ import { generateReport } from "../utils/Report";
 import { useNavigate } from "react-router-dom";
 import { ClientRow } from "./ClientRow";
 import { create } from "domain";
-import { createSnapshotProduct } from "../services/SnapshotProductsService";
+import { createSnapshotProduct, getSnapshotProductsByPdfId } from "../services/SnapshotProductsService";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -55,23 +55,33 @@ export const TableHistoricoContract: React.FC = () => {
     const [selectedPdf, setSelectedPdf] = useState<PdfStructCompleteDTO | null>(null);
     const [valueTab, setValueTab] = React.useState(0);
     const [openRow, setOpenRow] = React.useState<number | null>(null);
+    const [snapshotProducts, setSnapshotProducts] = React.useState<SnapshotProductDTO[]>([]);
     const navigate = useNavigate();
     
 
     const handleChangeTab = (event: React.SyntheticEvent, newValue: number) => {
+        if (showReport) {
+            setShowReport(false);
+        }
         setValueTab(newValue);
     };
 
     const handleShowReport = async (pdf: PdfStructCompleteDTO) => {
-        if (pdf.PDF_Contracts.length === 0) {
-            const contractData = await getContractByClientId(pdf.PDF_Client?.id || 0);
-            pdf.PDF_Contracts = Array.isArray(contractData) ? contractData : [contractData];
-        }
-        if (pdf.PDF_Products.length === 0) {
-            const productData: ProductDTO[] = await Promise.all(
-                pdf.PDF_Contracts.map(async contract => await getProductById(contract.Cont_ID_Prod))
-            );  
-            pdf.PDF_Products = productData;
+        if (pdf.PDF_Status === 0) {
+            
+            if (pdf.PDF_Contracts.length === 0) {
+                const contractData = await getContractByClientId(pdf.PDF_Client?.id || 0);
+                pdf.PDF_Contracts = Array.isArray(contractData) ? contractData : [contractData];
+            }
+            if (pdf.PDF_Products.length === 0) {
+                const productData: ProductDTO[] = await Promise.all(
+                    pdf.PDF_Contracts.map(async contract => await getProductById(contract.Cont_ID_Prod))
+                );  
+                pdf.PDF_Products = productData;
+            }
+        } else {
+            const snapshotsData: SnapshotProductDTO[] = await getSnapshotProductsByPdfId(pdf.id);
+            setSnapshotProducts(snapshotsData);
         }
         setSelectedPdf(pdf);
         setShowReport(true);
@@ -142,10 +152,10 @@ export const TableHistoricoContract: React.FC = () => {
         };
 
         try {
-            // await updatePdf(pdfToUpdate.id, pdfToUpdate);
+            await updatePdf(pdfToUpdate.id, pdfToUpdate);
             
             const selectedCompletePDF = pdfsCompleteData.find(pdf => pdf.id === selectedPdf.id);
-
+            
             if (selectedCompletePDF && selectedCompletePDF.PDF_Client) {
             
                 generateReport(selectedCompletePDF.PDF_Client, selectedCompletePDF.PDF_Contracts, selectedCompletePDF.PDF_Products);
@@ -158,7 +168,6 @@ export const TableHistoricoContract: React.FC = () => {
 
                 contractsArray.forEach(async contract => {
                     const product = selectedCompletePDF.PDF_Products.find(prod => prod.ID_Prod === contract.Cont_ID_Prod);
-                    console.log("Creating snapshot for contract:", contract, "with product:", product);
                     const snapshotProduct: SnapshotProductDTOInsert = { 
                         ContPDFItens_PDF_ID: selectedCompletePDF.id,
                         snapshot_qtde: contract.Cont_Qtde,
@@ -257,7 +266,7 @@ export const TableHistoricoContract: React.FC = () => {
                                                     style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}
                                                 >
                                                     <TableCell sx={{ fontSize: 16, textAlign: "center" }}>{pdf.PDF_Client?.cli_razaoSocial}</TableCell>
-                                                    <TableCell sx={{ fontSize: 16, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>{pdf.PDF_Generated_Date ? new Date(pdf.PDF_Generated_Date).toLocaleDateString('pt-BR') : ""}</TableCell>
+                                                    <TableCell sx={{ fontSize: 16, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>{pdf.PDF_Generated_Date ? new Date(pdf.PDF_Generated_Date).toLocaleDateString('pt-BR', {timeZone: "UTC"}) : ""}</TableCell>
                                                     <TableCell sx={{ fontSize: 16, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>{pdf.PDF_Client?.cli_end === "" ? "Não informado" : pdf.PDF_Client?.cli_end}</TableCell>
                                                     <TableCell sx={{ fontSize: 16, textAlign: "center" }}>{ pdf.PDF_Status == 0 ? <Button variant="contained" color="primary" onClick={() => handleShowReport(pdf)}>Visualizar</Button> : "Relatório Aprovado"}</TableCell>
                                                 </TableRow>
@@ -380,9 +389,9 @@ export const TableHistoricoContract: React.FC = () => {
                             <GenericButton name="Voltar" type="button" link="/gerenciar-clientes" />
                         </Box>
                     )}
-                    {selectedPdf && selectedPdf?.PDF_Client && showReport && (
+                    {(selectedPdf || snapshotProducts.length > 0) && selectedPdf?.PDF_Client && showReport && (
                         <Box width={"100%"}>
-                            <PreviewReport client={selectedPdf?.PDF_Client} contracts={selectedPdf?.PDF_Contracts} products={selectedPdf?.PDF_Products} />
+                            <PreviewReport client={selectedPdf?.PDF_Client} contracts={selectedPdf?.PDF_Contracts} products={selectedPdf?.PDF_Products} snapshotProducts={snapshotProducts} />
                             
                             <Box>
                                 <Typography variant="h5" sx={{ textAlign: 'center', mt: 4 }}>Observações:</Typography>
@@ -395,7 +404,7 @@ export const TableHistoricoContract: React.FC = () => {
                                 <Button
                                     variant="contained"
                                     size="large"
-                                    onClick={handleConfirmPdf}
+                                    onClick={ selectedPdf.PDF_Status === 0 ? handleConfirmPdf : () => generateReport(selectedPdf.PDF_Client!, selectedPdf.PDF_Contracts, selectedPdf.PDF_Products)}
                                 >
                                     <Typography variant="h6">Gerar Contrato</Typography>
                                 </Button>
@@ -403,6 +412,7 @@ export const TableHistoricoContract: React.FC = () => {
                                     variant="contained"
                                     size="large"
                                     onClick={() => navigate(`/contrato-cliente/${selectedPdf.PDF_Client?.id}`)}
+                                    sx={{ display: selectedPdf.PDF_Status === 0 ? "block" : "none" }}
                                 >
                                     <Typography variant="h6">Editar</Typography>
                                 </Button>

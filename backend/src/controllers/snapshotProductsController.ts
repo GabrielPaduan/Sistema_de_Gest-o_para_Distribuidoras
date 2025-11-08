@@ -1,5 +1,5 @@
 import express from 'express';
-import { createSnapshotProduct } from '../services/snapshotProductsService.js';
+import { createSnapshotProduct, getSnapshotProductsByPdfId } from '../services/snapshotProductsService.js';
 
 export const createSnapshotProductController = async (req: express.Request, res: express.Response) => {
     try {
@@ -10,5 +10,19 @@ export const createSnapshotProductController = async (req: express.Request, res:
     } catch (error) {
         console.error("Error in createSnapshotProduct controller:", error);
         res.status(500).json({ error: "Error creating snapshot product" });
+    }
+};
+
+export const getSnapshotProductsByPdfIdController = async (req: express.Request, res: express.Response) => {
+    try {
+        const pdfId = req.params.pdfId;
+        if (!pdfId) {
+            return res.status(400).json({ error: "pdfId parameter is required" });
+        }
+        const snapshotProducts = await getSnapshotProductsByPdfId(parseInt(pdfId));
+        res.status(200).json(snapshotProducts);
+    } catch (error) {
+        console.error("Error in getSnapshotProductsByPdfId controller:", error);
+        res.status(500).json({ error: "Error fetching snapshot products" });
     }
 };

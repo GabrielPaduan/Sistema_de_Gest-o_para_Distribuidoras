@@ -19,7 +19,6 @@ export const getContractByClientId = async (id: number): Promise<ContractDTO> =>
 };
 
 export const createContract = async (contractData: Omit<ContractDTOInsert, 'id'>): Promise<ContractDTOInsert> => {
-  console.log(contractData)
   const response = await api.post('/contratos', contractData);
   return response.data;
 };
@@ -29,8 +28,6 @@ export const removeContract = async (id: number): Promise<void> => {
 };
 
 export const updateContract = async (id: number, cmdt: number, qtde: number, valorTotal: number, porcLucro: number): Promise<ContractDTO> => {
-  console.log("Atualizando contrato ID:", id);
-  console.log("Novos valores - Comodato:", cmdt, "Qtde:", qtde, "ValorTotal:", valorTotal, "PorcLucro:", porcLucro);
   const response = await api.put(`/contratos/${id}`, {cmdt, qtde, valorTotal, porcLucro });
   return response.data;
 };

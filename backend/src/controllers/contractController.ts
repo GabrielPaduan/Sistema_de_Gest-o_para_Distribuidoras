@@ -44,7 +44,6 @@ export const removeContract = async (req: express.Request, res: express.Response
 };
 
 export const updateContract = async (req: express.Request, res: express.Response) => {
-    console.log("TESTE!");
     try {
         if (!req.params.id) {
             return res.status(400).json({ error: 'Contract ID is required' });

@@ -57,7 +57,6 @@ export const getProductByContractId = async (req: express.Request, res: express.
             return res.status(400).json({ message: "Contract ID is required" });
         }
         const product = await productService.findProductByContractId(Number(req.params.id));
-        // console.log("Product:", product);
         if (!product) {
             return res.status(404).json({ message: "Product not found" });
         }
@@ -68,7 +67,6 @@ export const getProductByContractId = async (req: express.Request, res: express.
 };
 
 export const searchProducts = async (req: express.Request, res: express.Response) => {
-    // O termo da busca virá como um query parameter (ex: /search?q=texto)
     const query = req.query.q as string;
 
     if (!query) {

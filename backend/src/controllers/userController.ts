@@ -2,7 +2,6 @@ import express from 'express';
 import * as userService from '../services/userService.js';
 
 export const createUser = async (req: express.Request, res: express.Response) => {
-    console.log("Criando usuário:", req.body);
     try {
         const user = await userService.createUserService(req.body);
         res.status(201).json(user);

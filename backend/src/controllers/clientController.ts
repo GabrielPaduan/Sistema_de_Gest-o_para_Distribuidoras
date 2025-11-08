@@ -25,7 +25,6 @@ export const getClientByPDF = async (req: express.Request, res: express.Response
 
 export const createClient = async (req: express.Request, res: express.Response) => {
     try {
-        console.log(req.body);
         const newClient = await clientService.createNewClient(req.body);
         res.status(201).json(newClient);
     } catch (error: any) {

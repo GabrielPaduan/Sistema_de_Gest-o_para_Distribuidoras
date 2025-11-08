@@ -1,5 +1,5 @@
 import { Box, Button, Modal, TablePagination, TextareaAutosize, TextField, Typography } from "@mui/material";
-import { ClientDTO, ContractDTO, ContractDTOInsert, DadosProdutoComodatoDTO, LayoutBaseContratoProps, ProductDTO } from "../utils/DTOS";
+import { ClientDTO, ContractDTO, ContractDTOInsert, DadosProdutoComodatoDTO, LayoutBaseContratoProps, ProductDTO, SnapshotProductDTO } from "../utils/DTOS";
 import React, { use, useEffect, useState } from "react";
 import { TableContract } from "./TableContract";
 import { getClientById, getModelClients, getModelContracts } from "../services/clientService"; // Supondo que você tenha este serviço
@@ -168,7 +168,6 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
             if (clientPDF == null) {
                 const date = new Date();
                 date.setHours(12, 0, 0, 0);
-                console.log(date);
                 await createPDFContracts({ PDF_Client_Id: id, PDF_Status: 0, PDF_Generated_Date: date.toISOString(), PDF_Observacoes: observation });
             } else {
                 await updatePdf(clientPDF.id, {id: clientPDF.id, PDF_Client_Id: clientPDF.PDF_Client_Id, PDF_Status: 0, PDF_Generated_Date: new Date().toISOString(), PDF_Observacoes: observation });
@@ -619,11 +618,20 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                     </Box>
                 </Box>
             )}
-            {showReport && client && (
+            { 
+            showReport && client && (
                 <Box>
-                    <PreviewReport client={client} contracts={contracts} products={productsClient} />
+                    <PreviewReport client={client} contracts={contracts} products={productsClient} snapshotProducts={undefined} />
 
                     <Box display={"flex"} justifyContent={"center"} sx={{ width: '80%', margin: 'auto', textAlign: 'center', my: 4, gap: 4, '@media (max-width: 800px)': { gap: 2 } }}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            sx={{ padding: "15px", width: "50%" }}
+                            onClick={() => handleGeneratePdf()}
+                        >
+                            <Typography variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: "15px" } }}>Enviar Relatório</Typography>
+                        </Button>
                         <Button
                             variant="contained"
                             color="primary"
@@ -633,14 +641,6 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
 
                         >
                             <Typography variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: "15px" } }}>Ocultar Relatório</Typography>
-                        </Button>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            sx={{ padding: "15px", width: "50%" }}
-                            onClick={() => handleGeneratePdf()}
-                        >
-                            <Typography variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: "15px" } }}>Enviar Relatório</Typography>
                         </Button>
                     </Box>
                 </Box>

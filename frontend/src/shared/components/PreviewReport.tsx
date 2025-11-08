@@ -16,7 +16,7 @@ import {
     useTheme
 } from '@mui/material';
 import React, { useState } from 'react';
-import { ClientDTO, ContractDTO, ProductDTO } from "../utils/DTOS";
+import { ClientDTO, ContractDTO, ProductDTO, SnapshotProductDTO } from "../utils/DTOS";
 import logo from '../assets/logo_empresa.png';
 
 
@@ -24,10 +24,11 @@ interface RelatorioPreviewProps {
     client: ClientDTO;
     contracts: ContractDTO[];
     products: ProductDTO[];
+    snapshotProducts?: SnapshotProductDTO[];
 }
 
 // 3. O COMPONENTE
-export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contracts, products }) => {
+export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contracts, products, snapshotProducts }) => {
     const theme = useTheme();
 
     const valorTotalGeral = contracts.reduce((sum, contract) => {
@@ -55,18 +56,28 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {contractList.map(contract => {
+                    {snapshotProducts == undefined ? contractList.map(contract => {
                         const product = products.find(p => p.ID_Prod === contract.Cont_ID_Prod);
                         const valorTotal = (contract.Cont_Qtde ?? 0) * (product?.Prod_Valor ?? 0);
                         return (
                             <TableRow key={contract.ID_Contrato} sx={{ '&:nth-of-type(odd)': { backgroundColor: theme.palette.action.hover } }}>
-                                <TableCell align="center">{contract.Cont_Comodato}</TableCell>
+                                <TableCell align="center">{ contract.Cont_Comodato}</TableCell>
                                 <TableCell>{product?.Prod_CodProduto || 'Produto não encontrado'}</TableCell>
                                 <TableCell align="right">R$ {product?.Prod_Valor?.toFixed(2) || '0.00'}</TableCell>
                                 <TableCell align="center">{contract.Cont_Qtde || 0}</TableCell>
                                 <TableCell align="right">R$ {valorTotal.toFixed(2)}</TableCell>
                             </TableRow>
                         );
+                    }) : snapshotProducts?.map(snapshot => {
+                        return (    
+                            <TableRow key={snapshot.ID_ContPDFItens} sx={{ '&:nth-of-type(odd)': { backgroundColor: theme.palette.action.hover } }}>
+                                <TableCell align="center">{ snapshot.snapshot_comodato}</TableCell>
+                                <TableCell>{snapshot.snapshot_prod_cod || 'Produto não encontrado'}</TableCell>
+                                <TableCell align="right">R$ {snapshot.snapshot_valor_unitario?.toFixed(2) || '0.00'}</TableCell>
+                                <TableCell align="center">{snapshot.snapshot_qtde || 0}</TableCell>
+                                <TableCell align="right">R$ {snapshot.snapshot_valor_total_item?.toFixed(2) || '0.00'}</TableCell>
+                            </TableRow>
+                        )
                     })}
                 </TableBody>
             </Table>

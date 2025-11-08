@@ -22,7 +22,6 @@ export const createPDFContracts = async (pdfData: PdfStructInsertDTO): Promise<P
 };
 
 export const updatePdf = async (id: number, pdfData: PdfStructDTO): Promise<PdfStructDTO> => {
-  console.log("Updating PDF with ID:", id, "Data:", pdfData);
   const response = await api.put(`/pdfContratos/${id}`, pdfData);
   return response.data;
 };
