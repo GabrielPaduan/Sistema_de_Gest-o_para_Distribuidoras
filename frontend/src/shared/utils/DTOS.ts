@@ -136,3 +136,24 @@ export interface DadosProdutoComodatoDTO {
     qtde: number;
     valorTotal: number
 }
+
+export interface SnapshotProductDTO {
+    ID_ContPDFItens: number;
+    ContPDFItens_PDF_ID: number;
+    snapshot_qtde: number;
+    snapshot_comodato: number;
+    snapshot_prod_nome: string;
+    snapshot_prod_cod: string;
+    snapshot_valor_unitario: number;
+    snapshot_valor_total_item: number
+}
+
+export interface SnapshotProductDTOInsert {
+    ContPDFItens_PDF_ID: number;
+    snapshot_qtde: number;
+    snapshot_comodato: number;
+    snapshot_prod_nome: string;
+    snapshot_prod_cod: string;
+    snapshot_valor_unitario: number;
+    snapshot_valor_total_item: number
+}

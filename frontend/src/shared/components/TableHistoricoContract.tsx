@@ -1,7 +1,7 @@
 import { Box, Button, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { SearchField } from "./searchField";
-import { ClientDTO, PdfStructCompleteDTO, PdfStructDTO, ProductDTO } from "../utils/DTOS";
+import { ClientDTO, PdfStructCompleteDTO, PdfStructDTO, ProductDTO, SnapshotProductDTO, SnapshotProductDTOInsert } from "../utils/DTOS";
 import { getPdfByStatus, updatePdf, getPdfById } from "../services/pdfContract";
 import { getClientById, getClientByPDF } from "../services/clientService";
 import { getContractByClientId, updateContract } from "../services/contractService";
@@ -11,6 +11,8 @@ import { GenericButton } from "./GenericButton";
 import { generateReport } from "../utils/Report";
 import { useNavigate } from "react-router-dom";
 import { ClientRow } from "./ClientRow";
+import { create } from "domain";
+import { createSnapshotProduct } from "../services/SnapshotProductsService";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -54,6 +56,7 @@ export const TableHistoricoContract: React.FC = () => {
     const [valueTab, setValueTab] = React.useState(0);
     const [openRow, setOpenRow] = React.useState<number | null>(null);
     const navigate = useNavigate();
+    
 
     const handleChangeTab = (event: React.SyntheticEvent, newValue: number) => {
         setValueTab(newValue);
@@ -139,20 +142,34 @@ export const TableHistoricoContract: React.FC = () => {
         };
 
         try {
-            await updatePdf(pdfToUpdate.id, pdfToUpdate);
+            // await updatePdf(pdfToUpdate.id, pdfToUpdate);
             
             const selectedCompletePDF = pdfsCompleteData.find(pdf => pdf.id === selectedPdf.id);
 
             if (selectedCompletePDF && selectedCompletePDF.PDF_Client) {
             
                 generateReport(selectedCompletePDF.PDF_Client, selectedCompletePDF.PDF_Contracts, selectedCompletePDF.PDF_Products);
-                selectedCompletePDF.PDF_Status = 1
-                
-                
+                selectedCompletePDF.PDF_Status = 1;
+
                 const contractData = await getContractByClientId(selectedCompletePDF.PDF_Client.id);
                 
             
                 const contractsArray = Array.isArray(contractData) ? contractData : [contractData];
+
+                contractsArray.forEach(async contract => {
+                    const product = selectedCompletePDF.PDF_Products.find(prod => prod.ID_Prod === contract.Cont_ID_Prod);
+                    console.log("Creating snapshot for contract:", contract, "with product:", product);
+                    const snapshotProduct: SnapshotProductDTOInsert = { 
+                        ContPDFItens_PDF_ID: selectedCompletePDF.id,
+                        snapshot_qtde: contract.Cont_Qtde,
+                        snapshot_comodato: contract.Cont_Comodato,
+                        snapshot_prod_nome: product ? product.Prod_Nome : "",
+                        snapshot_prod_cod: product ? product.Prod_CodProduto : "",
+                        snapshot_valor_unitario: contract.Cont_Qtde > 0 ? parseFloat((contract.Cont_ValorTotal / contract.Cont_Qtde).toFixed(2)) : 0,
+                        snapshot_valor_total_item: parseFloat(contract.Cont_ValorTotal),
+                    }
+                    await createSnapshotProduct(snapshotProduct);
+                });
 
                 const productData: ProductDTO[] = await Promise.all(
                     contractsArray.map(async contract => await getProductById(contract.Cont_ID_Prod))

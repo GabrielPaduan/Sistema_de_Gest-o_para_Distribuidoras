@@ -92,3 +92,14 @@ export interface LoginDTO {
     nome: string;
     senha: string;
 }
+
+export interface SnapshotProductDTOInsert {
+    ContPDFItens_PDF_ID: number;
+    snapshot_qtde: number;
+    snapshot_comodato: number;
+    snapshot_prod_nome: string;
+    snapshot_prod_cod: number;
+    snapshot_valor_unitario: number;
+    snapshot_valor_total_item: number
+}
+

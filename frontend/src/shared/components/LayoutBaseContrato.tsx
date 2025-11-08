@@ -166,7 +166,10 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
             }
             const clientPDF = await getPendentPdfByClientId(id);
             if (clientPDF == null) {
-                await createPDFContracts({ PDF_Client_Id: id, PDF_Status: 0, PDF_Generated_Date: new Date().toISOString(), PDF_Observacoes: observation });
+                const date = new Date();
+                date.setHours(12, 0, 0, 0);
+                console.log(date);
+                await createPDFContracts({ PDF_Client_Id: id, PDF_Status: 0, PDF_Generated_Date: date.toISOString(), PDF_Observacoes: observation });
             } else {
                 await updatePdf(clientPDF.id, {id: clientPDF.id, PDF_Client_Id: clientPDF.PDF_Client_Id, PDF_Status: 0, PDF_Generated_Date: new Date().toISOString(), PDF_Observacoes: observation });
             }
