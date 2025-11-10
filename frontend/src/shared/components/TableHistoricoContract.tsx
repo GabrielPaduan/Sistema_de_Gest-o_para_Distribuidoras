@@ -158,7 +158,7 @@ export const TableHistoricoContract: React.FC = () => {
             
             if (selectedCompletePDF && selectedCompletePDF.PDF_Client) {
             
-                generateReport(selectedCompletePDF.PDF_Client, selectedCompletePDF.PDF_Contracts, selectedCompletePDF.PDF_Products);
+                generateReport(selectedCompletePDF.PDF_Client, selectedCompletePDF.PDF_Contracts, selectedCompletePDF.PDF_Products, snapshotProducts);
                 selectedCompletePDF.PDF_Status = 1;
 
                 const contractData = await getContractByClientId(selectedCompletePDF.PDF_Client.id);
@@ -404,7 +404,7 @@ export const TableHistoricoContract: React.FC = () => {
                                 <Button
                                     variant="contained"
                                     size="large"
-                                    onClick={ selectedPdf.PDF_Status === 0 ? handleConfirmPdf : () => generateReport(selectedPdf.PDF_Client!, selectedPdf.PDF_Contracts, selectedPdf.PDF_Products)}
+                                    onClick={ selectedPdf.PDF_Status === 0 ? handleConfirmPdf : () => generateReport(selectedPdf.PDF_Client!, selectedPdf.PDF_Contracts, selectedPdf.PDF_Products, snapshotProducts)}
                                 >
                                     <Typography variant="h6">Gerar Contrato</Typography>
                                 </Button>

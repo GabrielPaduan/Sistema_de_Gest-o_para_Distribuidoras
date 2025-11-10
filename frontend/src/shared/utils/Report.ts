@@ -2,13 +2,15 @@
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { ClientDTO, ContractDTO, ProductDTO } from "../utils/DTOS";
+import { ClientDTO, ContractDTO, ProductDTO, SnapshotProductDTO } from "../utils/DTOS";
 import logo from '../assets/logo_empresa.png'// Verifique se o caminho da logo está correto
 
-export const generateReport = (client: ClientDTO, contracts: ContractDTO[], products: ProductDTO[]) => {
+export const generateReport = (client: ClientDTO, contracts: ContractDTO[], products: ProductDTO[], snapshotProducts: SnapshotProductDTO[]) => {
     const doc = new jsPDF();
     const pageHeight = doc.internal.pageSize.height;
     const margin = 15;
+
+    console.log("Generating report with snapshotProducts:", snapshotProducts);
 
     // --- CABEÇALHO PROFISSIONAL ---
     // Logo
@@ -45,17 +47,30 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
 
     // --- TABELA DE PRODUTOS ---
     const tableColumn = ["CMDT", "PRODUTOS", "VALOR UNITÁRIO", "QUANTIDADE", "VALOR TOTAL"];
-    const tableRows = contracts.map(contract => {
-        const product = products.find(p => p.ID_Prod === contract.Cont_ID_Prod);
-        const valorTotal = (contract?.Cont_Qtde ?? 0) * (product?.Prod_Valor ?? 0);
-        return [
-            contract.Cont_Comodato,
-            product?.Prod_Nome ?? 'Produto não encontrado',
-            `R$ ${product?.Prod_Valor?.toFixed(2) ?? '0.00'}`,
-            contract?.Cont_Qtde ?? 0,
-            `R$ ${valorTotal.toFixed(2)}`
-        ];
-    });
+    let tableRows: any[] = [];
+    if (snapshotProducts.length === 0) {
+        tableRows = contracts.map(contract => {
+            const product = products.find(p => p.ID_Prod === contract.Cont_ID_Prod);
+            const valorTotal = (contract?.Cont_Qtde ?? 0) * (product?.Prod_Valor ?? 0);
+            return [
+                contract.Cont_Comodato,
+                product?.Prod_Nome ?? 'Produto não encontrado',
+                `R$ ${product?.Prod_Valor?.toFixed(2) ?? '0.00'}`,
+                contract?.Cont_Qtde ?? 0,
+                `R$ ${valorTotal.toFixed(2)}`
+            ];
+        });
+    } else {
+        tableRows = snapshotProducts.map(snapshot => {
+            return [
+                snapshot.snapshot_comodato,
+                snapshot.snapshot_prod_cod || 'Produto não encontrado',
+                `R$ ${snapshot.snapshot_valor_unitario?.toFixed(2) || '0.00'}`,
+                snapshot.snapshot_qtde || 0,
+                `R$ ${snapshot.snapshot_valor_total_item?.toFixed(2) || '0.00'}`
+            ];
+        });
+    }
 
     autoTable(doc, {
         head: [tableColumn],
@@ -69,11 +84,13 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
 
     const finalY = (doc as any).lastAutoTable.finalY;
 
-    // --- RODAPÉ COM TOTAIS E INFORMAÇÕES ADICIONAIS ---
-    const totalGeral = contracts.reduce((sum, contract) => {
+    // --- RODAPÉ COM TOTAIS E INFORMAÇÕES ADICIONAIS ---)
+    const totalGeral = snapshotProducts.length === 0 ? contracts.reduce((sum, contract) => {
         const product = products.find(p => p.ID_Prod === contract.Cont_ID_Prod);
         return sum + ((contract?.Cont_Qtde ?? 0) * (product?.Prod_Valor ?? 0));
-    }, 0);
+    }, 0) : snapshotProducts.reduce((sum, snapshot) => {
+        return sum + (snapshot.snapshot_valor_total_item || 0)
+        }, 0);
 
     // Total
     doc.setFontSize(12);

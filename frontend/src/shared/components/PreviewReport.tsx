@@ -18,6 +18,7 @@ import {
 import React, { useState } from 'react';
 import { ClientDTO, ContractDTO, ProductDTO, SnapshotProductDTO } from "../utils/DTOS";
 import logo from '../assets/logo_empresa.png';
+import { useDebounce } from 'use-debounce';
 
 
 interface RelatorioPreviewProps {
@@ -30,11 +31,19 @@ interface RelatorioPreviewProps {
 // 3. O COMPONENTE
 export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contracts, products, snapshotProducts }) => {
     const theme = useTheme();
+    let valorTotalGeral = 0;
+    if(snapshotProducts == undefined) {
+        valorTotalGeral = contracts.reduce((sum, contract) => {
+            const product = products.find(p => p.ID_Prod === contract.Cont_ID_Prod);
+            return sum + ((contract.Cont_Qtde ?? 0) * (product?.Prod_Valor ?? 0));
+        }, 0);
+    } else {
+        valorTotalGeral = snapshotProducts.reduce((sum, snapshot) => {
+            return sum + (snapshot.snapshot_valor_total_item ?? 0);
+        }, 0);
+    }
 
-    const valorTotalGeral = contracts.reduce((sum, contract) => {
-        const product = products.find(p => p.ID_Prod === contract.Cont_ID_Prod);
-        return sum + ((contract.Cont_Qtde ?? 0) * (product?.Prod_Valor ?? 0));
-    }, 0);
+
 
     const SPLIT_THRESHOLD = 10; 
     const shouldSplit = contracts.length > SPLIT_THRESHOLD;
