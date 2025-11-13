@@ -6,7 +6,6 @@ import productRoutes from './routes/productRoutes.js';
 import contractRoutes from './routes/contractRoutes.js';
 import pdfRoutes from './routes/pdfRoutes.js';
 import userRoutes from './routes/userRoutes.js';
-import { snapshot } from 'node:test';
 import snapshotProductsRoutes from './routes/snapshotProductsRoutes.js';
 
 dotenv.config();

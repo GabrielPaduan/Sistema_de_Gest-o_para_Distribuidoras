@@ -59,7 +59,7 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
                     <TableRow sx={{ bgcolor: 'primary.main' }}>
                         <TableCell sx={{ color: 'common.white', fontWeight: 'bold' }}>CMDT</TableCell>
                         <TableCell sx={{ color: 'common.white', fontWeight: 'bold' }}>PRODUTOS</TableCell>
-                        <TableCell align="right" sx={{ color: 'common.white', fontWeight: 'bold' }}>VALOR UNIT.</TableCell>
+                        <TableCell align="right" sx={{ color: 'common.white', fontWeight: 'bold', '@media (max-width: 800px)': { display: 'none' } }}>VALOR UNIT.</TableCell>
                         <TableCell align="center" sx={{ color: 'common.white', fontWeight: 'bold' }}>QTD</TableCell>
                         <TableCell align="right" sx={{ color: 'common.white', fontWeight: 'bold' }}>VALOR TOTAL</TableCell>
                     </TableRow>
@@ -72,7 +72,7 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
                             <TableRow key={contract.ID_Contrato} sx={{ '&:nth-of-type(odd)': { backgroundColor: theme.palette.action.hover } }}>
                                 <TableCell align="center">{ contract.Cont_Comodato}</TableCell>
                                 <TableCell>{product?.Prod_CodProduto || 'Produto não encontrado'}</TableCell>
-                                <TableCell align="right">R$ {product?.Prod_Valor?.toFixed(2) || '0.00'}</TableCell>
+                                <TableCell align="right" sx={{ '@media (max-width: 800px)': { display: 'none' } }}>R$ {product?.Prod_Valor?.toFixed(2) || '0.00'}</TableCell>
                                 <TableCell align="center">{contract.Cont_Qtde || 0}</TableCell>
                                 <TableCell align="right">R$ {valorTotal.toFixed(2)}</TableCell>
                             </TableRow>
@@ -82,7 +82,7 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
                             <TableRow key={snapshot.ID_ContPDFItens} sx={{ '&:nth-of-type(odd)': { backgroundColor: theme.palette.action.hover } }}>
                                 <TableCell align="center">{ snapshot.snapshot_comodato}</TableCell>
                                 <TableCell>{snapshot.snapshot_prod_cod || 'Produto não encontrado'}</TableCell>
-                                <TableCell align="right">R$ {snapshot.snapshot_valor_unitario?.toFixed(2) || '0.00'}</TableCell>
+                                <TableCell align="right" sx={{ '@media (max-width: 800px)': { display: 'none' } }}>R$ {snapshot.snapshot_valor_unitario?.toFixed(2) || '0.00'}</TableCell>
                                 <TableCell align="center">{snapshot.snapshot_qtde || 0}</TableCell>
                                 <TableCell align="right">R$ {snapshot.snapshot_valor_total_item?.toFixed(2) || '0.00'}</TableCell>
                             </TableRow>

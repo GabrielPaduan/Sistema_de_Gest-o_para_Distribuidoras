@@ -1,0 +1,8 @@
+# Ignorar a pasta de módulos (será instalada no build)
+node_modules/
+
+# Ignorar arquivos de ambiente locais
+.env
+
+# Ignorar logs ou outros arquivos desnecessários
+*.log

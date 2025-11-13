@@ -54,8 +54,6 @@ export const TableClients: React.FC = () => {
                     <TableHead >
                         <TableRow sx={{ background: '#00008B' }}>
                             <TableCell  sx={{ fontSize: 20, textAlign: "center" }}>Cliente</TableCell>
-                            <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { display: 'none' } }}>E-mail</TableCell>
-                            <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { display: 'none' } }}>Endereço</TableCell>
                             <ProtectedComponent allowedRoles={['1']}>
                                 <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Editar</TableCell>
                                 <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Remover</TableCell>
@@ -80,8 +78,6 @@ export const TableClients: React.FC = () => {
                                         
                                     >
                                         <TableCell onClick={() => window.location.href = `/contrato-cliente/${client.id}`} sx={{ fontSize: 16, textAlign: "center" }}>{client.cli_razaoSocial}</TableCell>
-                                        <TableCell onClick={() => window.location.href = `/contrato-cliente/${client.id}`} sx={{ fontSize: 16, textAlign: "center", '@media (max-width: 800px)': { display: 'none' } }}>{client.cli_email === "" ? "Não informado" : client.cli_email}</TableCell>
-                                        <TableCell onClick={() => window.location.href = `/contrato-cliente/${client.id}`} sx={{ fontSize: 16, textAlign: "center", '@media (max-width: 800px)': { display: 'none' } }}>{client.cli_end === "" ? "Não informado" : client.cli_end}</TableCell>
                                         <ProtectedComponent allowedRoles={['1']}>
                                             <TableCell sx={{ fontSize: 20, textAlign: "center" }}>
                                                 <Button onClick={() => navigate(`/editar-cliente/${client.id}`)}><Icon sx={{ fontSize: 40 }}>edit</Icon></Button>
