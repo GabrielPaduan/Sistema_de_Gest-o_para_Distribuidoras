@@ -355,6 +355,20 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
         handleSearch(debouncedSearchTerm);
     }, [debouncedSearchTerm]);
 
+    useEffect(() => {
+    // Busca na lista completa de produtos 'products' (que é a usada na listagem do modal)
+    const product = products.find(p => p.ID_Prod === selectedProduct);
+    
+    if (product) {
+        // Se achou o produto, joga a margem dele para o estado editável
+        // Garante que seja número
+        setPorcLucro(Number(product.Prod_PorcLucro) || 0); 
+    } else {
+        // Se desmarcou, zera ou define um padrão
+        setPorcLucro(0); 
+    }
+}, [selectedProduct, products]);
+
     return (
         <Box padding={10} sx={{ "@media (max-width: 800px)": { padding: 0, margin: "auto", width: "80%" } }}>
             <Modal
