@@ -1,0 +1,229 @@
+import { Box, Button, Icon, Modal, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TextField, Typography } from "@mui/material";
+import { TableProducts } from "./TableProducts";
+import { ProtectedComponent } from "./ProtectedComponent";
+import { GenericButton } from "./GenericButton";
+import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { createCategory, deleteCategory, getAllCategories, updateCategory } from "../services/categoriasProdutoService";
+import { ProductsCategoriesDTO, ProductsCategoriesDTOInsert } from "../utils/DTOS";
+
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 'auto',
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};
+
+
+export const TelaEstoque: React.FC = () => {
+    const navigate = useNavigate();
+    const [open, setOpen] = useState(false);
+    const [categorias, setCategorias] = useState<ProductsCategoriesDTO[]>([]);
+    const [nomeCategoria, setNomeCategoria] = useState<string>('');
+    const [categoriaToEdit, setCategoriaToEdit] = useState<ProductsCategoriesDTO | null>(null);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [modalMode, setModalMode] = useState<0 | 1>(0); // 0 - Inserir, 1 - Editar
+
+    const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
+        setPage(newPage);
+    }
+
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const data = await getAllCategories();
+            setCategorias(data);
+        }
+        fetchData();
+            
+    }, []);
+
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => {
+        setOpen(false);
+        setModalMode(0);
+        setCategoriaToEdit({ ID_CategoriaProduto: 0, CatProd_Nome: "" });
+        setNomeCategoria('');
+    }   
+    
+    const handleSwitchModalMode = (category: ProductsCategoriesDTO) => {
+        if (categoriaToEdit?.ID_CategoriaProduto === category.ID_CategoriaProduto) {
+            setModalMode(0);
+            setCategoriaToEdit(null);
+            return;
+        }
+        setModalMode(1);
+        setCategoriaToEdit(category);
+        console.log(modalMode);
+    }
+
+    const handleInsertCategory = async (nomeCategoria: ProductsCategoriesDTOInsert) => {
+        await createCategory(nomeCategoria);
+        const data = await getAllCategories();
+        setCategorias(data);
+        setNomeCategoria('');
+    }
+
+    const handleEditCategory = async (categoriaToEdit: ProductsCategoriesDTO) => {
+        await updateCategory(categoriaToEdit.ID_CategoriaProduto, { CatProd_Nome: categoriaToEdit.CatProd_Nome });
+        const data = await getAllCategories();
+        setCategorias(data);
+        setModalMode(0);
+        setCategoriaToEdit(null); 
+    }
+
+    const handleDeleteCategory = async (categoryID: number) => {   
+        await deleteCategory(categoryID);
+        const data = await getAllCategories();
+        setCategorias(data);
+    }
+
+    return (
+        <Box>
+            <Modal
+                    open={open}
+                    onClose={handleClose}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                    >
+                        <Box sx={{ ...style, '@media (max-width: 800px)': { width: "80%" } }}>
+                            <Typography id="modal-modal-title" variant="h6" component="h2" textAlign={"center"}>
+                                Gerenciar Categorias
+                            </Typography>
+                            <Typography id="modal-modal-description" sx={{ mt: 2 }} />
+        
+                            {/* Listagem de categorias */}
+                            <Box>
+                                <TableContainer>
+                                    <Table>
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell><Typography variant="h6" textAlign="center">Nome da Categoria</Typography></TableCell>
+                                                <TableCell><Typography variant="h6" textAlign="center">Editar</Typography></TableCell>
+                                                <TableCell><Typography variant="h6" textAlign="center">Excluir</Typography></TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {categorias.map((categoria) => (
+                                                <TableRow key={categoria.ID_CategoriaProduto}>
+                                                    <TableCell><Typography textAlign="center">{categoria.CatProd_Nome}</Typography></TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}><Button onClick={() => handleSwitchModalMode({ID_CategoriaProduto: categoria.ID_CategoriaProduto, CatProd_Nome: categoria.CatProd_Nome})}><Icon>edit</Icon></Button></TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}><Button onClick={() => handleDeleteCategory(categoria.ID_CategoriaProduto)}><Icon>delete</Icon></Button></TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                    <TablePagination
+                                        component="div"
+                                        count={categorias.length}
+                                        page={page}
+                                        onPageChange={handleChangePage}
+                                        rowsPerPage={rowsPerPage}
+                                        onRowsPerPageChange={handleChangeRowsPerPage}
+                                        rowsPerPageOptions={[3, 5, 7]}
+                                        sx={{ '@media (max-width: 800px)': { 
+                                            '& .MuiTablePagination-selectLabel': {
+                                                display: 'none'
+                                            }
+                                        }}}
+                                    />
+                                </TableContainer>
+                            </Box>
+                            
+                            <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} gap={2} mt={2} sx={{ flexDirection: "column"  }}>
+                               
+                                    {
+                                        modalMode === 0 && (
+                                             <Box display={"flex"} alignItems={"center"} justifyContent={"space-evenly"} width={"100%"} height={"100%"} sx={{ gap: 2, '@media (max-width: 800px)': { width: "100%" } }}>
+                                                <Typography component="label" htmlFor={`quantity`} variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: '16px' } }}>
+                                                    Nova Categoria:
+                                                </Typography>
+                                                <TextField
+                                                    id={`quantity`}
+                                                    name={`quantity`}
+                                                    variant="outlined"
+                                                    value={nomeCategoria}
+                                                    onChange={(e) => {
+                                                        setNomeCategoria(e.target.value);
+                                                    }}
+                                                    inputProps = {{ style: { padding: "8px" } }}
+                                                />
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    onClick={() => handleInsertCategory({ CatProd_Nome: nomeCategoria })}
+                                                >
+                                                    <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}> Adicionar</Typography>
+                                                </Button>
+                                            </Box>
+                                        )
+                                    } 
+                                    {
+                                        modalMode === 1 && (
+                                            <Box display={"flex"} alignItems={"center"} justifyContent={"space-evenly"} width={"100%"} height={"100%"} sx={{ gap: 2, '@media (max-width: 800px)': { width: "100%" } }}>
+                                                <Typography component="label" htmlFor={`quantity`} variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: '16px' } }}>
+                                                    Editar Categoria:
+                                                </Typography>
+                                                <TextField
+                                                    id={`quantity`}
+                                                    name={`quantity`}
+                                                    variant="outlined"
+                                                    value={categoriaToEdit ? categoriaToEdit.CatProd_Nome : ""}
+                                                    onChange={(e) => {
+                                                        if (categoriaToEdit) {
+                                                            setCategoriaToEdit({ ...categoriaToEdit, CatProd_Nome: e.target.value });
+                                                        }
+                                                    }}
+                                                    inputProps = {{ style: { padding: "8px" } }}
+                                                />
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    onClick={() => handleEditCategory(categoriaToEdit ? categoriaToEdit : {ID_CategoriaProduto: 0, CatProd_Nome: ""})}
+                                                >
+                                                    <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}> Editar</Typography>
+                                                </Button>
+                                            </Box> 
+                                        )}
+                                    
+                                
+                                <Box width={"100%"} display={"flex"} justifyContent={"center"} height={"100%"} gap={1} sx={{ '@media (max-width: 800px)': { width: "100%" } }}>   
+                                    <Button onClick={handleClose} variant="contained" color="primary">
+                                        <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}>Voltar</Typography>
+                                    </Button>
+                                </Box>
+                            </Box>
+                        </Box>
+                    </Modal>
+            <TableProducts
+                categorias={categorias}
+             />
+             <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2} padding={2}>
+                <ProtectedComponent allowedRoles={['1']}>
+                    <Box>
+                        <Button onClick={() => navigate("/cadastro-produto")} variant="contained" color="primary" sx={{ padding: "15px", width: "100%" }}><Typography variant="h6">Adicionar Produto</Typography></Button>
+                    </Box>
+                </ProtectedComponent>
+                <ProtectedComponent allowedRoles={['1']}>
+                    <Box>
+                        <Button onClick={() => handleOpen()} variant="contained" color="primary" sx={{ padding: "15px", width: "100%" }}><Typography variant="h6">Gerenciar Categorias</Typography></Button>
+                    </Box>
+                </ProtectedComponent>
+                <Box sx={{ '@media (max-width: 800px)': { width: '50%' } }}>
+                    <GenericButton name="Voltar" type="button" link="/" />
+                </Box>
+            </Box>
+        </Box>
+    );
+
+} 

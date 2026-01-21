@@ -1,5 +1,5 @@
-import { Box, Button, Modal, TablePagination, TextareaAutosize, TextField, Typography } from "@mui/material";
-import { ClientDTO, ContractDTO, ContractDTOInsert, DadosProdutoComodatoDTO, LayoutBaseContratoProps, ProductDTO, SnapshotProductDTO } from "../utils/DTOS";
+import { Box, Button, Icon, Modal, TablePagination, TextareaAutosize, TextField, Typography } from "@mui/material";
+import { ClientDTO, ContractDTO, ContractDTOInsert, DadosProdutoComodatoDTO, LayoutBaseContratoProps, objectContractExclusion, ProductDTO, SnapshotProductDTO } from "../utils/DTOS";
 import React, { use, useEffect, useState } from "react";
 import { TableContract } from "./TableContract";
 import { getClientById, getModelClients, getModelContracts } from "../services/clientService"; // Supondo que você tenha este serviço
@@ -26,6 +26,7 @@ const style = {
   p: 4,
 };
 
+
 export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) => {
     const [client, setClient] = useState<ClientDTO | null>(null);
     const [contracts, setContracts] = useState<ContractDTO[]>([]);
@@ -35,7 +36,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
     const [open, setOpen] = React.useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [cmdt, setCmdt] = useState<number | 1>(1);
-    const [porcLucro, setPorcLucro] = useState<number | 0.1>(0.1);
+    const [porcLucro, setPorcLucro] = useState<number | 0>(0);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(3);
     const [selectedProduct, setSelectedProduct] = useState<number>(0);
@@ -49,6 +50,26 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
     const [openModelo, setOpenModelo] = useState(false);
     const [openEdit, setOpenEdit] = useState(false);
     const [contractToEdit, setContractToEdit] = useState<number>(0);
+    const [selectedItems, setSelectedItems] = useState<objectContractExclusion[]>([]);
+
+    const handleToggleSelect = (contractId: number, productId: number) => {
+        const isSelected = selectedItems.some(item => item.contractId === contractId);
+        if (isSelected) {
+            setSelectedItems(prev => prev.filter(item => item.contractId !== contractId));
+        } else {
+            setSelectedItems(prev => [...prev, { contractId, productId }]);
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (!window.confirm(`Deseja excluir ${selectedItems.length} contratos?`)) return;
+
+        for (const item of selectedItems) {
+            await handleRemoveContract(item.contractId, item.productId);
+        }
+        setSelectedItems([]);
+    };
+
 
     const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
         setPage(newPage);
@@ -421,7 +442,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                                     value={porcLucro}
                                     onChange={(e) => {
                                         const value = Number(e.target.value);
-                                        setPorcLucro(isNaN(value) ? 0.1 : value);
+                                        setPorcLucro(isNaN(value) ? 0 : value);
                                     }}
                                     inputProps = {{ style: { padding: "8px" } }}
                                 />
@@ -566,10 +587,44 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
             </Typography>
             {!showReport && (
                 <Box width={"80%"} margin={"auto"} sx={{ "@media (max-width: 800px)": { width: "95%" } }}>
+          
+                    <Box 
+                        width={"80%"} 
+                        margin={"auto"} 
+                        mb={2} 
+                        display="flex" 
+                        justifyContent="flex-end" 
+                        alignItems="center"
+                        height="50px" // Altura fixa para não pular layout
+                    >
+                        {selectedItems.length > 0 ? (
+                            <Box display="flex" alignItems="center" gap={2} bgcolor="#ffebee" p={1} borderRadius={2} width="100%" justifyContent="space-between">
+                                <Typography variant="body1" color="error" fontWeight="bold" ml={2}>
+                                    {selectedItems.length} contrato(s) selecionado(s)
+                                </Typography>
+                                <Button 
+                                    variant="contained" 
+                                    color="error" 
+                                    onClick={handleBulkDelete}
+                                    startIcon={<Icon>delete</Icon>}
+                                >
+                                    Excluir Selecionados
+                                </Button>
+                            </Box>
+                        ) : (
+                            // Espaço vazio ou instruções quando nada selecionado
+                            <Typography variant="body2" color="text.secondary">
+                                Selecione itens na tabela para ações em massa
+                            </Typography>
+                        )}
+                    </Box>
+
                     <TableContract
                         client={client}
                         contracts={contracts}
                         products={productsClient}
+                        selectedItems={selectedItems}
+                        onToggleSelect={handleToggleSelect}
                         onAddProduct={handleAddProduct}    
                         onRemoveProduct={handleRemoveProduct}
                         onRemoveContract={handleRemoveContract}

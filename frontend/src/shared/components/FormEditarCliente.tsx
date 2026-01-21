@@ -52,12 +52,12 @@ export const FormEditarCliente: React.FC = () => {
     };
 
     const handleSelectChange = (event: SelectChangeEvent<number>) => {
-    const { name, value } = event.target;
-    setFormData((prevData) => ({
-        ...prevData,
-        [name]: Number(value), // Garante que o valor salvo seja sempre um número
-    }));
-};
+        const { name, value } = event.target;
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: Number(value), // Garante que o valor salvo seja sempre um número
+        }));
+    };
 
     const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();

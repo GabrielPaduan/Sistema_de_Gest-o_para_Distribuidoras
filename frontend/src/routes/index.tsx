@@ -23,7 +23,7 @@ export const AppRoutes = () => {
         <Route path="/visualizar-clientes" element={<ProtectedRoute><VisualizarClientes /></ProtectedRoute>} />
         <Route path="/contrato-cliente/:id" element={<ProtectedRoute><ContratoCliente /></ProtectedRoute>} />
         <Route path="/historico-contratos" element={<ProtectedRoute><HistoricoContratos /></ProtectedRoute>} />
-        <Route path="/cadastro-user" element={<ProtectedRoute><CadastroUser /></ProtectedRoute>} />
+        <Route path="/cadastro-user" element={<CadastroUser />} />
         <Route path="/estoque-produtos" element={<ProtectedRoute><EstoqueProdutos /></ProtectedRoute>} />
         <Route path="/cadastro-produto" element={<ProtectedRoute><CadastroProduto /></ProtectedRoute>} /> 
         <Route path="/editar-produto/:id" element={<ProtectedRoute><EditarProduto /></ProtectedRoute>} />

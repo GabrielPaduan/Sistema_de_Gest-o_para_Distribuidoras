@@ -1,17 +1,55 @@
 import { useNavigate } from "react-router-dom";
-import { ProductDTOInsert } from "../utils/DTOS";
+import { ProductDTOInsert, ProductsCategoriesDTO, ProductsCategoriesDTOInsert } from "../utils/DTOS";
 import { SetStateAction, useEffect, useState } from "react";
 import { createProduct } from "../services/productService";
-import { Box, TextField, Select, MenuItem, Typography, Checkbox, Button, InputAdornment } from "@mui/material";
+import { Box, TextField, Select, MenuItem, Typography, Checkbox, Button, InputAdornment, Modal } from "@mui/material";
 import { GenericButton } from "./GenericButton";
+import { createCategory, getAllCategories } from "../services/categoriasProdutoService";
+
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 'auto',
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};
 
 export const FormCadastroProduto: React.FC = () => {
-    const [product, setProduct] = useState<ProductDTOInsert | null>(null);
+    const [categorias, setCategorias] = useState<ProductsCategoriesDTO[]>([]);
     const [custoCompra, setCustoCompra] = useState<number | 0>(0);
     const [porcentagemLucro, setPorcentagemLucro] = useState<number | 0>(0);
     const [valor, setValor] = useState<number | 0>(0);
     const [disabled, setDisabled] = useState<boolean>(false);
     const navigate = useNavigate();
+    const [open, setOpen] = useState(false);
+
+    const [nomeCategoria, setNomeCategoria] = useState<string>('');
+    
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
+
+    const handleInsertCategory = async (nomeCategoria: ProductsCategoriesDTOInsert) => {
+        await createCategory(nomeCategoria);
+        const data = await getAllCategories();
+        setCategorias(data);
+        handleClose();
+    }
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const data = await getAllCategories();
+            setCategorias(data);
+        }
+        fetchData();
+        
+        console.log(categorias);
+    }, []);
+
+
     const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         try {
@@ -27,6 +65,7 @@ export const FormCadastroProduto: React.FC = () => {
                 Prod_Nome: formData.get("nomeProduto") as string,
                 Prod_Estoque: formData.get("prodEstoque") as unknown as number || 0,
                 Prod_PorcLucro: formData.get("prodPorcLucro") as unknown as number || 0,
+                Prod_Categoria: formData.get("prodCategoria") as unknown as number || 0,
             }
             await createProduct(newProduct);
         } catch (error) {
@@ -59,6 +98,51 @@ export const FormCadastroProduto: React.FC = () => {
     }, [valor]);
 
     return (
+        <>
+        <Modal
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+            >
+            <Box sx={{ ...style, '@media (max-width: 800px)': { width: "80%" } }}>
+                <Typography id="modal-modal-title" variant="h6" component="h2" textAlign={"center"}>
+                    Adicionar Nova Categoria
+                </Typography>
+                <Typography id="modal-modal-description" sx={{ mt: 2 }} />
+
+                {/* <TextField variant="filled"  label="Código do Produto" name="codigoProduto" required placeholder="Digite o código do produto" fullWidth sx={{ marginBottom: 2 }}/> */}
+                <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} gap={2} mt={2} sx={{ flexDirection: "column"  }}>
+                    <Box display={"flex"} alignItems={"center"} justifyContent={"space-evenly"} width={"100%"} height={"100%"} sx={{ gap: 2, '@media (max-width: 800px)': { width: "100%" } }}>
+                        <Typography component="label" htmlFor={`quantity`} variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: '16px' } }}>
+                            Nome da Categoria:
+                        </Typography>
+                        <TextField
+                            id={`quantity`}
+                            name={`quantity`}
+                            variant="outlined"
+                            value={nomeCategoria}
+                            onChange={(e) => {
+                                setNomeCategoria(e.target.value);
+                            }}
+                            inputProps = {{ style: { padding: "8px" } }}
+                        />
+                    </Box>
+                    <Box width={"100%"} display={"flex"} justifyContent={"center"} height={"100%"} gap={1} sx={{ '@media (max-width: 800px)': { width: "100%" } }}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleInsertCategory({ CatProd_Nome: nomeCategoria })}
+                        >
+                            <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}> Adicionar</Typography>
+                        </Button>
+                        <Button onClick={handleClose} variant="contained" color="primary">
+                            <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}>Voltar</Typography>
+                        </Button>
+                    </Box>
+                </Box>
+            </Box>
+        </Modal>
         <Box
             component="form"
             noValidate
@@ -74,7 +158,7 @@ export const FormCadastroProduto: React.FC = () => {
         >
             <Box display={"flex"} flexDirection={"column"} width={"100%"} gap={2}>
                 <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column", gap: 2 } }}>
-                    <TextField label="Em desenvolvimento..." id="codigoBarras" name="codigoBarras" variant="outlined" placeholder="Em desenvolvimento..." sx={{ width: "33.33%", '@media (max-width: 800px)': { width: "100%" }, '& .MuiInputLabel-root': {
+                    <TextField label="Em desenvolvimento..." id="codigoBarras" name="codigoBarras" variant="outlined" placeholder="Em desenvolvimento..." sx={{ width: "25%", '@media (max-width: 800px)': { width: "100%" }, '& .MuiInputLabel-root': {
                         color: 'gray', // Cor do label normal
                     }, '& .MuiInputLabel-root.Mui-focused': {
                         color: '#181393', // Cor do label quando em foco
@@ -82,16 +166,36 @@ export const FormCadastroProduto: React.FC = () => {
                     type="number"
                     disabled/>
 
-                    <TextField label="Código do Produto" id="codigoProduto" name="codigoProduto" variant="outlined" placeholder="Digite o código de produto" sx={{ width: "33.33%", '& .MuiInputLabel-root': {
+                    <TextField label="Código do Produto" id="codigoProduto" name="codigoProduto" variant="outlined" placeholder="Digite o código de produto" sx={{ width: "25%", '& .MuiInputLabel-root': {
                         color: 'gray', // Cor do label normal
                     }, '& .MuiInputLabel-root.Mui-focused': {
                         color: '#181393', // Cor do label quando em foco
                     } }} />
-                    <TextField label="Nome do Produto" id="nomeProduto" name="nomeProduto" variant="outlined" placeholder="Digite o nome do produto" sx={{ width: "33.33%", '& .MuiInputLabel-root': {
+                    <TextField label="Nome do Produto" id="nomeProduto" name="nomeProduto" variant="outlined" placeholder="Digite o nome do produto" sx={{ width: "25%", '& .MuiInputLabel-root': {
                         color: 'gray', // Cor do label normal
                     }, '& .MuiInputLabel-root.Mui-focused': {
                         color: '#181393', // Cor do label quando em foco
                     } }} />
+
+                    <Box display={"flex"} justifyContent={"space-evenly"} alignItems={"center"} width={"25%"} gap={2}>
+                        <Select
+                            labelId="prodCategoria-select-label"
+                            id="prodCategoria-select"
+                            label="prodCategoria"
+                            name="prodCategoria"
+                            defaultValue={0}
+                            fullWidth
+                            sx={{ width: "100%", marginLeft: 0.5 }}
+                        >   
+                            <MenuItem value={0} disabled>Selecione a Categoria</MenuItem>
+                            {categorias.map((categoria) => (
+                                <MenuItem key={categoria.ID_CategoriaProduto} value={categoria.ID_CategoriaProduto}>
+                                    {categoria.CatProd_Nome}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                        <Button variant="contained" color="primary" sx={{ width: "5%", height: "100%" }} onClick={handleOpen}>+</Button>
+                    </Box>
 
                 </Box>
                 <Box display={"flex"} justifyContent={"space-between"} gap={2}>
@@ -179,5 +283,6 @@ export const FormCadastroProduto: React.FC = () => {
                 </Box>
             </Box>
         </Box>
+    </>
     )
 }
