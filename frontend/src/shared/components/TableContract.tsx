@@ -1,7 +1,8 @@
-import { Box, Button, Icon, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
-import { TableContractProps } from "../utils/DTOS";
-import React, { useState } from "react";
+import { Box, Button, Checkbox, Icon, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { ContractDTO, objectContractExclusion, TableContractProps } from "../utils/DTOS";
+import React, { useEffect, useState } from "react";
 import { ProtectedComponent } from "./ProtectedComponent";
+import { CheckBox } from "@mui/icons-material";
 
 // Adicione as funções onAdd e onRemove nas props
 interface CustomTableContractProps extends TableContractProps {
@@ -9,9 +10,15 @@ interface CustomTableContractProps extends TableContractProps {
     onRemoveProduct: (productId: number) => void;
     onRemoveContract: (contractId: number, productId: number) => void;
     openEditContract: (contractId: number, productId: number) => void;
+    selectedItems: objectContractExclusion[]; 
+    onToggleSelect: (contractId: number, productId: number) => void;
 }
 
-export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, products, onAddProduct, onRemoveProduct, onRemoveContract, openEditContract }) => {
+
+
+export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, products, selectedItems,
+    onToggleSelect, onAddProduct, onRemoveProduct, onRemoveContract, openEditContract }) => {
+    
     const sortedContracts = [...contracts].sort((a, b) => {
         const productA = products.find(p => p.ID_Prod === a.Cont_ID_Prod);
         const productB = products.find(p => p.ID_Prod === b.Cont_ID_Prod);
@@ -19,11 +26,14 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
         const nameB = productB ? productB.Prod_CodProduto : '';
         return nameA.localeCompare(nameB);
     });
-    
+
     return (
         <TableContainer component={Paper} sx={{ margin: "auto", cursor: "default", width: "100%" }}>
             <Table width="100%">
                 <TableHead>
+                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>
+                        Selecionar
+                    </TableCell>
                     <TableCell  sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Cmdt</TableCell>
                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Produtos</TableCell>
                     <ProtectedComponent allowedRoles={['1']}>
@@ -54,6 +64,14 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
 
                             return (
                                 <TableRow key={contract.ID_Contrato} hover>
+                                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>
+                                        <Checkbox
+                                        checked={selectedItems.some(item => item.contractId === contract.ID_Contrato)}
+                                        onChange={() => onToggleSelect(contract.ID_Contrato, product.ID_Prod)}
+                                        sx={{ width: '9%', color: 'grey' }}
+                                        color="secondary"
+                                    />
+                                    </TableCell>
                                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{contract.Cont_Comodato}</TableCell>
                                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_CodProduto}</TableCell>
                                     <ProtectedComponent allowedRoles={['1']}>

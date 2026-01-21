@@ -1,10 +1,24 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { ProductDTO } from "../utils/DTOS"; // Removi ProductDTOInsert, pois não está sendo usado
+import { ProductDTO, ProductsCategoriesDTO, ProductsCategoriesDTOInsert } from "../utils/DTOS"; // Removi ProductDTOInsert, pois não está sendo usado
 import { useEffect, useState } from "react";
 import { getProductById, updateProduct } from "../services/productService"; // Removi createProduct
-import { Box, TextField, Typography, Button, InputAdornment, CircularProgress, Alert } from "@mui/material";
+import { Box, TextField, Typography, Button, InputAdornment, CircularProgress, Alert, Select, MenuItem, Modal, SelectChangeEvent } from "@mui/material";
 import { GenericButton } from "./GenericButton";
 import { NumericFormat } from "react-number-format";
+import { createCategory, getAllCategories } from "../services/categoriasProdutoService";
+import { get } from "http";
+
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 'auto',
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};
 
 export const FormEditarProduto: React.FC = () => {
     let idProd = parseInt(useParams().id || "0");
@@ -17,6 +31,30 @@ export const FormEditarProduto: React.FC = () => {
     // 2. Estados para controle da UI
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [categorias, setCategorias] = useState<ProductsCategoriesDTO[]>([]);
+
+    const [open, setOpen] = useState(false);
+
+    const [nomeCategoria, setNomeCategoria] = useState<string>('');
+    
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
+
+    const handleInsertCategory = async (nomeCategoria: ProductsCategoriesDTOInsert) => {
+        await createCategory(nomeCategoria);
+        const data = await getAllCategories();
+        setCategorias(data);
+        handleClose();
+    }
+
+     useEffect(() => {
+        const fetchData = async () => {
+            const data = await getAllCategories();
+            setCategorias(data);
+        }
+        fetchData();
+        
+    }, []);
 
     // --- Carregamento dos Dados ---
     useEffect(() => {
@@ -80,6 +118,22 @@ export const FormEditarProduto: React.FC = () => {
             };
         });
     };
+
+    const handleSelectChange = (event: SelectChangeEvent<number>) => {
+        const { name, value } = event.target;
+        
+        setFormData(prevData => {
+            if (!prevData) return null;
+            return {
+                ...prevData,
+                [name]: Number(value) // Garante que o valor salvo seja sempre um número, 
+            }
+        });
+    };
+
+    // useEffect(() => {
+    //     console.log(formData);
+    // }, [formData]);
 
     // Handler específico para Custo de Compra
     const handleCustoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -170,10 +224,10 @@ export const FormEditarProduto: React.FC = () => {
                 Prod_CodBarras: Number(formData.Prod_CodBarras) || 0,
                 Prod_Estoque: Number(formData.Prod_Estoque) || 0,
                 Prod_PorcLucro: Number(formData.Prod_PorcLucro) || 0,
+                Prod_Categoria: Number(formData.Prod_Categoria) || 0,
             };
-
+            console.log("Produto a ser atualizado:", updatedProduct);
             await updateProduct(updatedProduct);
-            // Adicionar feedback de sucesso (ex: react-hot-toast)
             navigate("/estoque-produtos");
 
         } catch (error) {
@@ -206,161 +260,229 @@ export const FormEditarProduto: React.FC = () => {
     }
 
     return (
-        <Box
-            component="form"
-            noValidate
-            autoComplete="off"
-            padding={4}
-            display="flex"
-            flexDirection="column"
-            gap={2}
-            maxWidth={"70%"}
-            sx={{ '@media (max-width: 800px)': { maxWidth: "95%", padding: "10px" } }}
-            margin="auto"
-            onSubmit={submitForm}
-        >
-            {/* Exibe erro de submissão */}
-            {error && <Alert severity="error">{error}</Alert>}
-
-            <Box display={"flex"} flexDirection={"column"} width={"100%"} gap={2}>
-                <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column", gap: 2 } }}>
-                    <TextField 
-                        label="Código de Barras" 
-                        name="Prod_CodBarras" 
-                        variant="outlined" 
-                        placeholder="Digite o código de barras" 
-                        disabled // Campo código de barras desabilitado como no original
-                        value={formData.Prod_CodBarras} 
-                        onChange={handleChange} 
-                        sx={{ width: "33.33%", '& .MuiInputLabel-root': { color: 'gray' }, '@media (max-width: 800px)': { width: "100%" } }} 
-                    />
-
-                    <TextField 
-                        label="Código do Produto" 
-                        name="Prod_CodProduto" 
-                        variant="outlined" 
-                        placeholder="Digite o código de produto" 
-                        value={formData.Prod_CodProduto} 
-                        onChange={handleChange} 
-                        sx={{ width: "33.33%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
-                        required
-                    />
-                    <TextField 
-                        label="Nome do Produto" 
-                        name="Prod_Nome" 
-                        variant="outlined" 
-                        placeholder="Digite o nome do produto" 
-                        value={formData.Prod_Nome} 
-                        onChange={handleChange} 
-                        sx={{ width: "33.33%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
-                        required
-                    />
-                </Box>
-                <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column", gap: 2 } }}>
-                    <TextField 
-                        label="Unidade de Medida" 
-                        name="Prod_UnMedida" 
-                        variant="outlined" 
-                        placeholder="Digite a unidade de medida" 
-                        value={formData.Prod_UnMedida} 
-                        onChange={handleChange} 
-                        sx={{ width: "25%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
-                    />
-                    <TextField 
-                        label="NCM" 
-                        name="Prod_NCM" 
-                        variant="outlined" 
-                        placeholder="Digite o NCM" 
-                        type="number"
-                        value={formData.Prod_NCM} 
-                        onChange={handleChange} 
-                        sx={{ width: "25%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
-                    />
-                    <TextField 
-                        label="Estoque" 
-                        name="Prod_Estoque" 
-                        variant="outlined" 
-                        placeholder="Digite o estoque" 
-                        type="number"
-                        value={formData.Prod_Estoque} 
-                        onChange={handleChange} 
-                        sx={{ width: "25%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
-                    />
-                    <TextField 
-                        label="CFOP" 
-                        name="Prod_CFOP" 
-                        variant="outlined" 
-                        placeholder="Digite o CFOP" 
-                        value={formData.Prod_CFOP} 
-                        onChange={handleChange} 
-                        sx={{ width: "25%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
-                    />
-                </Box>
-                <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column", gap: 2 } }}>
-                    <TextField 
-                        label="Custo de Compra" 
-                        name="Prod_CustoCompra" 
-                        variant="outlined" 
-                        placeholder="Digite o custo de compra" 
-                        value={formData.Prod_CustoCompra} 
-                        onChange={handleCustoChange} // Handler específico
-                        type="number"  
-                        InputProps={{ // Prop correta é InputProps
-                            startAdornment: <InputAdornment position="start">R$</InputAdornment>,
-                            inputProps: { min: 0 } // Evita valores negativos
-                        }} 
-                        sx={{ width: "33.33%", '& .MuiInputLabel-root': { color: 'gray' }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' },'@media (max-width: 800px)': { width: "100%" } }} 
-                        onFocus={(event) => event.target.select()}
-                    />
-
-                    <TextField 
-                        label="Porcentagem de Lucro" 
-                        name="Prod_PorcLucro" 
-                        variant="outlined" 
-                        placeholder="Digite a porcentagem de lucro" 
-                        type="number"
-                        InputProps={{
-                            endAdornment: <InputAdornment position="end">%</InputAdornment>,
-                            inputProps: { min: 0 } 
-                        }}
-                        sx={{ width: "33.33%", '@media (max-width: 800px)': { width: "100%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' } }}  
-                        value={formData.Prod_PorcLucro}
-                        onChange={handlePorcChange} // Handler específico
-                        disabled={fieldsDisabled} // Lógica de disabled simplificada
-                        onFocus={(event) => event.target.select()}
-                    />
-
-                    <TextField 
-                        label="Custo de Venda" 
-                        name="Prod_Valor" // Nome correto do campo no DTO
-                        variant="outlined" 
-                        placeholder="Digite o custo de venda" 
-                        type="number"
-                        InputProps={{
-                            startAdornment: <InputAdornment position="start">R$</InputAdornment>,
-                            inputProps: { min: 0 } 
-                        }}
-                        sx={{ width: "33.33%", '@media (max-width: 800px)': { width: "100%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }}}
-                        value={formData.Prod_Valor}
-                        onChange={handleValorChange} // Handler específico  
-                        disabled={fieldsDisabled} // Lógica de disabled simplificada
-                        onFocus={(event) => event.target.select()}
-                    />
-                </Box>
-            </Box>
-
-            <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2}>
-                <Box>
-                    <Button variant="contained" color="primary" type="submit" sx={{ margin: "10px auto", padding: "15px", '@media (max-width: 800px)': { width: "100%" }  }}>
-                        <Typography variant="h6" color="text.secondary" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }} >
-                            Salvar Alterações
+        <>
+            <Modal
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+                >
+                    <Box sx={{ ...style, '@media (max-width: 800px)': { width: "80%" } }}>
+                        <Typography id="modal-modal-title" variant="h6" component="h2" textAlign={"center"}>
+                            Adicionar Nova Categoria
                         </Typography>
-                    </Button>
+                        <Typography id="modal-modal-description" sx={{ mt: 2 }} />
+
+                        {/* <TextField variant="filled"  label="Código do Produto" name="codigoProduto" required placeholder="Digite o código do produto" fullWidth sx={{ marginBottom: 2 }}/> */}
+                        <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} gap={2} mt={2} sx={{ flexDirection: "column"  }}>
+                            <Box display={"flex"} alignItems={"center"} justifyContent={"space-evenly"} width={"100%"} height={"100%"} sx={{ gap: 2, '@media (max-width: 800px)': { width: "100%" } }}>
+                                <Typography component="label" htmlFor={`quantity`} variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: '16px' } }}>
+                                    Nome da Categoria:
+                                </Typography>
+                                <TextField
+                                    id={`quantity`}
+                                    name={`quantity`}
+                                    variant="outlined"
+                                    value={nomeCategoria}
+                                    onChange={(e) => {
+                                        setNomeCategoria(e.target.value);
+                                    }}
+                                    inputProps = {{ style: { padding: "8px" } }}
+                                />
+                            </Box>
+                            <Box width={"100%"} display={"flex"} justifyContent={"center"} height={"100%"} gap={1} sx={{ '@media (max-width: 800px)': { width: "100%" } }}>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => handleInsertCategory({ CatProd_Nome: nomeCategoria })}
+                                >
+                                    <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}> Adicionar</Typography>
+                                </Button>
+                                <Button onClick={handleClose} variant="contained" color="primary">
+                                    <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}>Voltar</Typography>
+                                </Button>
+                            </Box>
+                        </Box>
+                    </Box>
+                </Modal>
+            <Box
+                component="form"
+                noValidate
+                autoComplete="off"
+                padding={4}
+                display="flex"
+                flexDirection="column"
+                gap={2}
+                maxWidth={"70%"}
+                sx={{ '@media (max-width: 800px)': { maxWidth: "95%", padding: "10px" } }}
+                margin="auto"
+                onSubmit={submitForm}
+            >
+                {/* Exibe erro de submissão */}
+                {error && <Alert severity="error">{error}</Alert>}
+
+                <Box display={"flex"} flexDirection={"column"} width={"100%"} gap={2}>
+                    <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column", gap: 2 } }}>
+                        <TextField 
+                            label="Código de Barras" 
+                            name="Prod_CodBarras" 
+                            variant="outlined" 
+                            placeholder="Digite o código de barras" 
+                            disabled // Campo código de barras desabilitado como no original
+                            value={formData.Prod_CodBarras} 
+                            onChange={handleChange} 
+                            sx={{ width: "33.33%", '& .MuiInputLabel-root': { color: 'gray' }, '@media (max-width: 800px)': { width: "100%" } }} 
+                        />
+
+                        <TextField 
+                            label="Código do Produto" 
+                            name="Prod_CodProduto" 
+                            variant="outlined" 
+                            placeholder="Digite o código de produto" 
+                            value={formData.Prod_CodProduto} 
+                            onChange={handleChange} 
+                            sx={{ width: "33.33%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
+                            required
+                        />
+                        <TextField 
+                            label="Nome do Produto" 
+                            name="Prod_Nome" 
+                            variant="outlined" 
+                            placeholder="Digite o nome do produto" 
+                            value={formData.Prod_Nome} 
+                            onChange={handleChange} 
+                            sx={{ width: "33.33%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
+                            required
+                        />
+
+                        <Box display={"flex"} justifyContent={"space-evenly"} alignItems={"center"} width={"25%"} gap={2}>
+                            <Select
+                                labelId="prodCategoria-select-label"
+                                id="prodCategoria-select"
+                                label="prodCategoria"
+                                name="Prod_Categoria"
+                                variant="outlined" 
+                                defaultValue={formData.Prod_Categoria || 0}
+                                fullWidth
+                                onChange={handleSelectChange}
+                                sx={{ width: "95%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' } }}
+                            >
+                                <MenuItem value={0} disabled>Selecione a Categoria</MenuItem>
+                                {categorias.map((categoria) => (
+                                    <MenuItem key={categoria.ID_CategoriaProduto} value={categoria.ID_CategoriaProduto}>
+                                        {categoria.CatProd_Nome}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                            <Button variant="contained" color="primary" sx={{ width: "5%", height: "100%" }} onClick={handleOpen}>+</Button>
+                        </Box>
+                    </Box>
+                    <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column", gap: 2 } }}>
+                        <TextField 
+                            label="Unidade de Medida" 
+                            name="Prod_UnMedida" 
+                            variant="outlined" 
+                            placeholder="Digite a unidade de medida" 
+                            value={formData.Prod_UnMedida} 
+                            onChange={handleChange} 
+                            sx={{ width: "25%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
+                        />
+                        <TextField 
+                            label="NCM" 
+                            name="Prod_NCM" 
+                            variant="outlined" 
+                            placeholder="Digite o NCM" 
+                            type="number"
+                            value={formData.Prod_NCM} 
+                            onChange={handleChange} 
+                            sx={{ width: "25%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
+                        />
+                        <TextField 
+                            label="Estoque" 
+                            name="Prod_Estoque" 
+                            variant="outlined" 
+                            placeholder="Digite o estoque" 
+                            type="number"
+                            value={formData.Prod_Estoque} 
+                            onChange={handleChange} 
+                            sx={{ width: "25%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
+                        />
+                        <TextField 
+                            label="CFOP" 
+                            name="Prod_CFOP" 
+                            variant="outlined" 
+                            placeholder="Digite o CFOP" 
+                            value={formData.Prod_CFOP} 
+                            onChange={handleChange} 
+                            sx={{ width: "25%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
+                        />
+                    </Box>
+                    <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column", gap: 2 } }}>
+                        <TextField 
+                            label="Custo de Compra" 
+                            name="Prod_CustoCompra" 
+                            variant="outlined" 
+                            placeholder="Digite o custo de compra" 
+                            value={formData.Prod_CustoCompra} 
+                            onChange={handleCustoChange} // Handler específico
+                            type="number"  
+                            InputProps={{ // Prop correta é InputProps
+                                startAdornment: <InputAdornment position="start">R$</InputAdornment>,
+                                inputProps: { min: 0 } // Evita valores negativos
+                            }} 
+                            sx={{ width: "33.33%", '& .MuiInputLabel-root': { color: 'gray' }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' },'@media (max-width: 800px)': { width: "100%" } }} 
+                            onFocus={(event) => event.target.select()}
+                        />
+
+                        <TextField 
+                            label="Porcentagem de Lucro" 
+                            name="Prod_PorcLucro" 
+                            variant="outlined" 
+                            placeholder="Digite a porcentagem de lucro" 
+                            type="number"
+                            InputProps={{
+                                endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                                inputProps: { min: 0 } 
+                            }}
+                            sx={{ width: "33.33%", '@media (max-width: 800px)': { width: "100%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' } }}  
+                            value={formData.Prod_PorcLucro}
+                            onChange={handlePorcChange} // Handler específico
+                            disabled={fieldsDisabled} // Lógica de disabled simplificada
+                            onFocus={(event) => event.target.select()}
+                        />
+
+                        <TextField 
+                            label="Custo de Venda" 
+                            name="Prod_Valor" // Nome correto do campo no DTO
+                            variant="outlined" 
+                            placeholder="Digite o custo de venda" 
+                            type="number"
+                            InputProps={{
+                                startAdornment: <InputAdornment position="start">R$</InputAdornment>,
+                                inputProps: { min: 0 } 
+                            }}
+                            sx={{ width: "33.33%", '@media (max-width: 800px)': { width: "100%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }}}
+                            value={formData.Prod_Valor}
+                            onChange={handleValorChange} // Handler específico  
+                            disabled={fieldsDisabled} // Lógica de disabled simplificada
+                            onFocus={(event) => event.target.select()}
+                        />
+                    </Box>
                 </Box>
-                <Box>
-                    <GenericButton name="Voltar" type="button" link="/estoque-produtos" />
+
+                <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2}>
+                    <Box>
+                        <Button variant="contained" color="primary" type="submit" sx={{ margin: "10px auto", padding: "15px", '@media (max-width: 800px)': { width: "100%" }  }}>
+                            <Typography variant="h6" color="text.secondary" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }} >
+                                Salvar Alterações
+                            </Typography>
+                        </Button>
+                    </Box>
+                    <Box>
+                        <GenericButton name="Voltar" type="button" link="/estoque-produtos" />
+                    </Box>
                 </Box>
             </Box>
-        </Box>
+        </>
     )
 }

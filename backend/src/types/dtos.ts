@@ -49,6 +49,7 @@ export interface ProductDTO {
     Prod_Nome: string;
     Prod_Estoque: number;
     Prod_PorcLucro: number;
+    Prod_Categoria: number;
 }
 
 export interface ContractDTO {
@@ -103,3 +104,11 @@ export interface SnapshotProductDTOInsert {
     snapshot_valor_total_item: number
 }
 
+export interface ProductsCategoriesDTO {
+    ID_CategoriaProduto: number;
+    CatProd_Nome: string;
+}
+
+export interface ProductsCategoriesDTOInsert {
+    CatProd_Nome: string;
+}
