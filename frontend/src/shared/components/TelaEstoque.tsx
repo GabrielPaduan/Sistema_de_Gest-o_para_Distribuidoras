@@ -5,7 +5,10 @@ import { GenericButton } from "./GenericButton";
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { createCategory, deleteCategory, getAllCategories, updateCategory } from "../services/categoriasProdutoService";
-import { ProductsCategoriesDTO, ProductsCategoriesDTOInsert } from "../utils/DTOS";
+import { ProductDTO, ProductsCategoriesDTO, ProductsCategoriesDTOInsert } from "../utils/DTOS";
+import { SearchField } from "./searchField";
+import { useDebounce } from "use-debounce";
+import { getAllProducts, searchProductsByName } from "../services/productService";
 
 const style = {
   position: 'absolute',
@@ -19,6 +22,15 @@ const style = {
   p: 4,
 };
 
+interface ProductLaunch {
+    ID_Prod: number;
+    Prod_CodProduto: string;
+    Prod_Estoque: number;
+    Prod_CustoCompra: number;
+    Prod_Observacao: string;
+    Prod_QuantidadeLancada: number;
+}
+
 
 export const TelaEstoque: React.FC = () => {
     const navigate = useNavigate();
@@ -29,9 +41,16 @@ export const TelaEstoque: React.FC = () => {
     const [categoriaToEdit, setCategoriaToEdit] = useState<ProductsCategoriesDTO | null>(null);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [pageLaunch, setPageLaunch] = useState(0);
+    const [rowsPerPageLaunch, setRowsPerPageLaunch] = useState(3);
     const [modalMode, setModalMode] = useState<0 | 1>(0); 
     const [filterCategory, setFilterCategory] = useState<number>(-1);
     const [lancType, setLancType] = useState<0 | 1>(0);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
+    const [productsData, setProductsData] = useState<ProductDTO[]>([]);
+    const [displayProductSearch, setDisplayProductSearch] = useState<'flex' | 'none'>('flex');
+    const [selectedProductLaunch, setSelectedProductLaunch] = useState<ProductLaunch | null>(null);
 
     const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
         setPage(newPage);
@@ -42,9 +61,20 @@ export const TelaEstoque: React.FC = () => {
         setPage(0);
     };
 
+    const handleChangePageLaunch = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
+        setPageLaunch(newPage);
+    }
+
+    const handleChangeRowsPerPageLaunch = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setRowsPerPageLaunch(parseInt(event.target.value, 10));
+        setPageLaunch(0);
+    }
+
     useEffect(() => {
         const fetchData = async () => {
             const data = await getAllCategories();
+            const products = await getAllProducts();
+            setProductsData(products);
             setCategorias(data);
         }
         fetchData();
@@ -104,6 +134,38 @@ export const TelaEstoque: React.FC = () => {
         setCategorias(data);
     }
 
+    const handleFillProductLaunchData = (product: ProductDTO) => {
+        setSelectedProductLaunch({
+            ID_Prod: product.ID_Prod,
+            Prod_CodProduto: product.Prod_CodProduto,
+            Prod_Estoque: product.Prod_Estoque,
+            Prod_CustoCompra: 0,
+            Prod_Observacao: '',
+            Prod_QuantidadeLancada: 0,
+        });
+        setDisplayProductSearch('none');
+    }
+
+    const handleSearch = async (query: string) => {
+        setPageLaunch(0);
+        if (!query) {
+            await setProductsData(await getAllProducts());
+            return;
+        }
+        try {
+            const response = await searchProductsByName(query);
+            setProductsData(response);
+        } catch (error) {
+            console.error("Error searching products:", error);
+            setProductsData([]);
+        }
+    }
+
+    useEffect(() => {
+        handleSearch(debouncedSearchTerm);
+        setDisplayProductSearch(debouncedSearchTerm ? 'flex' : 'none');
+    }, [debouncedSearchTerm]);
+
     return (
         <Box>
             <Modal
@@ -130,7 +192,7 @@ export const TelaEstoque: React.FC = () => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {categorias.map((categoria) => (
+                                    {categorias.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((categoria) => (
                                         <TableRow key={categoria.ID_CategoriaProduto}>
                                             <TableCell><Typography textAlign="center">{categoria.CatProd_Nome}</Typography></TableCell>
                                             <TableCell sx={{ textAlign: "center" }}><Button onClick={() => handleSwitchModalMode({ID_CategoriaProduto: categoria.ID_CategoriaProduto, CatProd_Nome: categoria.CatProd_Nome})}><Icon>edit</Icon></Button></TableCell>
@@ -238,32 +300,76 @@ export const TelaEstoque: React.FC = () => {
                     </Typography>
                     <Typography id="modal-modal-description" sx={{ mt: 2 }} />
 
-                    <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-evenly' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-evenly' }}>
                         <Tabs value={lancType} onChange={handleChangeLancType} aria-label="basic tabs example">
                             <Tab label="Entrada" sx={{ color: 'black', opacity: 0.5, '&.Mui-selected': { opacity: 1 } }} />
                             <Tab label="Saída" sx={{ color: 'black', opacity: 0.5, '&.Mui-selected': { opacity: 1 } }} />
                         </Tabs>
                     </Box>
 
-                    <Box display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} gap={2}>
-                        <TextField 
-                            label="Código do Produto" 
-                            name="Prod_CodProduto" 
-                            variant="outlined" 
-                            placeholder="Digite o código de produto" 
-                            value={''} 
-                            onChange={() => {}} 
-                            sx={{ width: "100%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
-                            required
-                        />
-                        <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"} gap={2} sx={{ flexDirection: { xs: 'column', sm: 'row' }, width: "100%" }}>
+                    <Box display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} gap={2} mt={2}>
+                        <Box width={"100%"}>
+                            <SearchField onSearchChange={setSearchTerm} />
+                            <Box width={"100%"} display={displayProductSearch} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} gap={2} >
+                                {productsData.length > 0 && searchTerm.length > 0 &&
+                                    <TableContainer>
+                                        <Table>
+                                            <TableBody>
+                                                {productsData.slice(pageLaunch * rowsPerPageLaunch, pageLaunch * rowsPerPageLaunch + rowsPerPageLaunch).map((product) => (
+                                                    <TableRow key={product.ID_Prod} hover sx={{ cursor: "pointer" }} onClick={() => { handleFillProductLaunchData(product) }}>
+                                                        <TableCell sx={{ padding: "5px"}}><Typography textAlign="left" fontSize={14} fontFamily={'Arial'}>{product.Prod_CodProduto}</Typography></TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                        <TablePagination
+                                            component="div"
+                                            count={productsData.length}
+                                            page={pageLaunch}
+                                            onPageChange={handleChangePageLaunch}
+                                            rowsPerPage={rowsPerPageLaunch}
+                                            onRowsPerPageChange={handleChangeRowsPerPageLaunch}
+                                            rowsPerPageOptions={[3, 5, 7]}
+                                            sx={{'& .MuiTablePagination-selectLabel': { fontSize: 12 }, '& .MuiSelect-select': { fontSize: 12 }, '& .MuiTablePagination-displayedRows': { fontSize: 12 }, '& .MuiTablePaginationActions-root': { fontSize: 12 }, '@media (max-width: 800px)': { 
+                                                '& .MuiTablePagination-selectLabel': {
+                                                    display: 'none'
+                                                }
+                                            }}}
+                                        />
+                                    </TableContainer>
+                                }
+                            </Box>
+                        </Box>
+                        <Box display={"flex"} gap={2} sx={{ flexDirection: { xs: 'column', sm: 'row' }, width: "100%" }}>
+                            <TextField 
+                                label="Código do Produto" 
+                                name="Prod_CodProduto" 
+                                variant="outlined" 
+                                placeholder="Digite o código de produto" 
+                                disabled
+                                value={selectedProductLaunch ? selectedProductLaunch.Prod_CodProduto : ''} 
+                                onChange={() => {}} 
+                                sx={{ width: "100%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
+                                required
+                            />
                             <TextField 
                                 label="Estoque" 
                                 name="Prod_Estoque" 
+                                variant="outlined"
+                                disabled 
+                                value={selectedProductLaunch ? selectedProductLaunch.Prod_Estoque : ''} 
+                                onChange={() => {}} 
+                                sx={{width: "100%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
+                            />
+                        </Box>
+                        <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"} gap={2} sx={{ flexDirection: { xs: 'column', sm: 'row' }, width: "100%" }}>
+                            <TextField 
+                                label="Quantidade a ser lançada" 
+                                name="entrada" 
                                 variant="outlined" 
-                                placeholder="Digite o estoque" 
+                                placeholder="Digite a quantidade" 
                                 type="number"
-                                value={''} 
+                                value={selectedProductLaunch ? selectedProductLaunch.Prod_QuantidadeLancada : ''} 
                                 onChange={() => {}} 
                                 sx={{width: "100%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
                             />
@@ -273,7 +379,7 @@ export const TelaEstoque: React.FC = () => {
                                     name="Prod_CustoCompra" 
                                     variant="outlined" 
                                     placeholder="Digite o custo de compra unitário" 
-                                    value={''} 
+                                    value={selectedProductLaunch ? selectedProductLaunch.Prod_CustoCompra : ''} 
                                     onChange={() => {}} 
                                     type="number"  
                                     InputProps={{ 
@@ -290,7 +396,7 @@ export const TelaEstoque: React.FC = () => {
                             name="Lanc_Observacao"
                             variant="outlined"
                             placeholder="Digite alguma observação"
-                            value={''}
+                            value={selectedProductLaunch ? selectedProductLaunch.Prod_Observacao : ''}
                             onChange={() => {}}
                             sx={{width: "100%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
                         />
