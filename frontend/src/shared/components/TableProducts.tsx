@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getAllProducts, removeProduct, searchProductsByName } from "../services/productService";
-import { Box, Button, Icon, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from "@mui/material";
+import { Box, Button, Icon, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TextField } from "@mui/material";
 import { SearchField } from "./searchField";
 import React from "react";
 import { useNavigate } from "react-router-dom";
@@ -10,9 +10,10 @@ import { ProtectedComponent } from "./ProtectedComponent";
 
 interface TableProductsProps {
     categorias?: ProductsCategoriesDTO[];
+    filteredCategory?: number;
 }
 
-export const TableProducts: React.FC<TableProductsProps> = ({ categorias }) => {
+export const TableProducts: React.FC<TableProductsProps> = ({ categorias, filteredCategory }) => {
     const [productsData, setProductsData] = React.useState<ProductDTO[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(0);
@@ -42,6 +43,19 @@ export const TableProducts: React.FC<TableProductsProps> = ({ categorias }) => {
         };
         fetchProducts();
     }, []);
+
+    useEffect(() => {
+        const fetchFilteredCategory = async () => {
+            const productsData = await getAllProducts();
+            if (filteredCategory === -1) {
+                setProductsData(productsData);
+                return;
+            }
+            const filtered = productsData.filter(product => product.Prod_Categoria === filteredCategory);
+            setProductsData(filtered);
+        }
+        fetchFilteredCategory();
+    }, [filteredCategory]);
 
     const filteredProducts = productsData.filter(product =>
         product.Prod_Nome.toLowerCase().includes(searchTerm.toLowerCase())

@@ -186,8 +186,7 @@ export const FormCadastroProduto: React.FC = () => {
                             defaultValue={0}
                             fullWidth
                             sx={{ width: "100%", marginLeft: 0.5 }}
-                        >   
-                            <MenuItem value={0} disabled>Selecione a Categoria</MenuItem>
+                        >  
                             {categorias.map((categoria) => (
                                 <MenuItem key={categoria.ID_CategoriaProduto} value={categoria.ID_CategoriaProduto}>
                                     {categoria.CatProd_Nome}

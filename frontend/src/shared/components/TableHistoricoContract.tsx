@@ -1,7 +1,7 @@
 import { Box, Button, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { SearchField } from "./searchField";
-import { ClientDTO, PdfStructCompleteDTO, PdfStructDTO, ProductDTO, SnapshotProductDTO, SnapshotProductDTOInsert } from "../utils/DTOS";
+import { ClientDTO, PdfStructCompleteDTO, PdfStructDTO, ProductDTO, ProductsCategoriesDTO, SnapshotProductDTO, SnapshotProductDTOInsert } from "../utils/DTOS";
 import { getPdfByStatus, updatePdf, getPdfById } from "../services/pdfContract";
 import { getClientById, getClientByPDF } from "../services/clientService";
 import { getContractByClientId, updateContract } from "../services/contractService";
@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { ClientRow } from "./ClientRow";
 import { create } from "domain";
 import { createSnapshotProduct, getSnapshotProductsByPdfId } from "../services/SnapshotProductsService";
+import { getAllCategories } from "../services/categoriasProdutoService";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -56,6 +57,7 @@ export const TableHistoricoContract: React.FC = () => {
     const [valueTab, setValueTab] = React.useState(0);
     const [openRow, setOpenRow] = React.useState<number | null>(null);
     const [snapshotProducts, setSnapshotProducts] = React.useState<SnapshotProductDTO[]>([]);
+    const [productCategories, setProductsCategories] = useState<ProductsCategoriesDTO[]>([]);
     const navigate = useNavigate();
     
 
@@ -126,7 +128,14 @@ export const TableHistoricoContract: React.FC = () => {
             }
         };
         fetchPDFContracts();
+
+        const fetchProductsCategories = async () => {
+             const productCategories = await getAllCategories();
+            setProductsCategories(productCategories);
+        }
         
+        fetchProductsCategories();
+
         const fetchClientsWithPDFs = async () => {
             try {
                 const clients = await getClientByPDF();
@@ -158,7 +167,7 @@ export const TableHistoricoContract: React.FC = () => {
             
             if (selectedCompletePDF && selectedCompletePDF.PDF_Client) {
             
-                generateReport(selectedCompletePDF.PDF_Client, selectedCompletePDF.PDF_Contracts, selectedCompletePDF.PDF_Products, snapshotProducts);
+                generateReport(selectedCompletePDF.PDF_Client, selectedCompletePDF.PDF_Contracts, selectedCompletePDF.PDF_Products, snapshotProducts, productCategories);
                 selectedCompletePDF.PDF_Status = 1;
 
                 const contractData = await getContractByClientId(selectedCompletePDF.PDF_Client.id);
@@ -176,6 +185,7 @@ export const TableHistoricoContract: React.FC = () => {
                         snapshot_prod_cod: product ? product.Prod_CodProduto : "",
                         snapshot_valor_unitario: contract.Cont_Qtde > 0 ? parseFloat((contract.Cont_ValorTotal / contract.Cont_Qtde).toFixed(2)) : 0,
                         snapshot_valor_total_item: parseFloat(contract.Cont_ValorTotal),
+                        snapshot_prod_cat: product ? product.Prod_Categoria : 0
                     }
                     await createSnapshotProduct(snapshotProduct);
                 });
@@ -232,7 +242,7 @@ export const TableHistoricoContract: React.FC = () => {
                             <Tab label="Pendentes" {...a11yProps(0)} sx={{ color: 'black', opacity: 0.5, '&.Mui-selected': { opacity: 1 } }} />
                             <Tab label="Clientes" {...a11yProps(1)} sx={{ color: 'black', opacity: 0.5, '&.Mui-selected': { opacity: 1 } }} />
                         </Tabs>
-                </Box>
+                </Box>      
                 
                 <CustomTabPanel value={valueTab} index={0}>
                       {
@@ -290,7 +300,7 @@ export const TableHistoricoContract: React.FC = () => {
                     )}
                     {selectedPdf && selectedPdf?.PDF_Client && showReport && (
                         <Box width={"100%"}>
-                            <PreviewReport client={selectedPdf?.PDF_Client} contracts={selectedPdf?.PDF_Contracts} products={selectedPdf?.PDF_Products} />
+                            <PreviewReport client={selectedPdf?.PDF_Client} contracts={selectedPdf?.PDF_Contracts} products={selectedPdf?.PDF_Products} productCategories={productCategories} />
                             
                             <Box>
                                 <Typography variant="h5" sx={{ textAlign: 'center', mt: 4 }}>Observações:</Typography>
@@ -391,7 +401,7 @@ export const TableHistoricoContract: React.FC = () => {
                     )}
                     {(selectedPdf || snapshotProducts.length > 0) && selectedPdf?.PDF_Client && showReport && (
                         <Box width={"100%"}>
-                            <PreviewReport client={selectedPdf?.PDF_Client} contracts={selectedPdf?.PDF_Contracts} products={selectedPdf?.PDF_Products} snapshotProducts={snapshotProducts} />
+                            <PreviewReport client={selectedPdf?.PDF_Client} contracts={selectedPdf?.PDF_Contracts} products={selectedPdf?.PDF_Products} productCategories={productCategories} snapshotProducts={snapshotProducts}  />
                             
                             <Box>
                                 <Typography variant="h5" sx={{ textAlign: 'center', mt: 4 }}>Observações:</Typography>
@@ -404,7 +414,7 @@ export const TableHistoricoContract: React.FC = () => {
                                 <Button
                                     variant="contained"
                                     size="large"
-                                    onClick={ selectedPdf.PDF_Status === 0 ? handleConfirmPdf : () => generateReport(selectedPdf.PDF_Client!, selectedPdf.PDF_Contracts, selectedPdf.PDF_Products, snapshotProducts)}
+                                    onClick={ selectedPdf.PDF_Status === 0 ? handleConfirmPdf : () => generateReport(selectedPdf.PDF_Client!, selectedPdf.PDF_Contracts, selectedPdf.PDF_Products, snapshotProducts, productCategories)}
                                 >
                                     <Typography variant="h6">Gerar Contrato</Typography>
                                 </Button>

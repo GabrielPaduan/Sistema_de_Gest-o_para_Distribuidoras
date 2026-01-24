@@ -131,10 +131,6 @@ export const FormEditarProduto: React.FC = () => {
         });
     };
 
-    // useEffect(() => {
-    //     console.log(formData);
-    // }, [formData]);
-
     // Handler específico para Custo de Compra
     const handleCustoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newCusto = parseFloat(e.target.value) || 0;
@@ -367,7 +363,6 @@ export const FormEditarProduto: React.FC = () => {
                                 onChange={handleSelectChange}
                                 sx={{ width: "95%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' } }}
                             >
-                                <MenuItem value={0} disabled>Selecione a Categoria</MenuItem>
                                 {categorias.map((categoria) => (
                                     <MenuItem key={categoria.ID_CategoriaProduto} value={categoria.ID_CategoriaProduto}>
                                         {categoria.CatProd_Nome}

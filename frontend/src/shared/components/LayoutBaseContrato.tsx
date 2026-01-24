@@ -1,5 +1,5 @@
 import { Box, Button, Icon, Modal, TablePagination, TextareaAutosize, TextField, Typography } from "@mui/material";
-import { ClientDTO, ContractDTO, ContractDTOInsert, DadosProdutoComodatoDTO, LayoutBaseContratoProps, objectContractExclusion, ProductDTO, SnapshotProductDTO } from "../utils/DTOS";
+import { ClientDTO, ContractDTO, ContractDTOInsert, DadosProdutoComodatoDTO, LayoutBaseContratoProps, objectContractExclusion, ProductDTO, ProductsCategoriesDTO, SnapshotProductDTO } from "../utils/DTOS";
 import React, { use, useEffect, useState } from "react";
 import { TableContract } from "./TableContract";
 import { getClientById, getModelClients, getModelContracts } from "../services/clientService"; // Supondo que você tenha este serviço
@@ -13,6 +13,7 @@ import { PreviewReport } from "./PreviewReport";
 import { useNavigate } from "react-router-dom";
 import { useDebounce } from 'use-debounce';
 import { ProtectedComponent } from "./ProtectedComponent";
+import { getAllCategories } from "../services/categoriasProdutoService";
 
 const style = {
   position: 'absolute',
@@ -51,6 +52,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
     const [openEdit, setOpenEdit] = useState(false);
     const [contractToEdit, setContractToEdit] = useState<number>(0);
     const [selectedItems, setSelectedItems] = useState<objectContractExclusion[]>([]);
+    const [productCategories, setProductsCategories] = useState<ProductsCategoriesDTO[]>([]);
 
     const handleToggleSelect = (contractId: number, productId: number) => {
         const isSelected = selectedItems.some(item => item.contractId === contractId);
@@ -128,6 +130,8 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                     const productData = await getAllProducts();
                     productData.filter(p => p.Prod_Valor > 0);
                     setProducts(productData);
+                    const productCategories = await getAllCategories();
+                    setProductsCategories(productCategories);
 
 
                     const contractData = await getContractByClientId(id);
@@ -415,7 +419,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                                     sx={{ width: '9%', color: 'grey' }}
                                     color="secondary"
                                 />
-                                <Typography width={"90%"}>{product.Prod_CodProduto} || R${product.Prod_Valor}</Typography>
+                                <Typography width={"90%"} alignSelf={"center"}>{product.Prod_CodProduto} || R${product.Prod_Valor} || {product.Prod_Categoria >= 0 ? productCategories.find(cat => cat.ID_CategoriaProduto === product.Prod_Categoria)?.CatProd_Nome : 'erro'}</Typography>
                             </Box>
                         ))}
                     </Box>
@@ -643,6 +647,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                         onRemoveProduct={handleRemoveProduct}
                         onRemoveContract={handleRemoveContract}
                         openEditContract={handleOpenEdit}
+                        productCategories={productCategories}
                     />
 
                     <Box>
@@ -690,7 +695,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
             { 
             showReport && client && (
                 <Box>
-                    <PreviewReport client={client} contracts={contracts} products={productsClient} snapshotProducts={undefined} />
+                    <PreviewReport client={client} contracts={contracts} products={productsClient} snapshotProducts={undefined} productCategories={productCategories} />
 
                     <Box display={"flex"} justifyContent={"center"} sx={{ width: '80%', margin: 'auto', textAlign: 'center', my: 4, gap: 4, '@media (max-width: 800px)': { gap: 2 } }}>
                         <Button

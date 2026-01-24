@@ -1,5 +1,5 @@
 import { Box, Button, Checkbox, Icon, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
-import { ContractDTO, objectContractExclusion, TableContractProps } from "../utils/DTOS";
+import { ContractDTO, objectContractExclusion, ProductsCategoriesDTO, TableContractProps } from "../utils/DTOS";
 import React, { useEffect, useState } from "react";
 import { ProtectedComponent } from "./ProtectedComponent";
 import { CheckBox } from "@mui/icons-material";
@@ -12,19 +12,21 @@ interface CustomTableContractProps extends TableContractProps {
     openEditContract: (contractId: number, productId: number) => void;
     selectedItems: objectContractExclusion[]; 
     onToggleSelect: (contractId: number, productId: number) => void;
+    productCategories: ProductsCategoriesDTO[];
 }
 
 
 
 export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, products, selectedItems,
-    onToggleSelect, onAddProduct, onRemoveProduct, onRemoveContract, openEditContract }) => {
+    onToggleSelect, onAddProduct, onRemoveProduct, onRemoveContract, openEditContract, productCategories }) => {
     
+
     const sortedContracts = [...contracts].sort((a, b) => {
         const productA = products.find(p => p.ID_Prod === a.Cont_ID_Prod);
         const productB = products.find(p => p.ID_Prod === b.Cont_ID_Prod);
-        const nameA = productA ? productA.Prod_CodProduto : '';
-        const nameB = productB ? productB.Prod_CodProduto : '';
-        return nameA.localeCompare(nameB);
+        const catA = productA ? productA.Prod_Categoria : 0;
+        const catB = productB ? productB.Prod_Categoria : 0;
+        return catB - catA;
     });
 
     return (
@@ -36,6 +38,7 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
                     </TableCell>
                     <TableCell  sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Cmdt</TableCell>
                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Produtos</TableCell>
+                    <TableCell  sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Categoria</TableCell>
                     <ProtectedComponent allowedRoles={['1']}>
                         <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px", display: "none" } }}>Custo Compra</TableCell>
                         <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px", display: "none" } }}>Porcentagem Lucro</TableCell>
@@ -61,7 +64,7 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
                         sortedContracts.map((contract) => {
                             const product = products.find(p => p.ID_Prod === contract.Cont_ID_Prod);
                             if (!product) return null;
-
+                        
                             return (
                                 <TableRow key={contract.ID_Contrato} hover>
                                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>
@@ -74,6 +77,7 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
                                     </TableCell>
                                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{contract.Cont_Comodato}</TableCell>
                                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_CodProduto}</TableCell>
+                                    <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_Categoria >= 0 ? productCategories.find(cat => cat.ID_CategoriaProduto === product.Prod_Categoria)?.CatProd_Nome : ''}</TableCell>
                                     <ProtectedComponent allowedRoles={['1']}>
                                         <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", display: "none" } }}>R$ {product.Prod_CustoCompra.toFixed(2)}</TableCell>
                                         <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", display: "none" } }}>{contract.Cont_PorcLucro > 0 ? contract.Cont_PorcLucro : product.Prod_PorcLucro}%</TableCell>

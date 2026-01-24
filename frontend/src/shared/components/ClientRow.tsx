@@ -71,7 +71,7 @@ export const ClientRow: React.FC<ClientRowProps> = ({ client, handleViewPdf }) =
                                         </TableRow> 
                                     </TableHead>
                                     <TableBody>
-                                        {pdfContracts.map((pdf) => (
+                                        {pdfContracts.sort((a, b) => {return new Date(b.PDF_Generated_Date).getTime() - new Date(a.PDF_Generated_Date).getTime()}).map((pdf) => (
                                             <TableRow key={pdf.id}>
                                                 <TableCell sx={{ fontSize: 16, textAlign: "center" }}>{pdf.PDF_Generated_Date ? new Date(pdf.PDF_Generated_Date).toLocaleDateString('pt-BR', {timeZone: "UTC"}) : ""}</TableCell>
                                                 <TableCell sx={{ fontSize: 16, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>{pdf.PDF_Status}</TableCell>

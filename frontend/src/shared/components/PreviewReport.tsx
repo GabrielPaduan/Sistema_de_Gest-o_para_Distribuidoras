@@ -16,20 +16,17 @@ import {
     useTheme
 } from '@mui/material';
 import React, { useState } from 'react';
-import { ClientDTO, ContractDTO, ProductDTO, SnapshotProductDTO } from "../utils/DTOS";
+import { ClientDTO, ContractDTO, ProductDTO, ProductsCategoriesDTO, SnapshotProductDTO } from "../utils/DTOS";
 import logo from '../assets/logo_empresa.png';
-import { useDebounce } from 'use-debounce';
-
 
 interface RelatorioPreviewProps {
     client: ClientDTO;
     contracts: ContractDTO[];
     products: ProductDTO[];
     snapshotProducts?: SnapshotProductDTO[];
+    productCategories: ProductsCategoriesDTO[];
 }
-
-// 3. O COMPONENTE
-export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contracts, products, snapshotProducts }) => {
+export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contracts, products, snapshotProducts, productCategories }) => {
     const theme = useTheme();
     let valorTotalGeral = 0;
     if(snapshotProducts == undefined) {
@@ -43,7 +40,17 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
         }, 0);
     }
 
+    snapshotProducts?.sort((a, b) => {
+        return b.snapshot_prod_cat - a.snapshot_prod_cat;
+    })
 
+    contracts.sort((a, b) => {
+        const productA = products.find(p => p.ID_Prod === a.Cont_ID_Prod);
+        const productB = products.find(p => p.ID_Prod === b.Cont_ID_Prod);
+        const catA = productCategories.find(cat => cat.ID_CategoriaProduto === productA?.Prod_Categoria)?.ID_CategoriaProduto || 0;
+        const catB = productCategories.find(cat => cat.ID_CategoriaProduto === productB?.Prod_Categoria)?.ID_CategoriaProduto || 0;
+        return catB - catA;
+    });
 
     const SPLIT_THRESHOLD = 10; 
     const shouldSplit = contracts.length > SPLIT_THRESHOLD;
@@ -53,12 +60,14 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
     const secondHalfContracts = shouldSplit ? contracts.slice(midpoint) : [];
 
     const ProductTable: React.FC<{ contractList: ContractDTO[] }> = ({ contractList }) => (
+
         <TableContainer component={Paper} variant="outlined" sx={{ height: '100%' }}>
             <Table>
                 <TableHead>
                     <TableRow sx={{ bgcolor: 'primary.main' }}>
                         <TableCell sx={{ color: 'common.white', fontWeight: 'bold' }}>CMDT</TableCell>
                         <TableCell sx={{ color: 'common.white', fontWeight: 'bold' }}>PRODUTOS</TableCell>
+                        <TableCell sx={{ color: 'common.white', fontWeight: 'bold' }}>CATEGORIA</TableCell>
                         <TableCell align="right" sx={{ color: 'common.white', fontWeight: 'bold', '@media (max-width: 800px)': { display: 'none' } }}>VALOR UNIT.</TableCell>
                         <TableCell align="center" sx={{ color: 'common.white', fontWeight: 'bold' }}>QTD</TableCell>
                         <TableCell align="right" sx={{ color: 'common.white', fontWeight: 'bold' }}>VALOR TOTAL</TableCell>
@@ -72,6 +81,7 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
                             <TableRow key={contract.ID_Contrato} sx={{ '&:nth-of-type(odd)': { backgroundColor: theme.palette.action.hover } }}>
                                 <TableCell align="center">{ contract.Cont_Comodato}</TableCell>
                                 <TableCell>{product?.Prod_CodProduto || 'Produto não encontrado'}</TableCell>
+                                <TableCell>{productCategories.find(cat => cat.ID_CategoriaProduto === product?.Prod_Categoria)?.CatProd_Nome}</TableCell>
                                 <TableCell align="right" sx={{ '@media (max-width: 800px)': { display: 'none' } }}>R$ {product?.Prod_Valor?.toFixed(2) || '0.00'}</TableCell>
                                 <TableCell align="center">{contract.Cont_Qtde || 0}</TableCell>
                                 <TableCell align="right">R$ {valorTotal.toFixed(2)}</TableCell>
@@ -82,6 +92,7 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
                             <TableRow key={snapshot.ID_ContPDFItens} sx={{ '&:nth-of-type(odd)': { backgroundColor: theme.palette.action.hover } }}>
                                 <TableCell align="center">{ snapshot.snapshot_comodato}</TableCell>
                                 <TableCell>{snapshot.snapshot_prod_cod || 'Produto não encontrado'}</TableCell>
+                                <TableCell>{productCategories.find(cat => cat.ID_CategoriaProduto === snapshot.snapshot_prod_cat)?.CatProd_Nome}</TableCell>
                                 <TableCell align="right" sx={{ '@media (max-width: 800px)': { display: 'none' } }}>R$ {snapshot.snapshot_valor_unitario?.toFixed(2) || '0.00'}</TableCell>
                                 <TableCell align="center">{snapshot.snapshot_qtde || 0}</TableCell>
                                 <TableCell align="right">R$ {snapshot.snapshot_valor_total_item?.toFixed(2) || '0.00'}</TableCell>

@@ -156,7 +156,8 @@ export interface SnapshotProductDTO {
     snapshot_prod_nome: string;
     snapshot_prod_cod: string;
     snapshot_valor_unitario: number;
-    snapshot_valor_total_item: number
+    snapshot_valor_total_item: number;
+    snapshot_prod_cat: number;
 }
 
 export interface SnapshotProductDTOInsert {
@@ -166,7 +167,8 @@ export interface SnapshotProductDTOInsert {
     snapshot_prod_nome: string;
     snapshot_prod_cod: string;
     snapshot_valor_unitario: number;
-    snapshot_valor_total_item: number
+    snapshot_valor_total_item: number;
+    snapshot_prod_cat: number;
 }
 
 export interface objectContractExclusion {

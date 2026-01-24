@@ -101,7 +101,8 @@ export interface SnapshotProductDTOInsert {
     snapshot_prod_nome: string;
     snapshot_prod_cod: number;
     snapshot_valor_unitario: number;
-    snapshot_valor_total_item: number
+    snapshot_valor_total_item: number;
+    snapshot_prod_cat: number;
 }
 
 export interface ProductsCategoriesDTO {
