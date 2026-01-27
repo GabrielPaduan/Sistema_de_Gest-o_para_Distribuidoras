@@ -36,6 +36,7 @@ export const FormEditarProduto: React.FC = () => {
     const [open, setOpen] = useState(false);
 
     const [nomeCategoria, setNomeCategoria] = useState<string>('');
+    const [prateleira, setPrateleira] = useState<number>(0);
     
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -224,7 +225,7 @@ export const FormEditarProduto: React.FC = () => {
             };
             console.log("Produto a ser atualizado:", updatedProduct);
             await updateProduct(updatedProduct);
-            navigate("/estoque-produtos");
+            navigate(-1);
 
         } catch (error) {
             console.error("Error updating product:", error);
@@ -286,11 +287,26 @@ export const FormEditarProduto: React.FC = () => {
                                     inputProps = {{ style: { padding: "8px" } }}
                                 />
                             </Box>
+                            <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} width={"100%"} height={"100%"} sx={{ gap: 2, '@media (max-width: 800px)': { width: "100%" } }}>
+                                <Typography component="label" htmlFor={`prateleira`} variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: '16px' } }}>
+                                    Número da Prateleira:
+                                </Typography>
+                                <TextField
+                                    id={`prateleira`}
+                                    name={`prateleira`}
+                                    variant="outlined"
+                                    value={prateleira}
+                                    onChange={(e) => {
+                                        setPrateleira(Number(e.target.value));
+                                    }}
+                                    inputProps = {{ style: { padding: "8px" } }}
+                                />
+                            </Box>
                             <Box width={"100%"} display={"flex"} justifyContent={"center"} height={"100%"} gap={1} sx={{ '@media (max-width: 800px)': { width: "100%" } }}>
                                 <Button
                                     variant="contained"
                                     color="primary"
-                                    onClick={() => handleInsertCategory({ CatProd_Nome: nomeCategoria })}
+                                    onClick={() => handleInsertCategory({ CatProd_Nome: nomeCategoria, Cat_Prateleira: prateleira })}
                                 >
                                     <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}> Adicionar</Typography>
                                 </Button>
@@ -474,7 +490,7 @@ export const FormEditarProduto: React.FC = () => {
                         </Button>
                     </Box>
                     <Box>
-                        <GenericButton name="Voltar" type="button" link="/estoque-produtos" />
+                        <GenericButton name="Voltar" type="button" link="" onClick={() => navigate(-1)} />
                     </Box>
                 </Box>
             </Box>

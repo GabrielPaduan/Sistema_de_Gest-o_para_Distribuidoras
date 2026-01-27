@@ -147,7 +147,7 @@ export const FormEditarCliente: React.FC = () => {
                     </Button>
                 </Box>
                 <Box>
-                    <GenericButton name="Voltar" type="button" link="/gerenciar-clientes" />
+                    <GenericButton name="Voltar" type="button" link="/visualizar-clientes" />
                 </Box>
             </Box>
         </Box>

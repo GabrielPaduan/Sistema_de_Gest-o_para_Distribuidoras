@@ -6,14 +6,14 @@ export const getAllCategories = async (): Promise<ProductsCategoriesDTO[]> => {
   return response.data; 
 };
 
-export const createCategory = async (nomeCategoria: ProductsCategoriesDTOInsert): Promise<ProductsCategoriesDTO> => {
-  console.log(nomeCategoria);
-  const response = await api.post('/categoriasProduto', nomeCategoria);
+export const createCategory = async (categoria: ProductsCategoriesDTOInsert): Promise<ProductsCategoriesDTO> => {
+  const response = await api.post('/categoriasProduto', categoria);
   return response.data; 
 }
 
-export const updateCategory = async (categoryID: number, nomeCategoria: ProductsCategoriesDTOInsert): Promise<ProductsCategoriesDTO> => {
-  const response = await api.put(`/categoriasProduto/${categoryID}`, nomeCategoria);
+export const updateCategory = async (categoryID: number, categoria: ProductsCategoriesDTOInsert): Promise<ProductsCategoriesDTO> => {
+  console.log(categoria)
+  const response = await api.put(`/categoriasProduto/${categoryID}`, categoria);
   return response.data; 
 }
 

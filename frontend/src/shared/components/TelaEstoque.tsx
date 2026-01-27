@@ -38,6 +38,7 @@ export const TelaEstoque: React.FC = () => {
     const [openLancamentos, setOpenLancamentos] = useState(false);
     const [categorias, setCategorias] = useState<ProductsCategoriesDTO[]>([]);
     const [nomeCategoria, setNomeCategoria] = useState<string>('');
+    const [prateleira, setPrateleira] = useState<number>(0);
     const [categoriaToEdit, setCategoriaToEdit] = useState<ProductsCategoriesDTO | null>(null);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -50,7 +51,7 @@ export const TelaEstoque: React.FC = () => {
     const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
     const [productsData, setProductsData] = useState<ProductDTO[]>([]);
     const [displayProductSearch, setDisplayProductSearch] = useState<'flex' | 'none'>('flex');
-    const [selectedProductLaunch, setSelectedProductLaunch] = useState<ProductLaunch | null>(null);
+    const [selectedProductLaunch, setSelectedProductLaunch] = useState<ProductLaunch>({ ID_Prod: 0, Prod_CodProduto: "", Prod_Estoque: 0, Prod_CustoCompra: 0, Prod_Observacao: "", Prod_QuantidadeLancada: 0 });
 
     const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
         setPage(newPage);
@@ -85,8 +86,9 @@ export const TelaEstoque: React.FC = () => {
     const handleClose = () => {
         setOpen(false);
         setModalMode(0);
-        setCategoriaToEdit({ ID_CategoriaProduto: 0, CatProd_Nome: "" });
+        setCategoriaToEdit({ ID_CategoriaProduto: 0, CatProd_Nome: "", Cat_Prateleira: 0 });
         setNomeCategoria('');
+        setPrateleira(0)
     }   
     
     const handleOpenLancamentos = () => setOpenLancamentos(true);
@@ -110,7 +112,6 @@ export const TelaEstoque: React.FC = () => {
         }
         setModalMode(1);
         setCategoriaToEdit(category);
-        console.log(modalMode);
     }
 
     const handleInsertCategory = async (nomeCategoria: ProductsCategoriesDTOInsert) => {
@@ -118,13 +119,15 @@ export const TelaEstoque: React.FC = () => {
         const data = await getAllCategories();
         setCategorias(data);
         setNomeCategoria('');
+        setPrateleira(0);
     }
 
     const handleEditCategory = async (categoriaToEdit: ProductsCategoriesDTO) => {
-        await updateCategory(categoriaToEdit.ID_CategoriaProduto, { CatProd_Nome: categoriaToEdit.CatProd_Nome });
+        await updateCategory(categoriaToEdit.ID_CategoriaProduto, { CatProd_Nome: categoriaToEdit.CatProd_Nome, Cat_Prateleira: categoriaToEdit.Cat_Prateleira });
         const data = await getAllCategories();
         setCategorias(data);
         setModalMode(0);
+        setPrateleira(0);
         setCategoriaToEdit(null); 
     }
 
@@ -161,6 +164,20 @@ export const TelaEstoque: React.FC = () => {
         }
     }
 
+    const handleChangeProductToLaunch = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = event.target;
+        if (selectedProductLaunch) {
+            setSelectedProductLaunch((prevData) => ({
+                ...prevData!,
+                [name]: value
+            }));
+        } 
+    };
+
+    useEffect(() => {
+        console.log(selectedProductLaunch);
+    }, [selectedProductLaunch]);
+
     useEffect(() => {
         handleSearch(debouncedSearchTerm);
         setDisplayProductSearch(debouncedSearchTerm ? 'flex' : 'none');
@@ -187,15 +204,17 @@ export const TelaEstoque: React.FC = () => {
                                 <TableHead>
                                     <TableRow>
                                         <TableCell><Typography variant="h6" textAlign="center">Nome da Categoria</Typography></TableCell>
+                                        <TableCell><Typography variant="h6" textAlign="center">Prateleira</Typography></TableCell>
                                         <TableCell><Typography variant="h6" textAlign="center">Editar</Typography></TableCell>
                                         <TableCell><Typography variant="h6" textAlign="center">Excluir</Typography></TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {categorias.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((categoria) => (
+                                    {categorias.sort((a, b) => { if (a.Cat_Prateleira === 0 && b.Cat_Prateleira === 0) return 0; if (a.Cat_Prateleira === 0) return 1; if (b.Cat_Prateleira === 0) return -1; return a.Cat_Prateleira - b.Cat_Prateleira }).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((categoria) => (
                                         <TableRow key={categoria.ID_CategoriaProduto}>
                                             <TableCell><Typography textAlign="center">{categoria.CatProd_Nome}</Typography></TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}><Button onClick={() => handleSwitchModalMode({ID_CategoriaProduto: categoria.ID_CategoriaProduto, CatProd_Nome: categoria.CatProd_Nome})}><Icon>edit</Icon></Button></TableCell>
+                                            <TableCell><Typography textAlign="center">{categoria.Cat_Prateleira === 0 ? "Sem Prateleira" : categoria.Cat_Prateleira}</Typography></TableCell>
+                                            <TableCell sx={{ textAlign: "center" }}><Button onClick={() => handleSwitchModalMode({ID_CategoriaProduto: categoria.ID_CategoriaProduto, CatProd_Nome: categoria.CatProd_Nome, Cat_Prateleira: categoria.Cat_Prateleira})}><Icon>edit</Icon></Button></TableCell>
                                             <TableCell sx={{ textAlign: "center" }}><Button onClick={() => handleDeleteCategory(categoria.ID_CategoriaProduto)}><Icon>delete</Icon></Button></TableCell>
                                         </TableRow>
                                     ))}
@@ -222,7 +241,7 @@ export const TelaEstoque: React.FC = () => {
                         
                             {
                                 modalMode === 0 && (
-                                        <Box display={"flex"} alignItems={"center"} justifyContent={"space-evenly"} width={"100%"} height={"100%"} sx={{ gap: 2, '@media (max-width: 800px)': { width: "100%" } }}>
+                                    <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} width={"100%"} height={"100%"} sx={{ gap: 2, '@media (max-width: 800px)': { width: "100%" } }}>
                                         <Typography component="label" htmlFor={`quantity`} variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: '16px' } }}>
                                             Nova Categoria:
                                         </Typography>
@@ -236,19 +255,12 @@ export const TelaEstoque: React.FC = () => {
                                             }}
                                             inputProps = {{ style: { padding: "8px" } }}
                                         />
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            onClick={() => handleInsertCategory({ CatProd_Nome: nomeCategoria })}
-                                        >
-                                            <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}> Adicionar</Typography>
-                                        </Button>
                                     </Box>
                                 )
                             } 
                             {
                                 modalMode === 1 && (
-                                    <Box display={"flex"} alignItems={"center"} justifyContent={"space-evenly"} width={"100%"} height={"100%"} sx={{ gap: 2, '@media (max-width: 800px)': { width: "100%" } }}>
+                                    <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} width={"100%"} height={"100%"} sx={{ gap: 2, '@media (max-width: 800px)': { width: "100%" } }}>
                                         <Typography component="label" htmlFor={`quantity`} variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: '16px' } }}>
                                             Editar Categoria:
                                         </Typography>
@@ -264,23 +276,51 @@ export const TelaEstoque: React.FC = () => {
                                             }}
                                             inputProps = {{ style: { padding: "8px" } }}
                                         />
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            onClick={() => handleEditCategory(categoriaToEdit ? categoriaToEdit : {ID_CategoriaProduto: 0, CatProd_Nome: ""})}
-                                        >
-                                            <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}> Editar</Typography>
-                                        </Button>
                                     </Box> 
                                 )}
-                            
-                        
-                        <Box width={"100%"} display={"flex"} justifyContent={"center"} height={"100%"} gap={1} sx={{ '@media (max-width: 800px)': { width: "100%" } }}>   
-                            { modalMode === 1 &&
-                                <Button onClick={() => { setModalMode(0); setNomeCategoria(""); }} variant="contained" color="primary">
-                                    <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}>Adicionar</Typography>
+                                <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} width={"100%"} height={"100%"} sx={{ gap: 2, '@media (max-width: 800px)': { width: "100%" } }}>
+                                    <Typography component="label" htmlFor={`prateleira`} variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: '16px' } }}>
+                                        Número da Prateleira:
+                                    </Typography>
+                                    <TextField
+                                        id={`prateleira`}
+                                        name={`prateleira`}
+                                        variant="outlined"
+                                        value={modalMode === 1 ? categoriaToEdit?.Cat_Prateleira : prateleira}
+                                        onChange={(e) => {
+                                            if (modalMode === 1) {
+                                                if (!categoriaToEdit) return;
+                                                setCategoriaToEdit({ ...categoriaToEdit, Cat_Prateleira: Number(e.target.value) });
+                                            } else {
+                                                setPrateleira(Number(e.target.value));
+                                            }
+                                        }}
+                                        inputProps = {{ style: { padding: "8px" } }}
+                                    />
+                                </Box>
+                        <Box width={"100%"} display={"flex"} justifyContent={"space-between"} height={"100%"} gap={1} sx={{ '@media (max-width: 800px)': { width: "100%" } }}>   
+                            { modalMode === 0 &&
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => handleInsertCategory({ CatProd_Nome: nomeCategoria, Cat_Prateleira: prateleira })}
+                                >
+                                    <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}> Adicionar</Typography>
                                 </Button>
                             }
+                            {
+                                modalMode === 1 &&
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={() => handleEditCategory(categoriaToEdit ? categoriaToEdit : {ID_CategoriaProduto: 0, CatProd_Nome: "", Cat_Prateleira: 0})}
+                                    >
+                                        <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}> Editar</Typography>
+                                    </Button>
+                            }
+                            <Button onClick={() => { modalMode === 0 ? setModalMode(1) : setModalMode(0) }} variant="contained" color="primary">
+                                <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}>Switch Mode</Typography>
+                            </Button>
                             <Button onClick={handleClose} variant="contained" color="primary">
                                 <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}>Voltar</Typography>
                             </Button>
@@ -347,8 +387,8 @@ export const TelaEstoque: React.FC = () => {
                                 variant="outlined" 
                                 placeholder="Digite o código de produto" 
                                 disabled
-                                value={selectedProductLaunch ? selectedProductLaunch.Prod_CodProduto : ''} 
-                                onChange={() => {}} 
+                                value={selectedProductLaunch.Prod_CodProduto} 
+                                onChange={handleChangeProductToLaunch} 
                                 sx={{ width: "100%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
                                 required
                             />
@@ -357,8 +397,8 @@ export const TelaEstoque: React.FC = () => {
                                 name="Prod_Estoque" 
                                 variant="outlined"
                                 disabled 
-                                value={selectedProductLaunch ? selectedProductLaunch.Prod_Estoque : ''} 
-                                onChange={() => {}} 
+                                value={selectedProductLaunch.Prod_Estoque} 
+                                onChange={handleChangeProductToLaunch} 
                                 sx={{width: "100%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
                             />
                         </Box>
@@ -369,8 +409,8 @@ export const TelaEstoque: React.FC = () => {
                                 variant="outlined" 
                                 placeholder="Digite a quantidade" 
                                 type="number"
-                                value={selectedProductLaunch ? selectedProductLaunch.Prod_QuantidadeLancada : ''} 
-                                onChange={() => {}} 
+                                value={selectedProductLaunch.Prod_QuantidadeLancada} 
+                                onChange={handleChangeProductToLaunch} 
                                 sx={{width: "100%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
                             />
                             { lancType === 0 &&
@@ -379,8 +419,8 @@ export const TelaEstoque: React.FC = () => {
                                     name="Prod_CustoCompra" 
                                     variant="outlined" 
                                     placeholder="Digite o custo de compra unitário" 
-                                    value={selectedProductLaunch ? selectedProductLaunch.Prod_CustoCompra : ''} 
-                                    onChange={() => {}} 
+                                    value={selectedProductLaunch.Prod_CustoCompra} 
+                                    onChange={handleChangeProductToLaunch} 
                                     type="number"  
                                     InputProps={{ 
                                         startAdornment: <InputAdornment position="start">R$</InputAdornment>,
@@ -396,8 +436,8 @@ export const TelaEstoque: React.FC = () => {
                             name="Lanc_Observacao"
                             variant="outlined"
                             placeholder="Digite alguma observação"
-                            value={selectedProductLaunch ? selectedProductLaunch.Prod_Observacao : ''}
-                            onChange={() => {}}
+                            value={selectedProductLaunch.Prod_Observacao}
+                            onChange={handleChangeProductToLaunch}
                             sx={{width: "100%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
                         />
                     </Box>

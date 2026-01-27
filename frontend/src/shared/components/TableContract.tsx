@@ -3,6 +3,7 @@ import { ContractDTO, objectContractExclusion, ProductsCategoriesDTO, TableContr
 import React, { useEffect, useState } from "react";
 import { ProtectedComponent } from "./ProtectedComponent";
 import { CheckBox } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 // Adicione as funções onAdd e onRemove nas props
 interface CustomTableContractProps extends TableContractProps {
@@ -19,14 +20,17 @@ interface CustomTableContractProps extends TableContractProps {
 
 export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, products, selectedItems,
     onToggleSelect, onAddProduct, onRemoveProduct, onRemoveContract, openEditContract, productCategories }) => {
-    
+    const navigate = useNavigate();
 
     const sortedContracts = [...contracts].sort((a, b) => {
         const productA = products.find(p => p.ID_Prod === a.Cont_ID_Prod);
         const productB = products.find(p => p.ID_Prod === b.Cont_ID_Prod);
-        const catA = productA ? productA.Prod_Categoria : 0;
-        const catB = productB ? productB.Prod_Categoria : 0;
-        return catB - catA;
+        const prateleiraA = productCategories.find(cat => cat.ID_CategoriaProduto === productA?.Prod_Categoria)?.Cat_Prateleira || 0;
+        const prateleiraB = productCategories.find(cat => cat.ID_CategoriaProduto === productB?.Prod_Categoria)?.Cat_Prateleira || 0;
+        if (prateleiraA - prateleiraB === 0) {
+            return productA?.Prod_CodProduto.localeCompare(productB?.Prod_CodProduto || "") || 0;
+        }
+        return prateleiraA - prateleiraB;
     });
 
     return (
@@ -49,6 +53,7 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Valor Total</TableCell>
                     <ProtectedComponent allowedRoles={['1']}>
                         <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Editar</TableCell>
+                        <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>%</TableCell>
                         <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Remover</TableCell>
                     </ProtectedComponent>
 
@@ -96,7 +101,10 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
                                     <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>R$ {contract.Cont_ValorTotal.toFixed(2)}</TableCell>
                                     <ProtectedComponent allowedRoles={['1']}>
                                         <TableCell sx={{ fontSize: 20, textAlign: "center" }}>
-                                            <Button onClick={() => openEditContract(contract.ID_Contrato, product.ID_Prod)}><Icon sx={{ fontSize: 40 }}>edit</Icon></Button>
+                                            <Button onClick={() => navigate(`/editar-produto/${product.ID_Prod}`)}><Icon sx={{ fontSize: 40 }}>edit</Icon></Button>
+                                        </TableCell>
+                                        <TableCell sx={{ fontSize: 20, textAlign: "center" }}>
+                                            <Button onClick={() => openEditContract(contract.ID_Contrato, product.ID_Prod)}>Editar Item</Button>
                                         </TableCell>
                                         <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { padding: "0px" } }}>
                                             <Button onClick={() => onRemoveContract(contract.ID_Contrato, contract.Cont_ID_Prod)} sx={{ '@media (max-width: 800px)': { padding: "0px" } }}><Icon sx={{ fontSize: 30, '@media (max-width: 800px)': { padding: "0px" } }}>delete_forever</Icon></Button>

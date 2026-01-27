@@ -108,8 +108,10 @@ export interface SnapshotProductDTOInsert {
 export interface ProductsCategoriesDTO {
     ID_CategoriaProduto: number;
     CatProd_Nome: string;
+    Cat_Prateleira: number;
 }
 
 export interface ProductsCategoriesDTOInsert {
     CatProd_Nome: string;
+    Cat_Prateleira: number;
 }
