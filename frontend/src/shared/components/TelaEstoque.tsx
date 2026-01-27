@@ -197,7 +197,6 @@ export const TelaEstoque: React.FC = () => {
                     </Typography>
                     <Typography id="modal-modal-description" sx={{ mt: 2 }} />
 
-                    {/* Listagem de categorias */}
                     <Box>
                         <TableContainer>
                             <Table>

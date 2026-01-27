@@ -26,6 +26,7 @@ export const FormEditarCliente: React.FC = () => {
         cli_celular: "",
         cli_cidade: "",
         cli_endNum: "",
+        cli_responsavel: "",
         cli_modelo: 0,
     });
     const navigate = useNavigate();
@@ -135,6 +136,9 @@ export const FormEditarCliente: React.FC = () => {
                 <Box display={"flex"} justifyContent={"space-between"}>
                     <TextField id="dddCel" name="cli_dddCel" variant="outlined" placeholder="DDD" sx={{ width: "9%", '@media (max-width: 800px)': { width: "15%" } }} value={formData?.cli_dddCel} onChange={handleChange} />
                     <TextField id="cel" name="cli_cel" variant="outlined" placeholder="Digite o celular" sx={{ width: "90%", '@media (max-width: 800px)': { width: "83%" } }} value={formData?.cli_celular} onChange={handleChange} />
+                </Box>
+                <Box display={"flex"} justifyContent={"space-between"}>
+                    <TextField id="responsavel" name="cli_responsavel" variant="outlined" placeholder="Digite o responsável" sx={{ width: "100%", '@media (max-width: 800px)': { width: "83%" } }} value={formData?.cli_responsavel} onChange={handleChange} />
                 </Box>
             </Box>
 

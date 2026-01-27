@@ -41,7 +41,12 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
     }
 
     snapshotProducts?.sort((a, b) => {
-        return b.snapshot_prod_cat - a.snapshot_prod_cat;
+        const prateleiraA = productCategories.find(cat => cat.ID_CategoriaProduto === a.snapshot_prod_cat)?.Cat_Prateleira || 0;
+        const prateleiraB = productCategories.find(cat => cat.ID_CategoriaProduto === b.snapshot_prod_cat)?.Cat_Prateleira || 0;
+        if (prateleiraA - prateleiraB === 0) {
+            return a.snapshot_prod_cod.localeCompare(b.snapshot_prod_cod || "") || 0;
+        }
+        return prateleiraA - prateleiraB;
     })
 
     contracts.sort((a, b) => {
@@ -119,6 +124,8 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
                         <Typography variant="body2">{client.cli_end || "Endereço não informado"}</Typography>
                         <Typography variant="body2">{client.cli_cidade ? `${client.cli_cidade} ${client.cli_uf}` : "Cidade não informada"}</Typography>
                         <Typography variant="body2">{client.cli_email || "Email não informado"}</Typography>
+                        <Typography variant="body2">{client.cli_dddTel && client.cli_telefone ? `Tel: (${client.cli_dddTel}) ${client.cli_telefone}` : "Telefone não informado"}</Typography>
+                        <Typography variant="body2">Responsável: {client.cli_responsavel || "não informado"}</Typography>
                     </Grid>
                     <Grid sx={{ xs: 12, md: 6, textAlign: { xs: 'left', md: 'right' }, mt: { xs: 2, md: 0 } }}>
                         <Box component="img" src={logo} alt="Logo O Rei do Óleo" sx={{ width: 100, mb: 1 }} />
@@ -159,7 +166,7 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mt: 4 }}>
                     <Box>
                         <Typography variant="body2"><strong>Responsável:</strong> Tiago Cernev Neves</Typography>
-                        <Typography variant="body2"><strong>Data de Emissão:</strong> {new Date().toLocaleDateString('pt-BR')}</Typography>
+                        <Typography variant="body2"><strong>Data de Criação:</strong> {new Date().toLocaleDateString('pt-BR')}</Typography>
                     </Box>
                     <Box sx={{ textAlign: 'right' }}>
                         <Typography variant="subtitle1" color="text.secondary">Valor Total do Contrato:</Typography>

@@ -37,6 +37,7 @@ export const Form: React.FC = () => {
                 cli_cidade: formData.get("cidade") as string,
                 cli_celular: formData.get("cel") as string,
                 cli_endNum: formData.get("endNum") as string,
+                cli_responsavel: formData.get("responsavel") as string,
                 cli_modelo: isChecked,
             };
             setClient(newClient);
@@ -107,6 +108,9 @@ export const Form: React.FC = () => {
                 <Box display={"flex"} justifyContent={"space-between"}>
                     <TextField id="dddCel" name="dddCel" variant="outlined" placeholder="DDD" sx={{ width: "9%", '@media (max-width: 800px)': { width: "15%" } }} />
                     <TextField id="cel" name="cel" variant="outlined" placeholder="Digite o celular" sx={{ width: "90%", '@media (max-width: 800px)': { width: "83%" } }} />
+                </Box>
+                <Box display={"flex"} justifyContent={"space-between"}>
+                    <TextField id="responsavel" name="responsavel" variant="outlined" placeholder="Digite o responsável" sx={{ width: "100%", '@media (max-width: 800px)': { width: "83%" } }} />
                 </Box>
             </Box>
             <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column" } }}>

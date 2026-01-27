@@ -34,6 +34,8 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
     doc.text(client.cli_end || "Endereço não informado", margin, margin + 20);
     doc.text(client.cli_cidade ? `${client.cli_cidade} ${client.cli_uf}` : "Cidade não informada", margin, margin + 25);
     doc.text(client.cli_email || "Email não informado", margin, margin + 30);
+    doc.text(client.cli_dddTel && client.cli_telefone ? `Tel: (${client.cli_dddTel}) ${client.cli_telefone}` : "Telefone não informado", margin, margin + 35);
+    doc.text(`Responsável: ${client.cli_responsavel || "não informado"}`, margin, margin + 40);
 
     // Linha divisória
     doc.setDrawColor(200, 200, 200);
@@ -48,7 +50,7 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
     // --- PREPARAÇÃO DOS DADOS ---
     // Colunas Reduzidas para caber lado a lado (Removi "Valor Unitário" para economizar espaço se necessário, mas vou tentar manter)
     // Se ficar apertado, remova a coluna Categoria ou Valor Unitário
-    const tableColumn = ["CMDT", "PRODUTO", "QTD", "TOTAL"]; 
+    const tableColumn = ["CMDT", "PRODUTO", "CATEGORIA", "QTD", "TOTAL"]; 
     
     let allRows: any[] = [];
     
@@ -71,6 +73,7 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
             return [
                 contract.Cont_Comodato,
                 product?.Prod_CodProduto || 'ND',
+                categorias.find(cat => cat.ID_CategoriaProduto === product?.Prod_Categoria)?.CatProd_Nome,
                 contract?.Cont_Qtde ?? 0,
                 `R$ ${valorTotal.toFixed(2)}`
             ];
@@ -80,6 +83,7 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
             return [
                 snapshot.snapshot_comodato,
                 snapshot.snapshot_prod_cod || 'ND',
+                categorias.find(cat => cat.ID_CategoriaProduto === snapshot.snapshot_prod_cat)?.CatProd_Nome,
                 snapshot.snapshot_qtde || 0,
                 `R$ ${snapshot.snapshot_valor_total_item?.toFixed(2) || '0.00'}`
             ];

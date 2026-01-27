@@ -14,7 +14,8 @@ export interface ClientDTO {
     cli_endNum: string;
     cli_bairro: string;
     cli_uf: string;
-    cli_insEstadual: string;    
+    cli_insEstadual: string;   
+    cli_responsavel: string; 
     cli_modelo: number;
 }
 
@@ -34,6 +35,7 @@ export interface ClientDTOInsert {
     cli_bairro: string;
     cli_uf: string;
     cli_insEstadual: string;
+    cli_responsavel: string;
     cli_modelo: number;
 }
 

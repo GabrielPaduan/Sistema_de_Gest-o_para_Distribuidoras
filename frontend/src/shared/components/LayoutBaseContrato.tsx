@@ -609,7 +609,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                         {client?.cli_razaoSocial ? `Contrato de ${client.cli_razaoSocial}` : "Carregando Contrato..."}
             </Typography>
             {!showReport && (
-                <Box width={"80%"} margin={"auto"} sx={{ "@media (max-width: 800px)": { width: "95%" } }}>
+                <Box width={"auto"} margin={"auto"} sx={{ "@media (max-width: 800px)": { width: "95%" } }}>
           
                     <Box 
                         width={"80%"} 
@@ -659,7 +659,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                         <TextareaAutosize
                             minRows={3}
                             placeholder="Digite observações aqui..."
-                            style={{ width: '98%', padding: '8px', marginTop: "32px", fontSize: "20px", fontFamily: "Arial", borderRadius: "4px" }}
+                            style={{ width: '98%', padding: '8px', marginTop: "32px", fontSize: "14px", fontFamily: "Arial", borderRadius: "4px" }}
                             value={observation}
                             onChange={(e) => setObservation(e.target.value)}
                         />
@@ -669,14 +669,14 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                         <ProtectedComponent allowedRoles={['1']}>                        
                             <Box sx={{width: "25%", '@media (max-width: 800px)': { width: '100%' } }}>
                                 <Button variant="contained" color="primary" sx={{ padding: "15px", width: "100%", '@media (max-width: 800px)': { padding: "15px" } }} onClick={handleOpen}>
-                                    <Typography variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }}>Adicionar Produto</Typography>
+                                    <Typography variant="h6" fontSize={'14px'} sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }}>Adicionar Produto</Typography>
                                 </Button>
                             </Box>
                         </ProtectedComponent>
                         <ProtectedComponent allowedRoles={['1']}>    
                             <Box sx={{width: "25%", '@media (max-width: 800px)': { width: '100%' } }}>
                                 <Button onClick={handleOpenModelo} variant="contained" color="primary" sx={{ padding: "15px", width: "100%", '@media (max-width: 800px)': { padding: "15px" } }}>
-                                    <Typography variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }}>Modelos Contrato</Typography>
+                                    <Typography variant="h6" fontSize={'14px'} sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }}>Modelos Contrato</Typography>
                                 </Button>
                             </Box>
                         </ProtectedComponent>
@@ -688,7 +688,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                                 disabled={!client}
                                 onClick={() => handleShowReport()}
                             >
-                                <Typography variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }}>Prévia Relatório</Typography>
+                                <Typography variant="h6" fontSize={'14px'} sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }}>Prévia Relatório</Typography>
                             </Button>
                         </Box>
                         <Box sx={{ width: "25%", '@media (max-width: 800px)': { width: '100%' } }}>
@@ -709,7 +709,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                             sx={{ padding: "15px", width: "50%" }}
                             onClick={() => handleGeneratePdf()}
                         >
-                            <Typography variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: "15px" } }}>Enviar Relatório</Typography>
+                            <Typography variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: "12px" } }}>Enviar Relatório</Typography>
                         </Button>
                         <Button
                             variant="contained"
@@ -719,7 +719,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                             disabled={!client}
 
                         >
-                            <Typography variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: "15px" } }}>Ocultar Relatório</Typography>
+                            <Typography variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: "12px" } }}>Ocultar Relatório</Typography>
                         </Button>
                     </Box>
                 </Box>
