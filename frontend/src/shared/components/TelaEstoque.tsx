@@ -486,7 +486,7 @@ export const TelaEstoque: React.FC = () => {
                 </ProtectedComponent>
                 <ProtectedComponent allowedRoles={['1']}>
                     <Box>
-                        <Button onClick={() => handleOpenLancamentos()} variant="contained" color="primary" sx={{ padding: "15px", width: "100%" }}><Typography variant="h6">Lançamentos</Typography></Button>
+                        <Button disabled onClick={() => handleOpenLancamentos()} variant="contained" color="primary" sx={{ padding: "15px", width: "100%" }}><Typography variant="h6">Lançamentos</Typography></Button>
                     </Box>
                 </ProtectedComponent>
                 <Box sx={{ '@media (max-width: 800px)': { width: '50%' } }}>

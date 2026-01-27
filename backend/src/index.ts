@@ -14,10 +14,20 @@ dotenv.config();
 const app = express();  
 const port = process.env.PORT || 3001;
 
-app.use(cors());
+app.use(cors({
+    origin: [
+        'https://sistema-de-comodato.web.app', 
+        'https://sistema-de-comodato.firebaseapp.com', 
+        'http://localhost:5173',
+        'http://localhost:3000'  
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true 
+}));
+
 app.use(express.json());
 
-// Registra os grupos de rotas
 app.use('/clientes', clientRoutes);
 app.use('/produtos', productRoutes);
 app.use('/contratos', contractRoutes);

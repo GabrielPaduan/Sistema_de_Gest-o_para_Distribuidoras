@@ -62,7 +62,7 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
                     {
                     sortedContracts.length === 0 ? (
                         <TableRow>
-                            <TableCell colSpan={7} sx={{ textAlign: "center", fontSize: 20 }}>Nenhum contrato cadastrado</TableCell>
+                            <TableCell colSpan={13} sx={{ textAlign: "center", fontSize: 20 }}>Nenhum contrato cadastrado</TableCell>
                         </TableRow>
                     ) : (
                         

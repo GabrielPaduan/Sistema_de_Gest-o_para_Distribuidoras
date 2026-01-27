@@ -189,14 +189,19 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
             for (const contract of contracts) {
                 await updateContract(contract.ID_Contrato, contract.Cont_Comodato, contract.Cont_Qtde, contract.Cont_ValorTotal, contract.Cont_PorcLucro);
             }
+            
             const clientPDF = await getPendentPdfByClientId(id);
+            console.log(id);
             if (clientPDF == null) {
                 const date = new Date();
                 date.setHours(12, 0, 0, 0);
                 await createPDFContracts({ PDF_Client_Id: id, PDF_Status: 0, PDF_Generated_Date: date.toISOString(), PDF_Observacoes: observation });
+                console.log("CREATE")
             } else {
+                console.log("UPDATE")
                 await updatePdf(clientPDF.id, {id: clientPDF.id, PDF_Client_Id: clientPDF.PDF_Client_Id, PDF_Status: 0, PDF_Generated_Date: new Date().toISOString(), PDF_Observacoes: observation });
             }
+            
             navigate("/pagina-inicial");
         } catch (err) {
             alert("PDF já criado no sistema!");

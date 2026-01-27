@@ -29,13 +29,14 @@ export const createPdf = async (pdfData: PdfStructInsertDTO) => {
 };
 
 export const getPendentPdfByClientId = async (clientId: number): Promise<PdfStructDTO | null> => {
+  
   const { data, error } = await supabase
     .from("ContratosPDF")
     .select("*")
     .eq("PDF_Client_Id", clientId)
-    .eq("PDF_Status", 0)
     .single();
-  
+
+    console.log("Fetching pendent PDF for client ID:", data);
   if (error) {
     if (error.code === 'PGRST116') {
       return data;

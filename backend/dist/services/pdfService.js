@@ -1,0 +1,67 @@
+import supabase from "../config/supabase.js";
+export const getAllPdfs = async () => {
+    const { data, error } = await supabase.from("ContratosPDF").select("*");
+    if (error)
+        throw error;
+    return data;
+};
+export const getPdfByStatus = async (status) => {
+    const { data, error } = await supabase
+        .from("ContratosPDF")
+        .select("*")
+        .eq("PDF_Status", status);
+    if (error)
+        throw error;
+    return data;
+};
+export const getPdfById = async (id) => {
+    const { data, error } = await supabase.from("ContratosPDF").select("*").eq("id", id).single();
+    if (error)
+        throw error;
+    return data;
+};
+export const createPdf = async (pdfData) => {
+    const { data, error } = await supabase.from("ContratosPDF").insert(pdfData).select();
+    if (error)
+        throw error;
+    return data;
+};
+export const getPendentPdfByClientId = async (clientId) => {
+    const { data, error } = await supabase
+        .from("ContratosPDF")
+        .select("*")
+        .eq("PDF_Client_Id", clientId)
+        .single();
+    console.log("Fetching pendent PDF for client ID:", data);
+    if (error) {
+        if (error.code === 'PGRST116') {
+            return data;
+        }
+        else {
+            throw error;
+        }
+    }
+    return data;
+};
+export const getPdfByClientId = async (clientId) => {
+    const { data, error } = await supabase
+        .from('ContratosPDF')
+        .select('*')
+        .eq('PDF_Client_Id', clientId)
+        .eq('PDF_Status', 1);
+    if (error)
+        throw error;
+    return data;
+};
+export const updatePdf = async (id, PDF_Client_Id, PDF_Status, PDF_Generated_Date, PDF_Observacoes) => {
+    const { data, error } = await supabase
+        .from('ContratosPDF')
+        .update({ PDF_Client_Id: PDF_Client_Id, PDF_Status: PDF_Status, PDF_Generated_Date: PDF_Generated_Date, PDF_Observacoes: PDF_Observacoes })
+        .eq('id', id)
+        .select('PDF_Client_Id, PDF_Status, PDF_Generated_Date, PDF_Observacoes')
+        .single();
+    if (error)
+        throw error;
+    return data;
+};
+//# sourceMappingURL=pdfService.js.map

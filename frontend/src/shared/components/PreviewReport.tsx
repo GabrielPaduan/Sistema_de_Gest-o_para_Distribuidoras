@@ -47,9 +47,12 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
     contracts.sort((a, b) => {
         const productA = products.find(p => p.ID_Prod === a.Cont_ID_Prod);
         const productB = products.find(p => p.ID_Prod === b.Cont_ID_Prod);
-        const catA = productCategories.find(cat => cat.ID_CategoriaProduto === productA?.Prod_Categoria)?.ID_CategoriaProduto || 0;
-        const catB = productCategories.find(cat => cat.ID_CategoriaProduto === productB?.Prod_Categoria)?.ID_CategoriaProduto || 0;
-        return catB - catA;
+        const prateleiraA = productCategories.find(cat => cat.ID_CategoriaProduto === productA?.Prod_Categoria)?.Cat_Prateleira || 0;
+        const prateleiraB = productCategories.find(cat => cat.ID_CategoriaProduto === productB?.Prod_Categoria)?.Cat_Prateleira || 0;
+        if (prateleiraA - prateleiraB === 0) {
+            return productA?.Prod_CodProduto.localeCompare(productB?.Prod_CodProduto || "") || 0;
+        }
+        return prateleiraA - prateleiraB;
     });
 
     const SPLIT_THRESHOLD = 10; 
@@ -141,14 +144,14 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
 
                     {shouldSplit && (
                         // 2. Renderiza DUAS tabelas lado a lado se a lista for LONGA
-                        <Grid container spacing={2} sx={{ alignItems: 'flex-start', justifyContent: 'center' }}>
-                            <Grid>
+                        <Box display="flex" width="100%" gap={2}>
+                            <Box width="50%">
                                 <ProductTable contractList={firstHalfContracts} />
-                            </Grid>
-                            <Grid>
+                            </Box>
+                            <Box width="50%">
                                 <ProductTable contractList={secondHalfContracts} />
-                            </Grid>
-                        </Grid>
+                            </Box>
+                        </Box>
                     )}
                 </Box>
 
