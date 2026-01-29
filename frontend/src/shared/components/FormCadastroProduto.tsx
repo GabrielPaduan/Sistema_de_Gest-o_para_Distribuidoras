@@ -5,6 +5,7 @@ import { createProduct } from "../services/productService";
 import { Box, TextField, Select, MenuItem, Typography, Checkbox, Button, InputAdornment, Modal } from "@mui/material";
 import { GenericButton } from "./GenericButton";
 import { createCategory, getAllCategories } from "../services/categoriasProdutoService";
+import { useShortcut } from "../hooks";
 
 const style = {
   position: 'absolute',
@@ -51,10 +52,10 @@ export const FormCadastroProduto: React.FC = () => {
     }, []);
 
 
-    const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
+    const submitForm = async (event?: React.FormEvent<HTMLFormElement>) => {
+        if (event) event.preventDefault();
         try {
-            const formData = new FormData(event.currentTarget);
+            const formData = new FormData(event?.currentTarget);
             const newProduct: ProductDTOInsert = {
                 Prod_Valor: valor,
                 Prod_CustoCompra: formData.get("prodCustoCompra") as unknown as number || 0,
@@ -75,6 +76,8 @@ export const FormCadastroProduto: React.FC = () => {
 
         navigate("/estoque-produtos");
     }
+
+    useShortcut("F1", () => submitForm());
 
     useEffect(() => {
         if (custoCompra === 0) {
@@ -289,7 +292,7 @@ export const FormCadastroProduto: React.FC = () => {
                 <Box>
                     <Button variant="contained" color="primary" type="submit" sx={{ margin: "10px auto", padding: "15px", '@media (max-width: 800px)': { width: "100%" } }}>
                         <Typography variant="h6" color="text.secondary" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }} >
-                            Cadastrar
+                            Cadastrar [F1]
                         </Typography>
                     </Button>
                 </Box>

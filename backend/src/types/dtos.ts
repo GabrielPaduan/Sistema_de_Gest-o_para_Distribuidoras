@@ -117,3 +117,12 @@ export interface ProductsCategoriesDTOInsert {
     CatProd_Nome: string;
     Cat_Prateleira: number;
 }
+
+export interface ProductLaunch {
+    ID_Prod: number;
+    Prod_CodProduto: string;
+    Prod_Estoque: number;
+    Prod_CustoCompra: number;
+    Prod_Observacao: string;
+    Prod_QuantidadeLancada: number;
+}

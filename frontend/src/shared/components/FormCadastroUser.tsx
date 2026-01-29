@@ -8,13 +8,14 @@ import { UserInsertDTO } from "../utils/DTOS";
 import { cadastrarUser } from "../services/userService";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
+import { useShortcut } from "../hooks";
 
 export const FormCadastroUser: React.FC = () => {
     const navigate = useNavigate();
-    const submitForm = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
+    const submitForm = (event?: React.FormEvent<HTMLFormElement>) => {
+        if (event) event.preventDefault();
         try {
-            const formData = new FormData(event.currentTarget);
+            const formData = new FormData(event?.currentTarget);
             const cadastro: UserInsertDTO = {
                 usu_nome: formData.get("nome") as string,
                 usu_senha: formData.get("senha") as string,
@@ -32,6 +33,8 @@ export const FormCadastroUser: React.FC = () => {
             console.error("Error submitting form:", error);
         }
     };
+
+    useShortcut("F1", () => submitForm());
 
     return (
         <Box
@@ -75,7 +78,7 @@ export const FormCadastroUser: React.FC = () => {
 
             <Box textAlign="center">
                 <Button type="submit" variant="contained" color="primary">
-                    <Typography variant="h6">Cadastrar</Typography>
+                    <Typography variant="h6">Cadastrar [F1]</Typography>
                 </Button>
             </Box>
         </Box>

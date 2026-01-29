@@ -179,3 +179,12 @@ export interface objectContractExclusion {
     contractId: number;
     productId: number;
 }
+
+export interface ProductLaunch {
+    ID_Prod: number;
+    Prod_CodProduto: string;
+    Prod_Estoque: number;
+    Prod_CustoCompra: number;
+    Prod_Observacao: string;
+    Prod_QuantidadeLancada: number;
+}

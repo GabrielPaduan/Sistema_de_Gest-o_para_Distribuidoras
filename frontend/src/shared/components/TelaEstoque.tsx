@@ -5,10 +5,10 @@ import { GenericButton } from "./GenericButton";
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { createCategory, deleteCategory, getAllCategories, updateCategory } from "../services/categoriasProdutoService";
-import { ProductDTO, ProductsCategoriesDTO, ProductsCategoriesDTOInsert } from "../utils/DTOS";
+import { ProductDTO, ProductLaunch, ProductsCategoriesDTO, ProductsCategoriesDTOInsert } from "../utils/DTOS";
 import { SearchField } from "./searchField";
 import { useDebounce } from "use-debounce";
-import { getAllProducts, searchProductsByName } from "../services/productService";
+import { getAllProducts, launchProduct, searchProductsByName } from "../services/productService";
 
 const style = {
   position: 'absolute',
@@ -22,14 +22,7 @@ const style = {
   p: 4,
 };
 
-interface ProductLaunch {
-    ID_Prod: number;
-    Prod_CodProduto: string;
-    Prod_Estoque: number;
-    Prod_CustoCompra: number;
-    Prod_Observacao: string;
-    Prod_QuantidadeLancada: number;
-}
+
 
 
 export const TelaEstoque: React.FC = () => {
@@ -174,9 +167,14 @@ export const TelaEstoque: React.FC = () => {
         } 
     };
 
-    useEffect(() => {
-        console.log(selectedProductLaunch);
-    }, [selectedProductLaunch]);
+    const enviarLancamento = async () => {
+        try {
+            const response = await launchProduct(selectedProductLaunch, lancType);
+            console.log("Lançamento realizado com sucesso:", response);
+        } catch (error) {
+            console.error("Error launching product:", error);
+        }
+    }
 
     useEffect(() => {
         handleSearch(debouncedSearchTerm);
@@ -404,7 +402,7 @@ export const TelaEstoque: React.FC = () => {
                         <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"} gap={2} sx={{ flexDirection: { xs: 'column', sm: 'row' }, width: "100%" }}>
                             <TextField 
                                 label="Quantidade a ser lançada" 
-                                name="entrada" 
+                                name="Prod_QuantidadeLancada" 
                                 variant="outlined" 
                                 placeholder="Digite a quantidade" 
                                 type="number"
@@ -432,7 +430,7 @@ export const TelaEstoque: React.FC = () => {
                         </Box>
                         <TextField
                             label="Observações"
-                            name="Lanc_Observacao"
+                            name="Prod_Observacao"
                             variant="outlined"
                             placeholder="Digite alguma observação"
                             value={selectedProductLaunch.Prod_Observacao}
@@ -441,7 +439,7 @@ export const TelaEstoque: React.FC = () => {
                         />
                     </Box>
                     <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"} gap={2} mt={2} sx={{ flexDirection: "row"  }}>
-                        <Button onClick={() => {}} variant="contained" color="primary" sx={{ width: "100%" }}>
+                        <Button onClick={enviarLancamento} variant="contained" color="primary" sx={{ width: "100%" }}>
                             Confirmar Lançamento
                         </Button>
                         <Button onClick={handleCloseLancamentos} variant="contained" color="primary" sx={{ width: "100%" }}>
@@ -485,7 +483,7 @@ export const TelaEstoque: React.FC = () => {
                 </ProtectedComponent>
                 <ProtectedComponent allowedRoles={['1']}>
                     <Box>
-                        <Button disabled onClick={() => handleOpenLancamentos()} variant="contained" color="primary" sx={{ padding: "15px", width: "100%" }}><Typography variant="h6">Lançamentos</Typography></Button>
+                        <Button onClick={() => handleOpenLancamentos()} variant="contained" color="primary" sx={{ padding: "15px", width: "100%" }}><Typography variant="h6">Lançamentos</Typography></Button>
                     </Box>
                 </ProtectedComponent>
                 <Box sx={{ '@media (max-width: 800px)': { width: '50%' } }}>

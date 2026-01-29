@@ -1,1 +1,1 @@
-export { };
+export { useShortcut } from "./useShortcut";

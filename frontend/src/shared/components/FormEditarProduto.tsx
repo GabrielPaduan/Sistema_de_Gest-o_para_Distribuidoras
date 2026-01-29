@@ -2,11 +2,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ProductDTO, ProductsCategoriesDTO, ProductsCategoriesDTOInsert } from "../utils/DTOS"; // Removi ProductDTOInsert, pois não está sendo usado
 import { useEffect, useState } from "react";
 import { getProductById, updateProduct } from "../services/productService"; // Removi createProduct
-import { Box, TextField, Typography, Button, InputAdornment, CircularProgress, Alert, Select, MenuItem, Modal, SelectChangeEvent } from "@mui/material";
+import { Box, TextField, Typography, Button, InputAdornment, CircularProgress, Alert, Select, MenuItem, Modal, SelectChangeEvent, TableContainer, Table, TableHead, TableCell, TableBody, TableRow } from "@mui/material";
 import { GenericButton } from "./GenericButton";
 import { NumericFormat } from "react-number-format";
 import { createCategory, getAllCategories } from "../services/categoriasProdutoService";
 import { get } from "http";
+import { useShortcut } from "../hooks/useShortcut";
 
 const style = {
   position: 'absolute',
@@ -213,9 +214,11 @@ export const FormEditarProduto: React.FC = () => {
     };
 
 
+
+
     // --- Submissão do Formulário ---
-    const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
+    const submitForm = async (event?: React.FormEvent<HTMLFormElement>) => {
+        if (event) event?.preventDefault();
         
         if (!formData) {
             setError("Dados do formulário não estão carregados.");
@@ -238,6 +241,8 @@ export const FormEditarProduto: React.FC = () => {
             };
             console.log("Produto a ser atualizado:", updatedProduct);
             await updateProduct(updatedProduct);
+            
+            
             navigate(-1);
 
         } catch (error) {
@@ -245,6 +250,8 @@ export const FormEditarProduto: React.FC = () => {
             setError("Falha ao salvar o produto. Tente novamente.");
         }
     };
+
+    useShortcut("F1", () => submitForm());
 
     // --- Renderização ---
 
@@ -496,11 +503,37 @@ export const FormEditarProduto: React.FC = () => {
                     </Box>
                 </Box>
 
+                <Box width={"50%"} sx={{  maxWidth: "70%", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", marginTop: 3, marginBottom: 2, '@media (max-width: 800px)': { maxWidth: "90%" }  }}>
+                    <Typography variant="h6" gutterBottom>
+                        Histórico de Lançamentos
+                    </Typography>
+                    <TableContainer>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Nome</TableCell>
+                                    <TableCell>Endereço</TableCell>
+                                    <TableCell>Cidade</TableCell>
+                                    <TableCell>Telefone</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell></TableCell>
+                                    <TableCell></TableCell>
+                                    <TableCell></TableCell>
+                                    <TableCell></TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Box>
+
                 <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2}>
                     <Box>
                         <Button variant="contained" color="primary" type="submit" sx={{ margin: "10px auto", padding: "15px", '@media (max-width: 800px)': { width: "100%" }  }}>
                             <Typography variant="h6" color="text.secondary" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }} >
-                                Salvar Alterações
+                                Salvar Alterações [F1]
                             </Typography>
                         </Button>
                     </Box>

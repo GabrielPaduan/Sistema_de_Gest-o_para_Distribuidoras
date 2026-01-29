@@ -94,3 +94,12 @@ export const deleteProduct = async (req: express.Request, res: express.Response)
     }
 };
 
+export const launchProduct = async (req: express.Request, res: express.Response) => {
+    try {
+        const productToLaunch = req.body;
+        await productService.productLaunch(productToLaunch, Number(req.params.type));
+        res.status(200).json({ message: "Product launch successful" });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+};

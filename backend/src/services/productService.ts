@@ -1,5 +1,5 @@
 import supabase from '../config/supabase.js'; // Ajuste o caminho conforme necessário
-import type { ProductDTO } from '../types/dtos.js'; // Supondo que você tenha seus tipos definidos
+import type { ProductDTO, ProductLaunch } from '../types/dtos.js'; // Supondo que você tenha seus tipos definidos
 
 export const findAllProduct = async (): Promise<ProductDTO[]> => {
     const { data, error } = await supabase.from('Produtos').select('*').range(0, 8000);
@@ -90,3 +90,51 @@ export const deleteProductById = async (id: number): Promise<void> => {
 export function findAllProductWithPagination(page: number, pageSize: number): { products: any; total: any; } | PromiseLike<{ products: any; total: any; }> {
     throw new Error('Function not implemented.');
 }
+
+export const productLaunch = async (productToLaunch: ProductLaunch, launchType: number): Promise<void> => {
+    const product = await findProductById(productToLaunch.ID_Prod);
+    if (!product) {
+        throw new Error('Produto não encontrado');
+    }
+    console.log("PRODUCT TO LAUNCH: ", productToLaunch);
+    console.log("LAUNCH TYPE: ", launchType);
+    if (launchType === 0) { 
+        const newStock = Number(product.Prod_Estoque) + Number(productToLaunch.Prod_QuantidadeLancada);
+        let newCustoCompra = 0
+        if (productToLaunch.Prod_CustoCompra > product.Prod_CustoCompra) {
+          newCustoCompra = productToLaunch.Prod_CustoCompra;
+        } else {
+          newCustoCompra = product.Prod_CustoCompra;
+        }
+
+        const { data, error } = await supabase
+        .from('Produtos')
+        .update({
+            Prod_Estoque: newStock,
+            Prod_CustoCompra: newCustoCompra,
+        })
+        .eq('ID_Prod', productToLaunch.ID_Prod);
+        
+        console.log("DATA: ", data);
+
+        if (error) {
+            console.error('Erro ao lançar entrada de produto:', error);
+            throw error;
+        }
+    } else if (launchType === 1) { 
+        const newStock = Number(product.Prod_Estoque) - Number(productToLaunch.Prod_QuantidadeLancada);
+        if (newStock < 0) {
+            throw new Error('Estoque insuficiente para a saída');
+        }
+        const { error } = await supabase
+        .from('Produtos')
+        .update({
+            Prod_Estoque: newStock,
+        })
+        .eq('ID_Prod', productToLaunch.ID_Prod);
+        if (error) {
+            console.error('Erro ao lançar saída de produto:', error);
+            throw error;
+        }
+    }
+} 

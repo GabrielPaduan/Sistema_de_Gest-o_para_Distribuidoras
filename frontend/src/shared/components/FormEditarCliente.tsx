@@ -6,6 +6,7 @@ import { ClientDTO, ClientDTOInsert } from "../utils/DTOS";
 import { createClient, getClientById, updateClient } from "../services/clientService";
 import { create } from "domain";
 import { useNavigate, useParams } from "react-router-dom";
+import { useShortcut } from "../hooks";
 
 export const FormEditarCliente: React.FC = () => {
     let idCliente = parseInt(useParams().id || "0");
@@ -60,8 +61,8 @@ export const FormEditarCliente: React.FC = () => {
         }));
     };
 
-    const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
+    const submitForm = async (event?: React.FormEvent<HTMLFormElement>) => {
+        if (event) event?.preventDefault();
         try {
             const newClient: ClientDTO = {
                 id: idCliente,
@@ -75,6 +76,8 @@ export const FormEditarCliente: React.FC = () => {
             console.error("Error submitting form:", error);
         }
     };
+
+    useShortcut("F1", () => submitForm());
 
     return (
         <Box
@@ -141,12 +144,11 @@ export const FormEditarCliente: React.FC = () => {
                     <TextField id="responsavel" name="cli_responsavel" variant="outlined" placeholder="Digite o responsável" sx={{ width: "100%", '@media (max-width: 800px)': { width: "83%" } }} value={formData?.cli_responsavel} onChange={handleChange} />
                 </Box>
             </Box>
-
             <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2}>
                 <Box>
                     <Button variant="contained" color="primary" type="submit" sx={{ margin: "10px auto", padding: "15px", '@media (max-width: 800px)': { width: "100%" } }}>
                         <Typography variant="h6" color="text.secondary" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }} >
-                            Editar
+                            Editar [F1]
                         </Typography>
                     </Button>
                 </Box>
