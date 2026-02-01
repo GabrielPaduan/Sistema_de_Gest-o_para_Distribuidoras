@@ -42,12 +42,12 @@ export const FormEditarProduto: React.FC = () => {
     const ITEM_HEIGHT = 48; 
     const ITEM_PADDING_TOP = 8; 
     const MenuProps = {
-    PaperProps: {
-        style: {
-        maxHeight: ITEM_HEIGHT * 3.5 + ITEM_PADDING_TOP, 
-        width: 250, 
+        PaperProps: {
+            style: {
+            maxHeight: ITEM_HEIGHT * 3.5 + ITEM_PADDING_TOP, 
+            width: 250, 
+            },
         },
-    },
     };
 
 
@@ -397,7 +397,6 @@ export const FormEditarProduto: React.FC = () => {
                                 defaultValue={formData.Prod_Categoria || 0}
                                 fullWidth
                                 onChange={handleSelectChange}
-                                // ADICIONE ESTA LINHA AQUI:
                                 MenuProps={MenuProps}
                                 sx={{ width: "95%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' } }}
                             >

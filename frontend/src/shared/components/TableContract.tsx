@@ -37,9 +37,11 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
         <TableContainer component={Paper} sx={{ margin: "auto", cursor: "default", width: "100%" }}>
             <Table width="100%">
                 <TableHead>
+                <ProtectedComponent allowedRoles={['1']}>
                     <TableCell sx={{ fontSize: 14, padding: 0, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>
                         Selecionar
                     </TableCell>
+                </ProtectedComponent>
                     <TableCell  sx={{ fontSize: 14, padding: 0, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Cmdt</TableCell>
                     <TableCell sx={{ fontSize: 14, padding: 0, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Produtos</TableCell>
                     <TableCell  sx={{ fontSize: 14, padding: 0, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Categoria</TableCell>
@@ -62,7 +64,7 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
                     {
                     sortedContracts.length === 0 ? (
                         <TableRow>
-                            <TableCell colSpan={13} sx={{ textAlign: "center", fontSize: 20 }}>Nenhum contrato cadastrado</TableCell>
+                            <TableCell colSpan={13} sx={{ textAlign: "center", fontSize: 14 }}>Nenhum contrato cadastrado</TableCell>
                         </TableRow>
                     ) : (
                         
@@ -72,14 +74,15 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
                         
                             return (
                                 <TableRow key={contract.ID_Contrato} hover>
-                                    <TableCell sx={{ fontSize: 12, padding: 0, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>
-                                        <Checkbox
-                                        checked={selectedItems.some(item => item.contractId === contract.ID_Contrato)}
-                                        onChange={() => onToggleSelect(contract.ID_Contrato, product.ID_Prod)}
-                                        sx={{ width: '9%', color: 'grey' }}
-                                        color="secondary"
-                                    />
-                                    </TableCell>
+                                    <ProtectedComponent allowedRoles={['1']}>
+                                        <TableCell sx={{ fontSize: 12, padding: 0, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>
+                                            <Checkbox
+                                            checked={selectedItems.some(item => item.contractId === contract.ID_Contrato)}
+                                            onChange={() => onToggleSelect(contract.ID_Contrato, product.ID_Prod)}
+                                            sx={{ width: '9%', color: 'grey' }}
+                                            color="secondary"
+                                        /></TableCell>
+                                    </ProtectedComponent>
                                     <TableCell sx={{ fontSize: 12, padding: 0, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{contract.Cont_Comodato}</TableCell>
                                     <TableCell sx={{ fontSize: 12, padding: 0, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_CodProduto}</TableCell>
                                     <TableCell sx={{ fontSize: 12, padding: 0, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_Categoria >= 0 ? productCategories.find(cat => cat.ID_CategoriaProduto === product.Prod_Categoria)?.CatProd_Nome : ''}</TableCell>
@@ -92,9 +95,9 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
                                     </TableCell>
                                     <TableCell sx={{ fontSize: 12, padding: 0, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>
                                         <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
-                                            <Button onClick={() => onRemoveProduct(contract.ID_Contrato)} sx={{ '@media (max-width: 800px)': { padding: "0px", minWidth: "40px" } }}><Icon sx={{ fontSize: 20, '@media (max-width: 800px)': { fontSize: "20px", padding: "0px" } }}>remove_circle</Icon></Button>
+                                            <Button onClick={() => onRemoveProduct(contract.ID_Contrato)} sx={{ '@media (max-width: 800px)': { padding: "0px", minWidth: "40px" } }}><Icon sx={{ fontSize: 14, '@media (max-width: 800px)': { fontSize: "20px", padding: "0px" } }}>remove_circle</Icon></Button>
                                                 <Typography sx={{ fontSize: 12, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "0px" } }}>{contract.Cont_Qtde}</Typography>
-                                            <Button onClick={() => onAddProduct(contract.ID_Contrato, contract.Cont_Comodato)} sx={{ '@media (max-width: 800px)': { padding: "0px", minWidth: "40px" } }}><Icon sx={{ fontSize: 20, '@media (max-width: 800px)': { fontSize: "20px", padding: "0px" } }}>add_circle</Icon></Button>
+                                            <Button onClick={() => onAddProduct(contract.ID_Contrato, contract.Cont_Comodato)} sx={{ '@media (max-width: 800px)': { padding: "0px", minWidth: "40px" } }}><Icon sx={{ fontSize: 14, '@media (max-width: 800px)': { fontSize: "20px", padding: "0px" } }}>add_circle</Icon></Button>
                                         </Box>
                                     </TableCell>
                                     <TableCell sx={{ fontSize: 12, padding: 0, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_Estoque}</TableCell>
@@ -104,7 +107,7 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
                                             <Button onClick={() => navigate(`/editar-produto/${product.ID_Prod}`)}><Icon sx={{ fontSize: 30 }}>edit</Icon></Button>
                                         </TableCell>
                                         <TableCell sx={{ fontSize: 12, padding: 0, textAlign: "center" }}>
-                                            <Button onClick={() => openEditContract(contract.ID_Contrato, product.ID_Prod)}><Typography fontSize={'14px'}>Editar Item</Typography></Button>
+                                            <Button onClick={() => openEditContract(contract.ID_Contrato, product.ID_Prod)}><Typography fontSize={'12px'}>Editar Item</Typography></Button>
                                         </TableCell>
                                         <TableCell sx={{ fontSize: 12, padding: 0, textAlign: "center", '@media (max-width: 800px)': { padding: "0px" } }}>
                                             <Button onClick={() => onRemoveContract(contract.ID_Contrato, contract.Cont_ID_Prod)} sx={{ '@media (max-width: 800px)': { padding: "0px" } }}><Icon sx={{ fontSize: 30, '@media (max-width: 800px)': { padding: "0px" } }}>delete_forever</Icon></Button>

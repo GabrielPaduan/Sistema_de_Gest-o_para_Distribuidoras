@@ -223,12 +223,10 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                 
                 if (
                     c.ID_Contrato === contractId &&
-                    c.Cont_Qtde < cmdt &&
                     product?.Prod_Estoque !== undefined &&
                     c.Cont_Qtde < product.Prod_Estoque
                 ) {
                     const newQuantity = c.Cont_Qtde + 1;
-                    // Retorna um NOVO objeto (imutabilidade)
                     return { ...c, Cont_Qtde: newQuantity, Cont_ValorTotal: newQuantity * totalValue };
                 }
                 return c;

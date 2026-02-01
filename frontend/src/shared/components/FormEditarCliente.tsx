@@ -116,7 +116,7 @@ export const FormEditarCliente: React.FC = () => {
             </Box>
             <Box display={"flex"} flexDirection={"column"} width={"100%"} gap={2}>
                 <Box display={"flex"} justifyContent={"space-between"} sx={{ '@media (max-width: 800px)': { flexDirection: "column", gap: 2 } }}>
-                    <TextField id="endereco" name="cli_endereco" variant="outlined" placeholder="Digite o endereço" sx={{ width: "50%", '@media (max-width: 800px)': { width: "100%" } }} value={formData?.cli_end} onChange={handleChange} />
+                    <TextField id="end" name="cli_end" variant="outlined" placeholder="Digite o endereço" sx={{ width: "50%", '@media (max-width: 800px)': { width: "100%" } }} value={formData?.cli_end} onChange={handleChange} />
                     <Box width="49%" display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 800px)': { width: "100%" } }}>
                         <TextField id="endNum" name="cli_endNum" variant="outlined" placeholder="Digite o número" sx={{ width: "35%" }} value={formData?.cli_endNum} onChange={handleChange} />
                         <TextField id="cep" name="cli_cep" variant="outlined" placeholder="Digite o CEP" sx={{ width: "64%" }} value={formData?.cli_cep} onChange={handleChange} />
@@ -134,11 +134,11 @@ export const FormEditarCliente: React.FC = () => {
             <Box display={"flex"} flexDirection={"column"} gap={2}>
                 <Box display={"flex"} justifyContent={"space-between"}>
                     <TextField id="dddTel" name="cli_dddTel" variant="outlined" placeholder="DDD" sx={{ width: "9%", '@media (max-width: 800px)': { width: "15%" } }} value={formData?.cli_dddTel} onChange={handleChange} />
-                    <TextField id="tel" name="cli_tel" variant="outlined" placeholder="Digite o telefone" sx={{ width: "90%", '@media (max-width: 800px)': { width: "83%" } }} value={formData?.cli_telefone} onChange={handleChange} />
+                    <TextField id="tel" name="cli_telefone" variant="outlined" placeholder="Digite o telefone" sx={{ width: "90%", '@media (max-width: 800px)': { width: "83%" } }} value={formData?.cli_telefone} onChange={handleChange} />
                 </Box>
                 <Box display={"flex"} justifyContent={"space-between"}>
                     <TextField id="dddCel" name="cli_dddCel" variant="outlined" placeholder="DDD" sx={{ width: "9%", '@media (max-width: 800px)': { width: "15%" } }} value={formData?.cli_dddCel} onChange={handleChange} />
-                    <TextField id="cel" name="cli_cel" variant="outlined" placeholder="Digite o celular" sx={{ width: "90%", '@media (max-width: 800px)': { width: "83%" } }} value={formData?.cli_celular} onChange={handleChange} />
+                    <TextField id="cel" name="cli_celular" variant="outlined" placeholder="Digite o celular" sx={{ width: "90%", '@media (max-width: 800px)': { width: "83%" } }} value={formData?.cli_celular} onChange={handleChange} />
                 </Box>
                 <Box display={"flex"} justifyContent={"space-between"}>
                     <TextField id="responsavel" name="cli_responsavel" variant="outlined" placeholder="Digite o responsável" sx={{ width: "100%", '@media (max-width: 800px)': { width: "83%" } }} value={formData?.cli_responsavel} onChange={handleChange} />
@@ -147,7 +147,7 @@ export const FormEditarCliente: React.FC = () => {
             <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2}>
                 <Box>
                     <Button variant="contained" color="primary" type="submit" sx={{ margin: "10px auto", padding: "15px", '@media (max-width: 800px)': { width: "100%" } }}>
-                        <Typography variant="h6" color="text.secondary" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }} >
+                        <Typography variant="h6" fontSize={14} color="text.secondary" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }} >
                             Editar [F1]
                         </Typography>
                     </Button>

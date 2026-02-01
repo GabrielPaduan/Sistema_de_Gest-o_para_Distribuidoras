@@ -1,4 +1,4 @@
-import { Box, Button, Icon, InputAdornment, MenuItem, Modal, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs, TextField, Typography } from "@mui/material";
+import { Box, Button, Icon, InputAdornment, MenuItem, Modal, Select, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs, TextField, Typography } from "@mui/material";
 import { TableProducts } from "./TableProducts";
 import { ProtectedComponent } from "./ProtectedComponent";
 import { GenericButton } from "./GenericButton";
@@ -45,6 +45,17 @@ export const TelaEstoque: React.FC = () => {
     const [productsData, setProductsData] = useState<ProductDTO[]>([]);
     const [displayProductSearch, setDisplayProductSearch] = useState<'flex' | 'none'>('flex');
     const [selectedProductLaunch, setSelectedProductLaunch] = useState<ProductLaunch>({ ID_Prod: 0, Prod_CodProduto: "", Prod_Estoque: 0, Prod_CustoCompra: 0, Prod_Observacao: "", Prod_QuantidadeLancada: 0 });
+
+    const ITEM_HEIGHT = 48; 
+    const ITEM_PADDING_TOP = 8; 
+    const MenuProps = {
+        PaperProps: {
+            style: {
+            maxHeight: ITEM_HEIGHT * 3.5 + ITEM_PADDING_TOP, 
+            width: 250, 
+            },
+        },
+    };
 
     const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
         setPage(newPage);
@@ -302,7 +313,7 @@ export const TelaEstoque: React.FC = () => {
                                     color="primary"
                                     onClick={() => handleInsertCategory({ CatProd_Nome: nomeCategoria, Cat_Prateleira: prateleira })}
                                 >
-                                    <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}> Adicionar</Typography>
+                                    <Typography variant="h6" fontSize={14} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}> Adicionar</Typography>
                                 </Button>
                             }
                             {
@@ -312,14 +323,14 @@ export const TelaEstoque: React.FC = () => {
                                         color="primary"
                                         onClick={() => handleEditCategory(categoriaToEdit ? categoriaToEdit : {ID_CategoriaProduto: 0, CatProd_Nome: "", Cat_Prateleira: 0})}
                                     >
-                                        <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}> Editar</Typography>
+                                        <Typography variant="h6" fontSize={14} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}> Editar</Typography>
                                     </Button>
                             }
                             <Button onClick={() => { modalMode === 0 ? setModalMode(1) : setModalMode(0) }} variant="contained" color="primary">
-                                <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}>Switch Mode</Typography>
+                                <Typography variant="h6" fontSize={14} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}>Switch Mode</Typography>
                             </Button>
                             <Button onClick={handleClose} variant="contained" color="primary">
-                                <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}>Voltar</Typography>
+                                <Typography variant="h6" fontSize={14} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}>Voltar</Typography>
                             </Button>
                         </Box>
                     </Box>
@@ -440,23 +451,26 @@ export const TelaEstoque: React.FC = () => {
                     </Box>
                     <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"} gap={2} mt={2} sx={{ flexDirection: "row"  }}>
                         <Button onClick={enviarLancamento} variant="contained" color="primary" sx={{ width: "100%" }}>
-                            Confirmar Lançamento
+                            <Typography variant="h6" fontSize={14}>Confirmar Lançamento</Typography>
                         </Button>
                         <Button onClick={handleCloseLancamentos} variant="contained" color="primary" sx={{ width: "100%" }}>
-                            <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}>Voltar</Typography>
+                            <Typography variant="h6" fontSize={14} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}>Voltar</Typography>
                         </Button>
                     </Box>
                 </Box>
             </Modal>
             <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2} padding={2} sx={{ flexDirection: { xs: 'column', sm: 'row' } }}>
-                <TextField
-                    select
-                    id="demo-simple-select-autowidth"
-                    label="Categoria"
-                    value={filterCategory}
+                <Select
+                    labelId="prodCategoria-select-label"
+                    id="prodCategoria-select"
+                    label="prodCategoria"
+                    name="Prod_Categoria"
+                    variant="outlined" 
+                    defaultValue={filterCategory}
+                    fullWidth
                     onChange={(e) => setFilterCategory(Number(e.target.value))}
-                    size="small"
-                    sx={{bgcolor: 'background.paper'}}
+                    MenuProps={MenuProps}
+                    sx={{ width: "15%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' } }}
                 >
                     <MenuItem value={-1}>Todas</MenuItem>
                     {categorias.map((categoria) => (
@@ -464,7 +478,7 @@ export const TelaEstoque: React.FC = () => {
                             {categoria.CatProd_Nome}
                         </MenuItem>
                     ))}
-                </TextField>
+                </Select>
             </Box>
             <TableProducts
                 categorias={categorias}
@@ -473,17 +487,17 @@ export const TelaEstoque: React.FC = () => {
              <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2} padding={2}>
                 <ProtectedComponent allowedRoles={['1']}>
                     <Box>
-                        <Button onClick={() => navigate("/cadastro-produto")} variant="contained" color="primary" sx={{ padding: "15px", width: "100%" }}><Typography variant="h6">Adicionar Produto</Typography></Button>
+                        <Button onClick={() => navigate("/cadastro-produto")} variant="contained" color="primary" sx={{ padding: "15px", width: "100%" }}><Typography variant="h6" fontSize={14}>Adicionar Produto</Typography></Button>
                     </Box>
                 </ProtectedComponent>
                 <ProtectedComponent allowedRoles={['1']}>
                     <Box>
-                        <Button onClick={() => handleOpen()} variant="contained" color="primary" sx={{ padding: "15px", width: "100%" }}><Typography variant="h6">Gerenciar Categorias</Typography></Button>
+                        <Button onClick={() => handleOpen()} variant="contained" color="primary" sx={{ padding: "15px", width: "100%" }}><Typography variant="h6" fontSize={14}>Gerenciar Categorias</Typography></Button>
                     </Box>
                 </ProtectedComponent>
                 <ProtectedComponent allowedRoles={['1']}>
                     <Box>
-                        <Button onClick={() => handleOpenLancamentos()} variant="contained" color="primary" sx={{ padding: "15px", width: "100%" }}><Typography variant="h6">Lançamentos</Typography></Button>
+                        <Button onClick={() => handleOpenLancamentos()} variant="contained" color="primary" sx={{ padding: "15px", width: "100%" }}><Typography variant="h6" fontSize={14}>Lançamentos</Typography></Button>
                     </Box>
                 </ProtectedComponent>
                 <Box sx={{ '@media (max-width: 800px)': { width: '50%' } }}>

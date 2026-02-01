@@ -94,31 +94,31 @@ export const TableProducts: React.FC<TableProductsProps> = ({ categorias, filter
                     <TableHead>
                         <TableRow>
                             <ProtectedComponent allowedRoles={['1', '2']}>
-                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Código</TableCell>
+                                <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Código</TableCell>
                             </ProtectedComponent>
                             <ProtectedComponent allowedRoles={['1', '2']}>
-                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Nome</TableCell>
+                                <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Nome</TableCell>
                             </ProtectedComponent>
                             <ProtectedComponent allowedRoles={['1', '2']}>
-                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Categoria</TableCell>
+                                <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Categoria</TableCell>
                             </ProtectedComponent>
                             <ProtectedComponent allowedRoles={['1', '2']}>
-                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Estoque</TableCell>
+                                <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Estoque</TableCell>
                             </ProtectedComponent>
                             <ProtectedComponent allowedRoles={['1']}>
-                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Preço de Custo</TableCell>
+                                <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Preço de Custo</TableCell>
                             </ProtectedComponent>  
                             <ProtectedComponent allowedRoles={['1']}>
-                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Porcentagem de Lucro</TableCell>
+                                <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Porcentagem de Lucro</TableCell>
                             </ProtectedComponent>
                                 <ProtectedComponent allowedRoles={['1', '2']}>
-                            <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Preço de Venda</TableCell>
+                            <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Preço de Venda</TableCell>
                                 </ProtectedComponent>
                             <ProtectedComponent allowedRoles={['1']}>
-                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Editar</TableCell>
+                                <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Editar</TableCell>
                             </ProtectedComponent>
                             <ProtectedComponent allowedRoles={['1']}>
-                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Remover</TableCell>
+                                <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Remover</TableCell>
                             </ProtectedComponent>
                         </TableRow>
                     </TableHead>
@@ -126,40 +126,40 @@ export const TableProducts: React.FC<TableProductsProps> = ({ categorias, filter
                         {
                             filteredProducts.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={9} sx={{ textAlign: "center", fontSize: 20 }}>Nenhum produto cadastrado</TableCell>
+                                    <TableCell colSpan={9} sx={{ textAlign: "center", fontSize: 14 }}>Nenhum produto cadastrado</TableCell>
                                 </TableRow>
                             ) : (
                              
                                 filteredProducts.sort((a, b) => b.Prod_Categoria - a.Prod_Categoria).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(product => (
                                         <TableRow key={product.ID_Prod} hover sx={{ cursor: 'pointer' }}>
                                             <ProtectedComponent allowedRoles={['1', '2']}>
-                                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_CodProduto}</TableCell>
+                                                <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_CodProduto}</TableCell>
                                             </ProtectedComponent>
                                             <ProtectedComponent allowedRoles={['1', '2']}>
-                                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_Nome}</TableCell>
+                                                <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_Nome}</TableCell>
                                             </ProtectedComponent>
                                             <ProtectedComponent allowedRoles={['1', '2']}>
-                                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_Categoria ? categorias?.find(c => c.ID_CategoriaProduto === product.Prod_Categoria)?.CatProd_Nome : "Sem categoria"}</TableCell>
+                                                <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_Categoria ? categorias?.find(c => c.ID_CategoriaProduto === product.Prod_Categoria)?.CatProd_Nome : "Sem categoria"}</TableCell>
                                             </ProtectedComponent>
                                             <ProtectedComponent allowedRoles={['1', '2']}>
-                                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_Estoque}</TableCell>
+                                                <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_Estoque}</TableCell>
                                             </ProtectedComponent>
                                             <ProtectedComponent allowedRoles={['1']}>
-                                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>R${product.Prod_CustoCompra}</TableCell>
+                                                <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>R${product.Prod_CustoCompra}</TableCell>
                                             </ProtectedComponent>
                                             <ProtectedComponent allowedRoles={['1']}>
-                                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_PorcLucro}%</TableCell>
+                                                <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_PorcLucro}%</TableCell>
                                             </ProtectedComponent>
                                             <ProtectedComponent allowedRoles={['1', '2']}>
-                                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>R${product.Prod_Valor}</TableCell>
+                                                <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>R${product.Prod_Valor}</TableCell>
                                             </ProtectedComponent>
                                             <ProtectedComponent allowedRoles={['1']}>
-                                                <TableCell sx={{ fontSize: 20, textAlign: "center" }}>
+                                                <TableCell sx={{ fontSize: 14, textAlign: "center" }}>
                                                     <Button onClick={() => navigate(`/editar-produto/${product.ID_Prod}`)}><Icon sx={{ fontSize: 40 }}>edit</Icon></Button>
                                                 </TableCell>
                                             </ProtectedComponent>
                                             <ProtectedComponent allowedRoles={['1']}>
-                                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { padding: "0px" } }}>
+                                                <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { padding: "0px" } }}>
                                                     <Button onClick={() => onRemoveProduct(product.ID_Prod)} sx={{ '@media (max-width: 800px)': { padding: "0px" } }}><Icon sx={{ fontSize: 30, '@media (max-width: 800px)': { padding: "0px" } }}>delete_forever</Icon></Button>
                                                 </TableCell>  
                                             </ProtectedComponent>

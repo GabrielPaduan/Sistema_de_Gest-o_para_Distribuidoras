@@ -53,10 +53,10 @@ export const TableClients: React.FC = () => {
                 <Table stickyHeader>
                     <TableHead >
                         <TableRow sx={{ background: '#00008B' }}>
-                            <TableCell  sx={{ fontSize: 20, textAlign: "center" }}>Cliente</TableCell>
+                            <TableCell  sx={{ fontSize: 14, textAlign: "center" }}>Cliente</TableCell>
                             <ProtectedComponent allowedRoles={['1']}>
-                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Editar</TableCell>
-                                <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Remover</TableCell>
+                                <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Editar</TableCell>
+                                <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Remover</TableCell>
                             </ProtectedComponent>
                         </TableRow>
                     </TableHead>
@@ -64,7 +64,7 @@ export const TableClients: React.FC = () => {
                         {
                             filteredClients.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} sx={{ textAlign: "center", fontSize: 20 }}>
+                                    <TableCell colSpan={5} sx={{ textAlign: "center", fontSize: 14 }}>
                                         Nenhum cliente cadastrado
                                     </TableCell>
                                 </TableRow>
@@ -79,10 +79,10 @@ export const TableClients: React.FC = () => {
                                     >
                                         <TableCell onClick={() => window.location.href = `/contrato-cliente/${client.id}`} sx={{ fontSize: 16, textAlign: "center" }}>{client.cli_razaoSocial}</TableCell>
                                         <ProtectedComponent allowedRoles={['1']}>
-                                            <TableCell sx={{ fontSize: 20, textAlign: "center" }}>
+                                            <TableCell sx={{ fontSize: 14, textAlign: "center" }}>
                                                 <Button onClick={() => navigate(`/editar-cliente/${client.id}`)}><Icon sx={{ fontSize: 40 }}>edit</Icon></Button>
                                             </TableCell>
-                                            <TableCell  sx={{ fontSize: 20, textAlign: "center", '@media (max-width: 800px)': { padding: "0px" } }}>
+                                            <TableCell  sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { padding: "0px" } }}>
                                                 <Button onClick={() => onRemoveContract(client.id)} sx={{ '@media (max-width: 800px)': { padding: "0px" } }}><Icon sx={{ fontSize: 30, '@media (max-width: 800px)': { padding: "0px" } }}>delete_forever</Icon></Button>
                                             </TableCell>
                                         </ProtectedComponent>

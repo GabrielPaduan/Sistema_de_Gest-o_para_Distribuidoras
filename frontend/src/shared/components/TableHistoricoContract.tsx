@@ -253,17 +253,17 @@ export const TableHistoricoContract: React.FC = () => {
                                 <Table stickyHeader>
                                     <TableHead>
                                     <TableRow>
-                                        <TableCell  sx={{ fontSize: 20, textAlign: "center" }}>Nome</TableCell>
-                                        <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>Data</TableCell>
-                                        <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>Endereço</TableCell>
-                                        <TableCell sx={{ fontSize: 20, textAlign: "center" }}>Ações</TableCell>
+                                        <TableCell  sx={{ fontSize: 14, textAlign: "center" }}>Nome</TableCell>
+                                        <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>Data</TableCell>
+                                        <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>Endereço</TableCell>
+                                        <TableCell sx={{ fontSize: 14, textAlign: "center" }}>Ações</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {
                                         filteredClientsPDF.length === 0 ? (
                                             <TableRow>
-                                                <TableCell colSpan={5} sx={{ textAlign: "center", fontSize: 20 }}>
+                                                <TableCell colSpan={5} sx={{ textAlign: "center", fontSize: 14 }}>
                                                     Nenhum pdf de contrato cadastrado
                                                 </TableCell>
                                             </TableRow>
@@ -304,7 +304,7 @@ export const TableHistoricoContract: React.FC = () => {
                             
                             <Box>
                                 <Typography variant="h5" sx={{ textAlign: 'center', mt: 4 }}>Observações:</Typography>
-                                <Typography variant="body1" sx={{ textAlign: 'center', mb: 2, fontSize: 20, borderRadius: '4px', padding: '10px', width: '80%', margin: 'auto' }}>
+                                <Typography variant="body1" sx={{ textAlign: 'center', mb: 2, fontSize: 14, borderRadius: '4px', padding: '10px', width: '80%', margin: 'auto' }}>
                                     {selectedPdf.PDF_Observacoes ? selectedPdf.PDF_Observacoes : "Nenhuma observação adicionada."}
                                 </Typography>
                             </Box>
@@ -344,16 +344,16 @@ export const TableHistoricoContract: React.FC = () => {
                                 <Table stickyHeader>
                                     <TableHead>
                                     <TableRow>
-                                        <TableCell sx={{ fontSize: 20, textAlign: "Center"}}/>
-                                        <TableCell  sx={{ fontSize: 20, textAlign: "center" }}>Nome</TableCell>
-                                        <TableCell sx={{ fontSize: 20, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>Endereço</TableCell>
+                                        <TableCell sx={{ fontSize: 14, textAlign: "Center"}}/>
+                                        <TableCell  sx={{ fontSize: 14, textAlign: "center" }}>Nome</TableCell>
+                                        <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>Endereço</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {
                                         filteredClients.length === 0 ? (
                                             <TableRow>
-                                                <TableCell colSpan={5} sx={{ textAlign: "center", fontSize: 20 }}>
+                                                <TableCell colSpan={5} sx={{ textAlign: "center", fontSize: 14 }}>
                                                     Nenhum cliente cadastrado
                                                 </TableCell>
                                             </TableRow>
@@ -405,7 +405,7 @@ export const TableHistoricoContract: React.FC = () => {
                             
                             <Box>
                                 <Typography variant="h5" sx={{ textAlign: 'center', mt: 4 }}>Observações:</Typography>
-                                <Typography variant="body1" sx={{ textAlign: 'center', mb: 2, fontSize: 20, borderRadius: '4px', padding: '10px', width: '80%', margin: 'auto' }}>
+                                <Typography variant="body1" sx={{ textAlign: 'center', mb: 2, fontSize: 14, borderRadius: '4px', padding: '10px', width: '80%', margin: 'auto' }}>
                                     {selectedPdf.PDF_Observacoes ? selectedPdf.PDF_Observacoes : "Nenhuma observação adicionada."}
                                 </Typography>
                             </Box>
