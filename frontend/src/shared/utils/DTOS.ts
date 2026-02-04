@@ -180,7 +180,7 @@ export interface objectContractExclusion {
     productId: number;
 }
 
-export interface ProductLaunch {
+export interface ProductLaunching {
     ID_Prod: number;
     Prod_CodProduto: string;
     Prod_Estoque: number;
@@ -188,3 +188,17 @@ export interface ProductLaunch {
     Prod_Observacao: string;
     Prod_QuantidadeLancada: number;
 }
+
+export interface ProductLaunch { 
+    ID_LancProd: number;
+    LancProd_IDProd: number;
+    LancProd_CodProd: string;
+    LancProd_QtdeLanc: number;
+    LancProd_CustoCompra: number;
+    LancProd_Data: string;
+    LancProd_OperadorId: number;
+    LancProd_OperadorName: string;
+    LancProd_Observacao: string;
+    LancProd_Tipo: number;
+}
+

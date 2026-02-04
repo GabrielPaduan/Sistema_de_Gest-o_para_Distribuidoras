@@ -123,7 +123,7 @@ export const Form: React.FC = () => {
             <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2}>
                 <Box>
                     <Button variant="contained" color="primary" type="submit" sx={{ margin: "10px auto", padding: "15px", '@media (max-width: 800px)': { width: "100%" } }}>
-                        <Typography variant="h6" color="text.secondary" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }} >
+                        <Typography variant="h6" fontSize={14} color="text.secondary" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }} >
                             Cadastrar
                         </Typography>
                     </Button>

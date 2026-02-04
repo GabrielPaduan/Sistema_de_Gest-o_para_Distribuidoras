@@ -42,9 +42,10 @@ export const loginUser = async (loginData: LoginDTO): Promise<any> => {
         if (!isPasswordCorrect) {
             throw new Error("Usuário não encontrado ou credenciais inválidas.");
         }
-
+        console.log("User authenticated:", user);
+        console.log("Generating JWT token for user ID:", user.id);
         const payload = {
-            sub: user.usu_id,
+            sub: user.id,
             name: user.usu_nome,
             role: user.usu_typeUser
         }

@@ -1,5 +1,5 @@
 import api from '../services/api'; // Importa nossa instância centralizada do axios
-import { ProductDTO, ProductDTOInsert, ProductLaunch } from '../utils/DTOS'; // Supondo que você também tenha um arquivo de tipos no frontend
+import { ProductDTO, ProductDTOInsert, ProductLaunch, ProductLaunching } from '../utils/DTOS'; // Supondo que você também tenha um arquivo de tipos no frontend
 
 // Função para buscar TODOS os produtos
 export const getAllProducts = async (): Promise<ProductDTO[]> => {
@@ -44,7 +44,7 @@ export const getProductsWithPagination = async (page: number, limit: number): Pr
   return response.data;
 }
 
-export const launchProduct = async (productToLaunch: ProductLaunch, type: number): Promise<void> => {
+export const launchProduct = async (productToLaunch: ProductLaunching, type: number): Promise<void> => {
   const response = await api.put(`/produtos/launch/${type}`, productToLaunch);
   return response.data;
 }

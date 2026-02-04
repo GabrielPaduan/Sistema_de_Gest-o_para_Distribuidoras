@@ -5,10 +5,12 @@ import { GenericButton } from "./GenericButton";
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { createCategory, deleteCategory, getAllCategories, updateCategory } from "../services/categoriasProdutoService";
-import { ProductDTO, ProductLaunch, ProductsCategoriesDTO, ProductsCategoriesDTOInsert } from "../utils/DTOS";
+import { ProductDTO, ProductLaunch, ProductLaunching, ProductsCategoriesDTO, ProductsCategoriesDTOInsert } from "../utils/DTOS";
 import { SearchField } from "./searchField";
 import { useDebounce } from "use-debounce";
-import { getAllProducts, launchProduct, searchProductsByName } from "../services/productService";
+import { getAllProducts, getProductById, launchProduct, searchProductsByName } from "../services/productService";
+import { createLaunch } from "../services/productLaunchService";
+import { useAuth } from '../context/AuthContext';
 
 const style = {
   position: 'absolute',
@@ -21,9 +23,6 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
-
-
-
 
 export const TelaEstoque: React.FC = () => {
     const navigate = useNavigate();
@@ -44,7 +43,9 @@ export const TelaEstoque: React.FC = () => {
     const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
     const [productsData, setProductsData] = useState<ProductDTO[]>([]);
     const [displayProductSearch, setDisplayProductSearch] = useState<'flex' | 'none'>('flex');
-    const [selectedProductLaunch, setSelectedProductLaunch] = useState<ProductLaunch>({ ID_Prod: 0, Prod_CodProduto: "", Prod_Estoque: 0, Prod_CustoCompra: 0, Prod_Observacao: "", Prod_QuantidadeLancada: 0 });
+    const [selectedProductLaunch, setSelectedProductLaunch] = useState<ProductLaunching>({ ID_Prod: 0, Prod_CodProduto: "", Prod_Estoque: 0, Prod_CustoCompra: 0, Prod_Observacao: "", Prod_QuantidadeLancada: 0 });
+    const [ProductLaunch, setProductLaunch] = useState<ProductLaunch>();
+    const { user } = useAuth()
 
     const ITEM_HEIGHT = 48; 
     const ITEM_PADDING_TOP = 8; 
@@ -179,8 +180,22 @@ export const TelaEstoque: React.FC = () => {
     };
 
     const enviarLancamento = async () => {
+        console.log(user)
         try {
             const response = await launchProduct(selectedProductLaunch, lancType);
+            const responseLaunch = await createLaunch({
+                ID_LancProd: 0,
+                LancProd_IDProd: selectedProductLaunch.ID_Prod,
+                LancProd_CodProd: selectedProductLaunch.Prod_CodProduto,
+                LancProd_QtdeLanc: Number(selectedProductLaunch.Prod_QuantidadeLancada),
+                LancProd_CustoCompra: Number(selectedProductLaunch.Prod_CustoCompra),
+                LancProd_Data: new Date().toISOString(),
+                LancProd_OperadorId: user ? Number(user.sub) : 0,
+                LancProd_OperadorName: user ? user.name : '',
+                LancProd_Observacao: selectedProductLaunch.Prod_Observacao,
+                LancProd_Tipo: lancType
+            })
+            handleCloseLancamentos();
             console.log("Lançamento realizado com sucesso:", response);
         } catch (error) {
             console.error("Error launching product:", error);
@@ -306,7 +321,7 @@ export const TelaEstoque: React.FC = () => {
                                         inputProps = {{ style: { padding: "8px" } }}
                                     />
                                 </Box>
-                        <Box width={"100%"} display={"flex"} justifyContent={"space-between"} height={"100%"} gap={1} sx={{ '@media (max-width: 800px)': { width: "100%" } }}>   
+                        <Box width={"100%"} display={"flex"} justifyContent={"space-evenly"} height={"100%"} gap={1} sx={{ '@media (max-width: 800px)': { width: "100%" } }}>   
                             { modalMode === 0 &&
                                 <Button
                                     variant="contained"
@@ -326,7 +341,7 @@ export const TelaEstoque: React.FC = () => {
                                         <Typography variant="h6" fontSize={14} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}> Editar</Typography>
                                     </Button>
                             }
-                            <Button onClick={() => { modalMode === 0 ? setModalMode(1) : setModalMode(0) }} variant="contained" color="primary">
+                            <Button onClick={() => { modalMode === 1 ? setModalMode(0) : setModalMode(0) }} variant="contained" color="primary">
                                 <Typography variant="h6" fontSize={14} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}>Switch Mode</Typography>
                             </Button>
                             <Button onClick={handleClose} variant="contained" color="primary">
@@ -481,6 +496,7 @@ export const TelaEstoque: React.FC = () => {
                 </Select>
             </Box>
             <TableProducts
+                products={productsData}
                 categorias={categorias}
                 filteredCategory={filterCategory}
              />

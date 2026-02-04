@@ -8,6 +8,7 @@ import pdfRoutes from './routes/pdfRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import snapshotProductsRoutes from './routes/snapshotProductsRoutes.js';
 import productCategoriesRoutes from './routes/productsCategoriesRoutes.js';
+import productLaunchRoutes from './routes/productLaunchRoutes.js';
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use('/pdfContratos', pdfRoutes);
 app.use('/cadastro', userRoutes);
 app.use('/snapshotProducts', snapshotProductsRoutes);
 app.use('/categoriasProduto', productCategoriesRoutes);
+app.use('/product-launches', productLaunchRoutes)
 
 app.listen(port, () => {
   console.log(`🚀 Servidor backend rodando na porta http://localhost:${port}`);

@@ -1,13 +1,14 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { ProductDTO, ProductsCategoriesDTO, ProductsCategoriesDTOInsert } from "../utils/DTOS"; // Removi ProductDTOInsert, pois não está sendo usado
+import { ProductDTO, ProductLaunch, ProductsCategoriesDTO, ProductsCategoriesDTOInsert } from "../utils/DTOS"; 
 import { useEffect, useState } from "react";
-import { getProductById, updateProduct } from "../services/productService"; // Removi createProduct
-import { Box, TextField, Typography, Button, InputAdornment, CircularProgress, Alert, Select, MenuItem, Modal, SelectChangeEvent, TableContainer, Table, TableHead, TableCell, TableBody, TableRow } from "@mui/material";
+import { getProductById, updateProduct } from "../services/productService"; 
+import { Box, TextField, Typography, Button, InputAdornment, CircularProgress, Alert, Select, MenuItem, Modal, SelectChangeEvent, TableContainer, Table, TableHead, TableCell, TableBody, TableRow, Tabs, Tab } from "@mui/material";
 import { GenericButton } from "./GenericButton";
-import { NumericFormat } from "react-number-format";
 import { createCategory, getAllCategories } from "../services/categoriasProdutoService";
-import { get } from "http";
+import { format } from "date-fns";
+
 import { useShortcut } from "../hooks/useShortcut";
+import { getLaunchByProductId } from "../services/productLaunchService";
 
 const style = {
   position: 'absolute',
@@ -24,20 +25,15 @@ const style = {
 export const FormEditarProduto: React.FC = () => {
     let idProd = parseInt(useParams().id || "0");
     const navigate = useNavigate();
-
-    // --- Estado Refatorado ---
-    // 1. Fonte única da verdade para os dados do formulário
     const [formData, setFormData] = useState<ProductDTO | null>(null);
-    
-    // 2. Estados para controle da UI
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [categorias, setCategorias] = useState<ProductsCategoriesDTO[]>([]);
-
     const [open, setOpen] = useState(false);
-
     const [nomeCategoria, setNomeCategoria] = useState<string>('');
     const [prateleira, setPrateleira] = useState<number>(0);
+    const [lancamentosProduto, setLancamentosProduto] = useState<ProductLaunch[]>([]);
+    const [lancType, setLancType] = useState<0 | 1>(0);
 
     const ITEM_HEIGHT = 48; 
     const ITEM_PADDING_TOP = 8; 
@@ -71,7 +67,6 @@ export const FormEditarProduto: React.FC = () => {
         
     }, []);
 
-    // --- Carregamento dos Dados ---
     useEffect(() => {
         if (idProd === 0) {
             setError("ID de produto inválido.");
@@ -84,9 +79,9 @@ export const FormEditarProduto: React.FC = () => {
                 setLoading(true);
                 setError(null);
                 const productData = await getProductById(idProd);
-                
+                const lancamentoData = await getLaunchByProductId(idProd);
+                setLancamentosProduto(lancamentoData);
                 if (productData) {
-                    // Calcula a % de lucro inicial corretamente ao carregar
                     let calculatedPorcentagemLucro = productData.Prod_PorcLucro;
                     if (productData.Prod_CustoCompra > 0 && productData.Prod_Valor > 0) {
                         calculatedPorcentagemLucro = ((productData.Prod_Valor - productData.Prod_CustoCompra) / productData.Prod_CustoCompra) * 100;
@@ -110,9 +105,6 @@ export const FormEditarProduto: React.FC = () => {
         fetchProduct();
     }, [idProd]);
 
-    // --- Handlers de Mudança ---
-
-    // Handler genérico para campos simples
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
         
@@ -122,7 +114,6 @@ export const FormEditarProduto: React.FC = () => {
             const originalValue = prevData[name as keyof ProductDTO];
             let processedValue: string | number = value;
 
-            // Mantém o tipo do dado (se era número, converte para número)
             if (typeof originalValue === 'number') {
                 processedValue = parseFloat(value) || 0;
             }
@@ -141,12 +132,11 @@ export const FormEditarProduto: React.FC = () => {
             if (!prevData) return null;
             return {
                 ...prevData,
-                [name]: Number(value) // Garante que o valor salvo seja sempre um número, 
+                [name]: Number(value) 
             }
         });
     };
 
-    // Handler específico para Custo de Compra
     const handleCustoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newCusto = parseFloat(e.target.value) || 0;
         
@@ -168,7 +158,6 @@ export const FormEditarProduto: React.FC = () => {
         });
     };
 
-    // Handler específico para Porcentagem de Lucro
     const handlePorcChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newPorc = parseFloat(e.target.value) || 0;
 
@@ -178,7 +167,7 @@ export const FormEditarProduto: React.FC = () => {
             const custoCompra = prevData.Prod_CustoCompra;
             let newValor = 0;
 
-            if (custoCompra > 0 && newPorc >= 0) { // Permite lucro 0
+            if (custoCompra > 0 && newPorc >= 0) { 
                 newValor = custoCompra + (custoCompra * newPorc) / 100;
             }
 
@@ -190,7 +179,6 @@ export const FormEditarProduto: React.FC = () => {
         });
     };
 
-    // Handler específico para Custo de Venda (Valor)
     const handleValorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newValor = parseFloat(e.target.value) || 0;
 
@@ -200,7 +188,6 @@ export const FormEditarProduto: React.FC = () => {
             const custoCompra = prevData.Prod_CustoCompra;
             let newPorc = 0;
 
-            // Só calcula % se o valor de venda for maior ou igual ao custo
             if (custoCompra > 0 && newValor >= custoCompra) {
                 newPorc = ((newValor - custoCompra) / custoCompra) * 100;
             }
@@ -213,10 +200,6 @@ export const FormEditarProduto: React.FC = () => {
         });
     };
 
-
-
-
-    // --- Submissão do Formulário ---
     const submitForm = async (event?: React.FormEvent<HTMLFormElement>) => {
         if (event) event?.preventDefault();
         
@@ -226,11 +209,9 @@ export const FormEditarProduto: React.FC = () => {
         }
 
         try {
-            setError(null); // Limpa erros antigos
-            // O objeto a ser enviado é o próprio estado.
+            setError(null); 
             const updatedProduct: ProductDTO = {
                 ...formData,
-                // Garantir que os tipos numéricos sejam números
                 Prod_Valor: Number(formData.Prod_Valor) || 0,
                 Prod_CustoCompra: Number(formData.Prod_CustoCompra) || 0,
                 Prod_NCM: Number(formData.Prod_NCM) || 0,
@@ -253,9 +234,6 @@ export const FormEditarProduto: React.FC = () => {
 
     useShortcut("F1", () => submitForm());
 
-    // --- Renderização ---
-
-    // Estado de "disabled" agora é derivado, não um estado
     const fieldsDisabled = (formData?.Prod_CustoCompra || 0) <= 0;
 
     if (loading) {
@@ -266,7 +244,6 @@ export const FormEditarProduto: React.FC = () => {
         );
     }
 
-    // Não exibe o formulário se deu erro no carregamento inicial
     if (!formData) {
         return (
             <Box display="flex" flexDirection="column" gap={2} justifyContent="center" alignItems="center" height="80vh">
@@ -275,6 +252,14 @@ export const FormEditarProduto: React.FC = () => {
             </Box>
         );
     }
+
+    const handleChangeLancType = (event: React.SyntheticEvent, newValue: number) => {
+        if (newValue === 0) {
+            setLancType(0);
+        } else {
+            setLancType(1);
+        }  
+    };
 
     return (
         <>
@@ -290,7 +275,6 @@ export const FormEditarProduto: React.FC = () => {
                         </Typography>
                         <Typography id="modal-modal-description" sx={{ mt: 2 }} />
 
-                        {/* <TextField variant="filled"  label="Código do Produto" name="codigoProduto" required placeholder="Digite o código do produto" fullWidth sx={{ marginBottom: 2 }}/> */}
                         <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} gap={2} mt={2} sx={{ flexDirection: "column"  }}>
                             <Box display={"flex"} alignItems={"center"} justifyContent={"space-evenly"} width={"100%"} height={"100%"} sx={{ gap: 2, '@media (max-width: 800px)': { width: "100%" } }}>
                                 <Typography component="label" htmlFor={`quantity`} variant="h6" sx={{ '@media (max-width: 800px)': { fontSize: '16px' } }}>
@@ -350,7 +334,6 @@ export const FormEditarProduto: React.FC = () => {
                 margin="auto"
                 onSubmit={submitForm}
             >
-                {/* Exibe erro de submissão */}
                 {error && <Alert severity="error">{error}</Alert>}
 
                 <Box display={"flex"} flexDirection={"column"} width={"100%"} gap={2}>
@@ -360,7 +343,7 @@ export const FormEditarProduto: React.FC = () => {
                             name="Prod_CodBarras" 
                             variant="outlined" 
                             placeholder="Digite o código de barras" 
-                            disabled // Campo código de barras desabilitado como no original
+                            disabled
                             value={formData.Prod_CodBarras} 
                             onChange={handleChange} 
                             sx={{ width: "33.33%", '& .MuiInputLabel-root': { color: 'gray' }, '@media (max-width: 800px)': { width: "100%" } }} 
@@ -456,11 +439,11 @@ export const FormEditarProduto: React.FC = () => {
                             variant="outlined" 
                             placeholder="Digite o custo de compra" 
                             value={formData.Prod_CustoCompra} 
-                            onChange={handleCustoChange} // Handler específico
+                            onChange={handleCustoChange} 
                             type="number"  
-                            InputProps={{ // Prop correta é InputProps
+                            InputProps={{ 
                                 startAdornment: <InputAdornment position="start">R$</InputAdornment>,
-                                inputProps: { min: 0 } // Evita valores negativos
+                                inputProps: { min: 0 }
                             }} 
                             sx={{ width: "33.33%", '& .MuiInputLabel-root': { color: 'gray' }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' },'@media (max-width: 800px)': { width: "100%" } }} 
                             onFocus={(event) => event.target.select()}
@@ -478,14 +461,14 @@ export const FormEditarProduto: React.FC = () => {
                             }}
                             sx={{ width: "33.33%", '@media (max-width: 800px)': { width: "100%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' } }}  
                             value={formData.Prod_PorcLucro}
-                            onChange={handlePorcChange} // Handler específico
-                            disabled={fieldsDisabled} // Lógica de disabled simplificada
+                            onChange={handlePorcChange}
+                            disabled={fieldsDisabled} 
                             onFocus={(event) => event.target.select()}
                         />
 
                         <TextField 
                             label="Custo de Venda" 
-                            name="Prod_Valor" // Nome correto do campo no DTO
+                            name="Prod_Valor" 
                             variant="outlined" 
                             placeholder="Digite o custo de venda" 
                             type="number"
@@ -495,34 +478,70 @@ export const FormEditarProduto: React.FC = () => {
                             }}
                             sx={{ width: "33.33%", '@media (max-width: 800px)': { width: "100%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }}}
                             value={formData.Prod_Valor}
-                            onChange={handleValorChange} // Handler específico  
-                            disabled={fieldsDisabled} // Lógica de disabled simplificada
+                            onChange={handleValorChange} 
+                            disabled={fieldsDisabled} 
                             onFocus={(event) => event.target.select()}
                         />
                     </Box>
                 </Box>
 
-                <Box width={"50%"} sx={{  maxWidth: "70%", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", marginTop: 3, marginBottom: 2, '@media (max-width: 800px)': { maxWidth: "90%" }  }}>
+                <Box width={"auto"} sx={{  maxWidth: "100%", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", marginTop: 3, marginBottom: 2, '@media (max-width: 800px)': { maxWidth: "90%" }  }}>
                     <Typography variant="h6" gutterBottom>
                         Histórico de Lançamentos
                     </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-evenly' }}>
+                        <Tabs value={lancType} onChange={handleChangeLancType} aria-label="basic tabs example">
+                            <Tab label="Entrada" sx={{ color: 'black', opacity: 0.5, '&.Mui-selected': { opacity: 1 } }} />
+                            <Tab label="Saída" sx={{ color: 'black', opacity: 0.5, '&.Mui-selected': { opacity: 1 } }} />
+                        </Tabs>
+                    </Box>
                     <TableContainer>
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>Nome</TableCell>
-                                    <TableCell>Endereço</TableCell>
-                                    <TableCell>Cidade</TableCell>
-                                    <TableCell>Telefone</TableCell>
+                                    <TableCell><Typography variant="h6" fontSize={16} textAlign={"center"}>Código de Produto</Typography></TableCell>
+                                    <TableCell><Typography variant="h6" fontSize={16} textAlign={"center"}>Quantidade Lançada</Typography></TableCell>
+                                    {
+                                        lancType === 0 &&
+                                        <TableCell><Typography variant="h6" fontSize={16} textAlign={"center"}>Custo de Compra</Typography></TableCell>
+                                    }
+                                    <TableCell><Typography variant="h6" fontSize={16} textAlign={"center"}>Data | Hora</Typography></TableCell>
+                                    <TableCell><Typography variant="h6" fontSize={16} textAlign={"center"}>Operador</Typography></TableCell>
+                                    <TableCell><Typography variant="h6" fontSize={16} textAlign={"center"}>Observação</Typography></TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                <TableRow>
-                                    <TableCell></TableCell>
-                                    <TableCell></TableCell>
-                                    <TableCell></TableCell>
-                                    <TableCell></TableCell>
-                                </TableRow>
+                                {
+                                    lancamentosProduto.length === 0 && (
+                                        <TableRow>
+                                            <TableCell colSpan={6} align="center">
+                                                <Typography variant="h6" fontSize={14} textAlign={"center"}>Nenhum lançamento encontrado para este produto.</Typography>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                }
+                                {
+                                lancamentosProduto.length > 0 && lancType === 0 && lancamentosProduto.filter(l => l.LancProd_Tipo === 0).map((lancamento) => (
+                                    <TableRow  key={lancamento.ID_LancProd}>    
+                                        <TableCell><Typography variant="h6" fontSize={14} textAlign={"center"}>{lancamento.LancProd_CodProd}</Typography></TableCell>
+                                        <TableCell><Typography variant="h6" fontSize={14} textAlign={"center"}>{lancamento.LancProd_QtdeLanc}</Typography></TableCell>
+                                        <TableCell><Typography variant="h6" fontSize={14} textAlign={"center"}>R${lancamento.LancProd_CustoCompra}</Typography></TableCell>
+                                        <TableCell><Typography variant="h6" fontSize={14} textAlign={"center"}>{format(new Date(lancamento.LancProd_Data), 'dd/MM/yyyy | HH:mm')}</Typography></TableCell>
+                                        <TableCell><Typography variant="h6" fontSize={14} textAlign={"center"}>{lancamento.LancProd_OperadorName}</Typography></TableCell>
+                                        <TableCell><Typography variant="h6" fontSize={14} textAlign={"center"}>{lancamento.LancProd_Observacao ? lancamento.LancProd_Observacao : "Sem Observação"}</Typography></TableCell>
+                                    </TableRow>
+                                ))}
+                                {
+                                    lancamentosProduto.length > 0 && lancType === 1 && lancamentosProduto.filter(l => l.LancProd_Tipo === 1).map((lancamento) => (
+                                        <TableRow key={lancamento.ID_LancProd}>    
+                                            <TableCell><Typography variant="h6" fontSize={14} textAlign={"center"}>{lancamento.LancProd_CodProd}</Typography></TableCell>
+                                            <TableCell><Typography variant="h6" fontSize={14} textAlign={"center"}>{lancamento.LancProd_QtdeLanc}</Typography></TableCell>
+                                            <TableCell><Typography variant="h6" fontSize={14} textAlign={"center"}>{format(new Date(lancamento.LancProd_Data), 'dd/MM/yyyy | HH:mm')}</Typography></TableCell>
+                                            <TableCell><Typography variant="h6" fontSize={14} textAlign={"center"}>{lancamento.LancProd_OperadorName}</Typography></TableCell>
+                                            <TableCell><Typography variant="h6" fontSize={14} textAlign={"center"}>{lancamento.LancProd_Observacao ? lancamento.LancProd_Observacao : "Sem Observação"}</Typography></TableCell>
+                                        </TableRow>
+                                    ))
+                                }
                             </TableBody>
                         </Table>
                     </TableContainer>
@@ -531,7 +550,7 @@ export const FormEditarProduto: React.FC = () => {
                 <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2}>
                     <Box>
                         <Button variant="contained" color="primary" type="submit" sx={{ margin: "10px auto", padding: "15px", '@media (max-width: 800px)': { width: "100%" }  }}>
-                            <Typography variant="h6" color="text.secondary" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }} >
+                            <Typography variant="h6" fontSize={14} color="text.secondary" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }} >
                                 Salvar Alterações [F1]
                             </Typography>
                         </Button>

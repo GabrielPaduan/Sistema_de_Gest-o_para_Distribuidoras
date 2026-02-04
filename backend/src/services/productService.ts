@@ -45,7 +45,6 @@ export const findProductByContractId = async (contractId: number): Promise<Produ
   }
 
   const product: ProductDTO | undefined = Array.isArray(data.Produtos) ? data.Produtos[0] : data.Produtos;
-  // Retorna o produto diretamente, garantindo que não seja undefined.
   return product ?? null;
 };
 
@@ -96,8 +95,6 @@ export const productLaunch = async (productToLaunch: ProductLaunch, launchType: 
     if (!product) {
         throw new Error('Produto não encontrado');
     }
-    console.log("PRODUCT TO LAUNCH: ", productToLaunch);
-    console.log("LAUNCH TYPE: ", launchType);
     if (launchType === 0) { 
         const newStock = Number(product.Prod_Estoque) + Number(productToLaunch.Prod_QuantidadeLancada);
         let newCustoCompra = 0

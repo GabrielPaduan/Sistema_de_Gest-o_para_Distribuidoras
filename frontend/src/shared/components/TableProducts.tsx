@@ -11,10 +11,11 @@ import { ProtectedComponent } from "./ProtectedComponent";
 interface TableProductsProps {
     categorias?: ProductsCategoriesDTO[];
     filteredCategory?: number;
+    products?: ProductDTO[];
 }
 
-export const TableProducts: React.FC<TableProductsProps> = ({ categorias, filteredCategory }) => {
-    const [productsData, setProductsData] = React.useState<ProductDTO[]>([]);
+export const TableProducts: React.FC<TableProductsProps> = ({products, categorias, filteredCategory }) => {
+    const [productsData, setProductsData] = React.useState<ProductDTO[]>(products || []);
     const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -28,21 +29,6 @@ export const TableProducts: React.FC<TableProductsProps> = ({ categorias, filter
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
-
-
-    useEffect (() => {
-        const fetchProducts = async () => {
-        try {
-            const data = await getAllProducts();
-            setProductsData(data);
-
-            
-        } catch (err: any) {
-            console.error(err);
-        }
-        };
-        fetchProducts();
-    }, []);
 
     useEffect(() => {
         const fetchFilteredCategory = async () => {
@@ -115,9 +101,6 @@ export const TableProducts: React.FC<TableProductsProps> = ({ categorias, filter
                             <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Preço de Venda</TableCell>
                                 </ProtectedComponent>
                             <ProtectedComponent allowedRoles={['1']}>
-                                <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Editar</TableCell>
-                            </ProtectedComponent>
-                            <ProtectedComponent allowedRoles={['1']}>
                                 <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>Remover</TableCell>
                             </ProtectedComponent>
                         </TableRow>
@@ -131,7 +114,7 @@ export const TableProducts: React.FC<TableProductsProps> = ({ categorias, filter
                             ) : (
                              
                                 filteredProducts.sort((a, b) => b.Prod_Categoria - a.Prod_Categoria).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(product => (
-                                        <TableRow key={product.ID_Prod} hover sx={{ cursor: 'pointer' }}>
+                                        <TableRow key={product.ID_Prod} hover sx={{ cursor: 'pointer' }} onClick={() => navigate(`/editar-produto/${product.ID_Prod}`)}>
                                             <ProtectedComponent allowedRoles={['1', '2']}>
                                                 <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>{product.Prod_CodProduto}</TableCell>
                                             </ProtectedComponent>
@@ -152,11 +135,6 @@ export const TableProducts: React.FC<TableProductsProps> = ({ categorias, filter
                                             </ProtectedComponent>
                                             <ProtectedComponent allowedRoles={['1', '2']}>
                                                 <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "15px", padding: "10px" } }}>R${product.Prod_Valor}</TableCell>
-                                            </ProtectedComponent>
-                                            <ProtectedComponent allowedRoles={['1']}>
-                                                <TableCell sx={{ fontSize: 14, textAlign: "center" }}>
-                                                    <Button onClick={() => navigate(`/editar-produto/${product.ID_Prod}`)}><Icon sx={{ fontSize: 40 }}>edit</Icon></Button>
-                                                </TableCell>
                                             </ProtectedComponent>
                                             <ProtectedComponent allowedRoles={['1']}>
                                                 <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { padding: "0px" } }}>
