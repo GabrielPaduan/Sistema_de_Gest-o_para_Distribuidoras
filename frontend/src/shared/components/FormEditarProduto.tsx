@@ -370,7 +370,7 @@ export const FormEditarProduto: React.FC = () => {
                             required
                         />
 
-                        <Box display={"flex"} justifyContent={"space-evenly"} alignItems={"center"} width={"25%"} gap={2}>
+                        <Box display={"flex"} justifyContent={"space-evenly"} alignItems={"center"} width={"25%"} gap={2} sx={{ '@media (max-width: 800px)': { width: '100%' } }}>
                             <Select
                                 labelId="prodCategoria-select-label"
                                 id="prodCategoria-select"
@@ -389,7 +389,7 @@ export const FormEditarProduto: React.FC = () => {
                                     </MenuItem>
                                 ))}
                             </Select>
-                            <Button variant="contained" color="primary" sx={{ width: "5%", height: "100%" }} onClick={handleOpen}>+</Button>
+                            <Button variant="contained" color="primary" sx={{ width: "5%", height: "auto" }} onClick={handleOpen}>+</Button>
                         </Box>
                     </Box>
                     <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column", gap: 2 } }}>

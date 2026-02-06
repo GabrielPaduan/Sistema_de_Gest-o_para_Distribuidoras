@@ -178,25 +178,25 @@ export const FormCadastroProduto: React.FC = () => {
             <Box display={"flex"} flexDirection={"column"} width={"100%"} gap={2}>
                 <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column", gap: 2 } }}>
                     <TextField label="Em desenvolvimento..." id="codigoBarras" name="codigoBarras" variant="outlined" placeholder="Em desenvolvimento..." sx={{ width: "25%", '@media (max-width: 800px)': { width: "100%" }, '& .MuiInputLabel-root': {
-                        color: 'gray', // Cor do label normal
+                        color: 'gray', 
                     }, '& .MuiInputLabel-root.Mui-focused': {
-                        color: '#181393', // Cor do label quando em foco
+                        color: '#181393',
                     } }}
                     type="number"
                     disabled/>
 
                     <TextField label="Código do Produto" id="codigoProduto" name="codigoProduto" variant="outlined" placeholder="Digite o código de produto" sx={{ width: "25%", '& .MuiInputLabel-root': {
-                        color: 'gray', // Cor do label normal
+                        color: 'gray', 
                     }, '& .MuiInputLabel-root.Mui-focused': {
-                        color: '#181393', // Cor do label quando em foco
-                    } }} />
+                        color: '#181393', 
+                    }, '@media (max-width: 800px)': { width: "100%" } }} />
                     <TextField label="Nome do Produto" id="nomeProduto" name="nomeProduto" variant="outlined" placeholder="Digite o nome do produto" sx={{ width: "25%", '& .MuiInputLabel-root': {
-                        color: 'gray', // Cor do label normal
+                        color: 'gray', 
                     }, '& .MuiInputLabel-root.Mui-focused': {
-                        color: '#181393', // Cor do label quando em foco
-                    } }} />
+                        color: '#181393', 
+                    }, '@media (max-width: 800px)': { width: "100%" } }} />
 
-                    <Box display={"flex"} justifyContent={"space-evenly"} alignItems={"center"} width={"25%"} gap={2}>
+                    <Box display={"flex"} justifyContent={"space-evenly"} alignItems={"center"} width={"25%"} gap={2} sx={{ "@media (max-width: 800px)": { width: "100%" } }}>
                         <Select
                             labelId="prodCategoria-select-label"
                             id="prodCategoria-select"
@@ -216,41 +216,41 @@ export const FormCadastroProduto: React.FC = () => {
                     </Box>
 
                 </Box>
-                <Box display={"flex"} justifyContent={"space-between"} gap={2}>
+                <Box display={"flex"} justifyContent={"space-between"} gap={2} sx={{ '@media (max-width: 800px)': { gap: 2 } }}>
                     <TextField label="Unidade de Medida" id="prodUN" name="prodUN" variant="outlined" placeholder="Digite a unidade de medida" sx={{ width: "25%", '& .MuiInputLabel-root': {
-                        color: 'gray', // Cor do label normal
+                        color: 'gray', 
                     }, '& .MuiInputLabel-root.Mui-focused': {
-                        color: '#181393', // Cor do label quando em foco
-                    } }} />
-                    <TextField label="NCM" id="prodNCM" name="prodNCM" variant="outlined" placeholder="Digite o NCM" sx={{ width: "25%", '@media (max-width: 800px)': { width: "15%" }, '& .MuiInputLabel-root': {
-                        color: 'gray', // Cor do label normal
+                        color: '#181393', 
+                    }, '@media (max-width: 800px)': { width: "15%" } }} />
+                    <TextField label="NCM" id="prodNCM" name="prodNCM" variant="outlined" placeholder="Digite o NCM" sx={{ width: "25%", '@media (max-width: 800px)': { width: "30%" }, '& .MuiInputLabel-root': {
+                        color: 'gray', 
                     }, '& .MuiInputLabel-root.Mui-focused': {
-                        color: '#181393', // Cor do label quando em foco
+                        color: '#181393', 
                     } }} 
                     type="number"
                     />
                     <TextField label="Estoque" id="prodEstoque" name="prodEstoque" variant="outlined" placeholder="Digite o estoque" sx={{ width: "25%", '& .MuiInputLabel-root': {
-                        color: 'gray', // Cor do label normal
+                        color: 'gray', 
                     }, '& .MuiInputLabel-root.Mui-focused': {
-                        color: '#181393', // Cor do label quando em foco
-                    } }}
+                        color: '#181393', 
+                    }, '@media (max-width: 800px)': { width: "15%" } }}
                     type="number"
                     />
                     <TextField label="CFOP" id="prodCFOP" name="prodCFOP" variant="outlined" placeholder="Digite o CFOP" sx={{ width: "25%", '& .MuiInputLabel-root': {
-                        color: 'gray', // Cor do label normal
+                        color: 'gray', 
                     }, '& .MuiInputLabel-root.Mui-focused': {
-                        color: '#181393', // Cor do label quando em foco
-                    } }} />
+                        color: '#181393', 
+                    }, '@media (max-width: 800px)': { width: "40%" } }} />
                 </Box>
                 <Box display={"flex"} justifyContent={"space-between"} gap={2}>
                     <TextField label="Custo de Compra" id="prodCustoCompra" name="prodCustoCompra" variant="outlined" placeholder="Digite o custo de compra" slotProps={{
                         input: {
                         startAdornment: <InputAdornment position="start">R$</InputAdornment>,
                         },
-                    }} sx={{ width: "50%", '@media (max-width: 800px)': { width: "15%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': {
-                        color: 'gray', // Cor do label normal
+                    }} sx={{ width: "50%", '@media (max-width: 800px)': { width: "33%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': {
+                        color: 'gray', 
                     }, '& .MuiInputLabel-root.Mui-focused': {
-                        color: '#181393', // Cor do label quando em foco
+                        color: '#181393',
                     } }}
                     value={custoCompra}
                     onChange={(e) => setCustoCompra(Number(e.target.value))}
@@ -260,7 +260,7 @@ export const FormCadastroProduto: React.FC = () => {
                         input: {
                             endAdornment: <InputAdornment position="end">%</InputAdornment>,
                         },
-                    }} sx={{ width: "50%", '@media (max-width: 800px)': { width: "15%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': {
+                    }} sx={{ width: "50%", '@media (max-width: 800px)': { width: "33%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': {
                         color: 'gray', // Cor do label normal
                     }, '& .MuiInputLabel-root.Mui-focused': {
                         color: '#181393', // Cor do label quando em foco
@@ -274,7 +274,7 @@ export const FormCadastroProduto: React.FC = () => {
                         input: {
                             startAdornment: <InputAdornment position="start">R$</InputAdornment>,
                         },
-                    }} sx={{ width: "50%", '@media (max-width: 800px)': { width: "15%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': {
+                    }} sx={{ width: "50%", '@media (max-width: 800px)': { width: "33%" }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root': {
                         color: 'gray', // Cor do label normal
                     }, '& .MuiInputLabel-root.Mui-focused': {
                         color: '#181393', // Cor do label quando em foco

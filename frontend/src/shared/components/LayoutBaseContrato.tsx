@@ -663,7 +663,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                         />
                     </Box>
 
-                    <Box display={"flex"} alignItems="center" justifyContent="center" gap={2} mt={4}>
+                    <Box display={"flex"} alignItems="center" justifyContent="center" gap={2} mt={4} sx={{ '@media (max-width: 800px)': { flexDirection: "column", gap: 1 } }}>
                         <ProtectedComponent allowedRoles={['1']}>                        
                             <Box sx={{width: "25%", '@media (max-width: 800px)': { width: '100%' } }}>
                                 <Button variant="contained" color="primary" sx={{ padding: "15px", width: "100%", '@media (max-width: 800px)': { padding: "15px" } }} onClick={handleOpen}>

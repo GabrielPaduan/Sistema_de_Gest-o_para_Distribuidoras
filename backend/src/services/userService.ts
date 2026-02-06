@@ -1,4 +1,5 @@
 import supabase from '../config/supabase.js';
+import { login } from '../controllers/userController.js';
 import type { UserInsertDTO, LoginDTO } from '../types/dtos.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -26,6 +27,7 @@ export const createUserService = async (userData: UserInsertDTO): Promise<any> =
 };
 
 export const loginUser = async (loginData: LoginDTO): Promise<any> => {
+    loginData.nome = loginData.nome.toLocaleLowerCase();
     try {
         const { data: user, error } = await supabase
             .from('Usuarios')

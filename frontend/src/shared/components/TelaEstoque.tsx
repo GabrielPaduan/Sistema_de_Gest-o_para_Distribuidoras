@@ -485,7 +485,7 @@ export const TelaEstoque: React.FC = () => {
                     fullWidth
                     onChange={(e) => setFilterCategory(Number(e.target.value))}
                     MenuProps={MenuProps}
-                    sx={{ width: "15%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' } }}
+                    sx={{ width: "15%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }}
                 >
                     <MenuItem value={-1}>Todas</MenuItem>
                     {categorias.map((categoria) => (
@@ -500,23 +500,24 @@ export const TelaEstoque: React.FC = () => {
                 categorias={categorias}
                 filteredCategory={filterCategory}
              />
-             <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2} padding={2}>
+             <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2} padding={2} sx={{ '@media (max-width: 800px)': { flexDirection: 'column' } }}>
                 <ProtectedComponent allowedRoles={['1']}>
-                    <Box>
+                    <Box width={"100%"}>
                         <Button onClick={() => navigate("/cadastro-produto")} variant="contained" color="primary" sx={{ padding: "15px", width: "100%" }}><Typography variant="h6" fontSize={14}>Adicionar Produto</Typography></Button>
                     </Box>
                 </ProtectedComponent>
                 <ProtectedComponent allowedRoles={['1']}>
-                    <Box>
+                    <Box width={"100%"}>
                         <Button onClick={() => handleOpen()} variant="contained" color="primary" sx={{ padding: "15px", width: "100%" }}><Typography variant="h6" fontSize={14}>Gerenciar Categorias</Typography></Button>
                     </Box>
                 </ProtectedComponent>
                 <ProtectedComponent allowedRoles={['1']}>
-                    <Box>
+                    <Box width={"100%"}>
+
                         <Button onClick={() => handleOpenLancamentos()} variant="contained" color="primary" sx={{ padding: "15px", width: "100%" }}><Typography variant="h6" fontSize={14}>Lançamentos</Typography></Button>
                     </Box>
                 </ProtectedComponent>
-                <Box sx={{ '@media (max-width: 800px)': { width: '50%' } }}>
+                <Box sx={{ '@media (max-width: 800px)': { width: '100%' } }}>
                     <GenericButton name="Voltar" type="button" link="/" />
                 </Box>
             </Box>
