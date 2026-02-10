@@ -16,8 +16,6 @@ interface CustomTableContractProps extends TableContractProps {
     productCategories: ProductsCategoriesDTO[];
 }
 
-
-
 export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, products, selectedItems,
     onToggleSelect, onAddProduct, onRemoveProduct, onRemoveContract, openEditContract, productCategories }) => {
     const navigate = useNavigate();
