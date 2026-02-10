@@ -17,3 +17,4 @@ export { BoxNavigationClientes } from "./BoxNavigationClientes";
 export { FormEditarCliente } from "./FormEditarCliente";
 export { ProtectedComponent } from "./ProtectedComponent";
 export { TelaEstoque } from "./TelaEstoque";
+export { BoxNavigationModeloContrato } from "./BoxNavigationModeloContrato";

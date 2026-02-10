@@ -6,18 +6,15 @@ import { ClientDTO, ContractDTO, ProductDTO, ProductsCategoriesDTO, SnapshotProd
 import logo from '../assets/logo_empresa.png';
 
 export const generateReport = (client: ClientDTO, contracts: ContractDTO[], products: ProductDTO[], snapshotProducts: SnapshotProductDTO[], categorias: ProductsCategoriesDTO[]) => {
-    // Aumentar o padrão para A4 se não estiver
     const doc = new jsPDF('p', 'mm', 'a4'); 
     const pageHeight = doc.internal.pageSize.height;
     const pageWidth = doc.internal.pageSize.width;
-    const margin = 10; // Margem menor para aproveitar espaço
+    const margin = 10;
 
-    // --- CABEÇALHO PROFISSIONAL ---
     doc.addImage(logo, 'PNG', pageWidth - margin - 30, margin, 30, 30);
 
-    // Nome da Empresa
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(14); // Levemente menor
+    doc.setFontSize(14); 
     doc.text("O REI DO ÓLEO", pageWidth - margin, margin + 40, { align: 'right' });
 
     doc.setFont('helvetica', 'normal');
@@ -25,7 +22,6 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
     doc.text("reidooleodistribuidora@gmail.com", pageWidth - margin, margin + 45, { align: 'right' });
     doc.text("(43) 98488-0539", pageWidth - margin, margin + 49, { align: 'right' });
 
-    // Dados do Cliente
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
     doc.text("CLIENTE:", margin, margin + 10);
@@ -37,7 +33,6 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
     doc.text(client.cli_dddTel && client.cli_telefone ? `Tel: (${client.cli_dddTel}) ${client.cli_telefone}` : "Telefone não informado", margin, margin + 35);
     doc.text(`Responsável: ${client.cli_responsavel || "não informado"}`, margin, margin + 40);
 
-    // Linha divisória
     doc.setDrawColor(200, 200, 200);
     doc.line(margin, margin + 55, pageWidth - margin, margin + 55);
     
@@ -47,14 +42,10 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
     doc.text('INFORMAÇÕES DO CONTRATO', pageWidth / 2, y, { align: 'center' });
     y += 10;
 
-    // --- PREPARAÇÃO DOS DADOS ---
-    // Colunas Reduzidas para caber lado a lado (Removi "Valor Unitário" para economizar espaço se necessário, mas vou tentar manter)
-    // Se ficar apertado, remova a coluna Categoria ou Valor Unitário
     const tableColumn = ["CMDT", "PRODUTO", "CATEGORIA", "QTD", "TOTAL"]; 
     
     let allRows: any[] = [];
     
-    // Lógica para popular as linhas (mantida a sua lógica original de sort e map)
     const dataToMap = snapshotProducts.length === 0 ? contracts.sort((a, b) => {
              const productA = products.find(p => p.ID_Prod === a.Cont_ID_Prod);
              const productB = products.find(p => p.ID_Prod === b.Cont_ID_Prod);
@@ -90,11 +81,9 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
         });
     }
 
-    // --- LÓGICA DE DIVISÃO ---
-  const SPLIT_THRESHOLD = 15; 
+    const SPLIT_THRESHOLD = 32; 
     const shouldSplit = allRows.length > SPLIT_THRESHOLD;
 
-    // Configurações comuns
     const tableStyles = {
         theme: 'striped' as const,
         headStyles: { fillColor: [0, 0, 139] as [number, number, number], fontStyle: 'bold' as const, fontSize: 8 },
@@ -104,18 +93,15 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
     };
 
     let finalY = y;
-
     if (shouldSplit) {
-        const midpoint = Math.ceil(allRows.length / 2);
+        const midpoint = 32;
         const rowsLeft = allRows.slice(0, midpoint);
         const rowsRight = allRows.slice(midpoint);
 
         const tableWidth = (pageWidth - (margin * 2) - 5) / 2;
         
-        // CORREÇÃO 1: Usamos (doc as any) para acessar a propriedade interna sem erro
         const startPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
 
-        // 2. Desenha a Tabela da Esquerda
         autoTable(doc, {
             ...tableStyles,
             head: [tableColumn],
@@ -126,13 +112,10 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
         });
 
         const finalYLeft = (doc as any).lastAutoTable.finalY;
-        // CORREÇÃO 2: Mesmo cast aqui
         const endPageLeft = (doc as any).internal.getCurrentPageInfo().pageNumber;
 
-        // 3. Volta para a página inicial
         doc.setPage(startPage);
 
-        // 4. Desenha a Tabela da Direita
         autoTable(doc, {
             ...tableStyles,
             head: [tableColumn],
@@ -143,10 +126,8 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
         });
         
         const finalYRight = (doc as any).lastAutoTable.finalY;
-        // CORREÇÃO 3: Mesmo cast aqui
         const endPageRight = (doc as any).internal.getCurrentPageInfo().pageNumber;
 
-        // 5. Sincronização Final
         const maxPage = Math.max(endPageLeft, endPageRight);
         
         doc.setPage(maxPage);
@@ -160,7 +141,6 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
         }
 
     } else {
-        // Renderização padrão (coluna única)
         autoTable(doc, {
             ...tableStyles,
             head: [tableColumn],
@@ -171,8 +151,6 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
         finalY = (doc as any).lastAutoTable.finalY;
     }
 
-
-    // --- RODAPÉ COM TOTAIS ---
     const totalGeral = snapshotProducts.length === 0 ? contracts.reduce((sum, contract) => {
         const product = products.find(p => p.ID_Prod === contract.Cont_ID_Prod);
         return sum + ((contract?.Cont_Qtde ?? 0) * (product?.Prod_Valor ?? 0));
@@ -180,7 +158,6 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
         return sum + (snapshot.snapshot_valor_total_item || 0)
     }, 0);
 
-    // Verifica se precisa nova página para o total
     if (finalY + 30 > pageHeight) {
         doc.addPage();
         finalY = 20;
@@ -192,7 +169,6 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
     doc.setFontSize(12);
     doc.text(`R$ ${totalGeral.toFixed(2)}`, pageWidth - margin, finalY + 10, { align: 'right' });
 
-    // Rodapé fixo na parte inferior
     doc.setDrawColor(200, 200, 200);
     doc.line(margin, pageHeight - 15, pageWidth - margin, pageHeight - 15);
     

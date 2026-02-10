@@ -91,4 +91,14 @@ export const deleteProduct = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+export const launchProduct = async (req, res) => {
+    try {
+        const productToLaunch = req.body;
+        await productService.productLaunch(productToLaunch, Number(req.params.type));
+        res.status(200).json({ message: "Product launch successful" });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 //# sourceMappingURL=productController.js.map

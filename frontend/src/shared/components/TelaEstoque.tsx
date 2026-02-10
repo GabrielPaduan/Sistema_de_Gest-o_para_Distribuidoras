@@ -500,24 +500,24 @@ export const TelaEstoque: React.FC = () => {
                 categorias={categorias}
                 filteredCategory={filterCategory}
              />
-             <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2} padding={2} sx={{ '@media (max-width: 800px)': { flexDirection: 'column' } }}>
+             <Box display={"flex"} margin={"auto"} width={"70%"} justifyContent={"center"} alignItems={"center"} gap={2} padding={2} sx={{ '@media (max-width: 800px)': { flexDirection: 'column' } }}>
                 <ProtectedComponent allowedRoles={['1']}>
-                    <Box width={"100%"}>
+                    <Box width={"33%"} sx={{ '@media (max-width: 800px)': {width: '100%'} }}>
                         <Button onClick={() => navigate("/cadastro-produto")} variant="contained" color="primary" sx={{ padding: "15px", width: "100%" }}><Typography variant="h6" fontSize={14}>Adicionar Produto</Typography></Button>
                     </Box>
                 </ProtectedComponent>
                 <ProtectedComponent allowedRoles={['1']}>
-                    <Box width={"100%"}>
+                    <Box width={"33%"} sx={{ '@media (max-width: 800px)': {width: '100%'} }}>
                         <Button onClick={() => handleOpen()} variant="contained" color="primary" sx={{ padding: "15px", width: "100%" }}><Typography variant="h6" fontSize={14}>Gerenciar Categorias</Typography></Button>
                     </Box>
                 </ProtectedComponent>
                 <ProtectedComponent allowedRoles={['1']}>
-                    <Box width={"100%"}>
+                    <Box width={"33%"} sx={{ '@media (max-width: 800px)': {width: '100%'} }}>
 
                         <Button onClick={() => handleOpenLancamentos()} variant="contained" color="primary" sx={{ padding: "15px", width: "100%" }}><Typography variant="h6" fontSize={14}>Lançamentos</Typography></Button>
                     </Box>
                 </ProtectedComponent>
-                <Box sx={{ '@media (max-width: 800px)': { width: '100%' } }}>
+                <Box width={"33%"} sx={{ '@media (max-width: 800px)': { width: '100%' } }}>
                     <GenericButton name="Voltar" type="button" link="/" />
                 </Box>
             </Box>

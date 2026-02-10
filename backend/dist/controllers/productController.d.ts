@@ -7,4 +7,5 @@ export declare const getProductById: (req: express.Request, res: express.Respons
 export declare const getProductByContractId: (req: express.Request, res: express.Response) => Promise<express.Response<any, Record<string, any>> | undefined>;
 export declare const searchProducts: (req: express.Request, res: express.Response) => Promise<express.Response<any, Record<string, any>> | undefined>;
 export declare const deleteProduct: (req: express.Request, res: express.Response) => Promise<express.Response<any, Record<string, any>> | undefined>;
+export declare const launchProduct: (req: express.Request, res: express.Response) => Promise<void>;
 //# sourceMappingURL=productController.d.ts.map

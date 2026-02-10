@@ -1,4 +1,5 @@
 import supabase from '../config/supabase.js';
+import { login } from '../controllers/userController.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 export const createUserService = async (userData) => {
@@ -21,6 +22,7 @@ export const createUserService = async (userData) => {
     }
 };
 export const loginUser = async (loginData) => {
+    loginData.nome = loginData.nome.toLocaleLowerCase();
     try {
         const { data: user, error } = await supabase
             .from('Usuarios')
@@ -34,8 +36,10 @@ export const loginUser = async (loginData) => {
         if (!isPasswordCorrect) {
             throw new Error("Usuário não encontrado ou credenciais inválidas.");
         }
+        console.log("User authenticated:", user);
+        console.log("Generating JWT token for user ID:", user.id);
         const payload = {
-            sub: user.usu_id,
+            sub: user.id,
             name: user.usu_nome,
             role: user.usu_typeUser
         };

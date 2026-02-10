@@ -202,3 +202,9 @@ export interface ProductLaunch {
     LancProd_Tipo: number;
 }
 
+export interface ModelosContratoDTO {
+    ID_ModeloContrato: number;
+    modelCont_Name: string;
+    modelCont_Descricao: string;
+    modelCont_Date: string;
+}

@@ -40,7 +40,6 @@ export const findProductByContractId = async (contractId) => {
         throw error;
     }
     const product = Array.isArray(data.Produtos) ? data.Produtos[0] : data.Produtos;
-    // Retorna o produto diretamente, garantindo que não seja undefined.
     return product ?? null;
 };
 export const searchProductsByName = async (nameQuery) => {
@@ -79,4 +78,48 @@ export const deleteProductById = async (id) => {
 export function findAllProductWithPagination(page, pageSize) {
     throw new Error('Function not implemented.');
 }
+export const productLaunch = async (productToLaunch, launchType) => {
+    const product = await findProductById(productToLaunch.ID_Prod);
+    if (!product) {
+        throw new Error('Produto não encontrado');
+    }
+    if (launchType === 0) {
+        const newStock = Number(product.Prod_Estoque) + Number(productToLaunch.Prod_QuantidadeLancada);
+        let newCustoCompra = 0;
+        if (productToLaunch.Prod_CustoCompra > product.Prod_CustoCompra) {
+            newCustoCompra = productToLaunch.Prod_CustoCompra;
+        }
+        else {
+            newCustoCompra = product.Prod_CustoCompra;
+        }
+        const { data, error } = await supabase
+            .from('Produtos')
+            .update({
+            Prod_Estoque: newStock,
+            Prod_CustoCompra: newCustoCompra,
+        })
+            .eq('ID_Prod', productToLaunch.ID_Prod);
+        console.log("DATA: ", data);
+        if (error) {
+            console.error('Erro ao lançar entrada de produto:', error);
+            throw error;
+        }
+    }
+    else if (launchType === 1) {
+        const newStock = Number(product.Prod_Estoque) - Number(productToLaunch.Prod_QuantidadeLancada);
+        if (newStock < 0) {
+            throw new Error('Estoque insuficiente para a saída');
+        }
+        const { error } = await supabase
+            .from('Produtos')
+            .update({
+            Prod_Estoque: newStock,
+        })
+            .eq('ID_Prod', productToLaunch.ID_Prod);
+        if (error) {
+            console.error('Erro ao lançar saída de produto:', error);
+            throw error;
+        }
+    }
+};
 //# sourceMappingURL=productService.js.map

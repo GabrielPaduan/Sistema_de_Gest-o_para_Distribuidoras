@@ -1,5 +1,5 @@
 import supabase from '../config/supabase.js'; // Ajuste o caminho conforme necessário
-import type { ProductDTO, ProductLaunch } from '../types/dtos.js'; // Supondo que você tenha seus tipos definidos
+import type { ProductDTO, ProductLaunch, ProductLaunching } from '../types/dtos.js'; // Supondo que você tenha seus tipos definidos
 
 export const findAllProduct = async (): Promise<ProductDTO[]> => {
     const { data, error } = await supabase.from('Produtos').select('*').range(0, 8000);
@@ -90,7 +90,7 @@ export function findAllProductWithPagination(page: number, pageSize: number): { 
     throw new Error('Function not implemented.');
 }
 
-export const productLaunch = async (productToLaunch: ProductLaunch, launchType: number): Promise<void> => {
+export const productLaunch = async (productToLaunch: ProductLaunching, launchType: number): Promise<void> => {
     const product = await findProductById(productToLaunch.ID_Prod);
     if (!product) {
         throw new Error('Produto não encontrado');

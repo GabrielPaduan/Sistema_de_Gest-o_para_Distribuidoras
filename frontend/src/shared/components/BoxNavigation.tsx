@@ -16,6 +16,11 @@ export const BoxNavigation: React.FC = () => {
           </ProtectedComponent>
           <ProtectedComponent allowedRoles={['1', '2']}>
             <Box sx={{ '@media (max-width: 800px)': { width: '90%' } }}>
+              <GenericButton name="MODELO DE CONTRATOS" type="button" link="/gerenciar-modelo-contratos" />
+            </Box>
+          </ProtectedComponent>
+          <ProtectedComponent allowedRoles={['1', '2']}>
+            <Box sx={{ '@media (max-width: 800px)': { width: '90%' } }}>
               <GenericButton name="ESTOQUE" type="button" link="/estoque-produtos" />
             </Box>
           </ProtectedComponent>
