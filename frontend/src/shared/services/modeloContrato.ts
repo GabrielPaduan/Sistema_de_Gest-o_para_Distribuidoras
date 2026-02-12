@@ -1,4 +1,4 @@
-import { ModelosContratoDTO } from "../utils/DTOS";
+import { ModelosContratoDTO, ModelosContratoDTOInsert } from "../utils/DTOS";
 import api from "./api";
 
 export const getAllModelContracts = async (): Promise<ModelosContratoDTO[]> => {
@@ -6,8 +6,13 @@ export const getAllModelContracts = async (): Promise<ModelosContratoDTO[]> => {
     return response.data;
 }
 
-export const createModelContract = async (modelContract: Omit<ModelosContratoDTO, "modelCont_Id">): Promise<ModelosContratoDTO> => {
+export const createModelContract = async (modelContract: ModelosContratoDTOInsert): Promise<ModelosContratoDTO> => {
     const response = await api.post('/modelosContrato', modelContract);
+    return response.data;
+}
+
+export const getModelContractById = async (id: number): Promise<ModelosContratoDTO> => {
+    const response = await api.get(`/modelosContrato/${id}`);
     return response.data;
 }
 

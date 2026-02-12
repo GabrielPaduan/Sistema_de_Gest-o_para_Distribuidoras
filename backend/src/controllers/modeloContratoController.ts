@@ -11,6 +11,21 @@ export const getModelosContrato = async (req: Express.Request, res: Express.Resp
     }
 }
 
+export const getModeloContratoById = async (req: Express.Request, res: Express.Response) => {
+    try {
+        const id = Number(req.params.id);
+        const modeloContrato = await modeloContratoService.getModelContractById(id);
+        if (modeloContrato) {
+            res.status(200).json(modeloContrato);
+        } else {
+            res.status(404).json({ error: "Modelo de contrato não encontrado" });
+        }
+    } catch (error) {
+        console.error("Erro ao buscar modelo de contrato:", error);
+        res.status(500).json({ error: "Erro ao buscar modelo de contrato" });
+    }
+}
+
 export const createModeloContrato = async (req: Express.Request, res: Express.Response) => {
     try {
         const modelContractData = req.body;

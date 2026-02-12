@@ -1,5 +1,6 @@
 import { Button, Icon, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material"
 import { ModelosContratoDTO } from "../utils/DTOS"
+import { useNavigate } from "react-router-dom";
 
 interface ModelContractsTableProps {
     modelosContrato: ModelosContratoDTO[];
@@ -7,6 +8,7 @@ interface ModelContractsTableProps {
 }   
 
 export const ModelContractsTable: React.FC<ModelContractsTableProps> = ({ modelosContrato, onRemoveModel }) => {
+    const navigate = useNavigate();
 
     return (
         <>
@@ -29,10 +31,10 @@ export const ModelContractsTable: React.FC<ModelContractsTableProps> = ({ modelo
                                 </TableRow>
                             )}
                             {modelosContrato.map((modelo) => (
-                                <TableRow key={modelo.ID_ModeloContrato} hover>
-                                    <TableCell>{modelo.modelCont_Name}</TableCell>
-                                    <TableCell>{modelo.modelCont_Descricao}</TableCell>
-                                    <TableCell>{new Date(modelo.modelCont_Date).toLocaleDateString()}</TableCell>
+                                <TableRow key={modelo.ID_ModeloContrato} hover sx={{ cursor: "pointer" }}>
+                                    <TableCell onClick={() => navigate(`/contrato-modelo/${modelo.ID_ModeloContrato}`)}>{modelo.modelCont_Name}</TableCell>
+                                    <TableCell onClick={() => navigate(`/contrato-modelo/${modelo.ID_ModeloContrato}`)}>{modelo.modelCont_Descricao}</TableCell>
+                                    <TableCell onClick={() => navigate(`/contrato-modelo/${modelo.ID_ModeloContrato}`)}>{new Date(modelo.modelCont_Date).toLocaleDateString()}</TableCell>
                                     <TableCell>
                                          <Button onClick={() => onRemoveModel(modelo.ID_ModeloContrato)} sx={{ '@media (max-width: 800px)': { padding: "0px" } }}><Icon sx={{ fontSize: 30, '@media (max-width: 800px)': { padding: "0px" } }}>delete_forever</Icon></Button>
                                     </TableCell>

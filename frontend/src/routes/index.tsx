@@ -13,6 +13,7 @@ import { EditarProduto } from "../pages/editarProduto/EditarProduto";
 import { EditarCliente } from "../pages/editarCliente/EditarCliente";
 import { PaginaClientes } from "../pages/paginaClientes/PaginaClientes";
 import { PaginaModeloContratos } from "../pages/PaginaModeloContratos/PaginaModeloContratos";
+import { ContratoModelo } from "../pages/contratoModelo/contratoModelo";
 
 export const AppRoutes = () => {
   return (
@@ -31,6 +32,7 @@ export const AppRoutes = () => {
         <Route path="/editar-cliente/:id" element={<ProtectedRoute><EditarCliente /></ProtectedRoute>} />
         <Route path="/gerenciar-clientes" element={<ProtectedRoute><PaginaClientes /></ProtectedRoute>} />
         <Route path="/gerenciar-modelo-contratos" element={<ProtectedRoute><PaginaModeloContratos /></ProtectedRoute>} />
+        <Route path="/contrato-modelo/:id" element={<ProtectedRoute><ContratoModelo /></ProtectedRoute>} />
     </Routes>
  );
-}
+};

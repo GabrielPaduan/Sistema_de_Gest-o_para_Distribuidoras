@@ -18,3 +18,5 @@ export { FormEditarCliente } from "./FormEditarCliente";
 export { ProtectedComponent } from "./ProtectedComponent";
 export { TelaEstoque } from "./TelaEstoque";
 export { BoxNavigationModeloContrato } from "./BoxNavigationModeloContrato";
+export { LayoutModelContract } from "./LayoutModelContract";
+export { TableContractItens } from "./TableContractItens";

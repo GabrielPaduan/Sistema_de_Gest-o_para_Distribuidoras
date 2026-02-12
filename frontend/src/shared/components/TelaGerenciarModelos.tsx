@@ -22,7 +22,6 @@ export const TelaGerenciarModelos: React.FC = () => {
     const [modalCreateModelo, setModalCreateModelo] = useState(false);
     const [modelosContrato, setModelosContrato] = useState<ModelosContratoDTO[]>([]);
     const [newModeloContrato, setNewModeloContrato] = useState({
-        ID_ModeloContrato: 0,
         modelCont_Name: "",
         modelCont_Descricao: "",
         modelCont_Date: new Date().toISOString(),
@@ -132,7 +131,7 @@ export const TelaGerenciarModelos: React.FC = () => {
                     </Box>
                 </Box>
             </Modal>
-            <Typography variant="h6">Gerenciar Modelos de Contrato</Typography>
+            <Typography variant="h4" color="text.primary" textAlign={"center"} paddingTop={10}>Gerenciar Modelos de Contrato</Typography>
             <ModelContractsTable
                 modelosContrato={modelosContrato}
                 onRemoveModel={onRemoveModel}

@@ -9,13 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 export const Form: React.FC = () => {
     const [client, setClient] = useState<ClientDTOInsert | null>(null);
-    const [isChecked, setIsChecked] = useState<number>(0);
     const navigate = useNavigate();
-
-    const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        // Atualize o estado: 1 se estiver marcado, 0 se não estiver
-        setIsChecked(event.target.checked ? 1 : 0);
-    };
 
     const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -38,7 +32,6 @@ export const Form: React.FC = () => {
                 cli_celular: formData.get("cel") as string,
                 cli_endNum: formData.get("endNum") as string,
                 cli_responsavel: formData.get("responsavel") as string,
-                cli_modelo: isChecked,
             };
             setClient(newClient);
             const idCliente = await createClient(newClient);
@@ -113,12 +106,6 @@ export const Form: React.FC = () => {
                     <TextField id="responsavel" name="responsavel" variant="outlined" placeholder="Digite o responsável" sx={{ width: "100%", '@media (max-width: 800px)': { width: "83%" } }} />
                 </Box>
             </Box>
-            <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column" } }}>
-                <Typography variant="h6" textAlign={"center"}>Selecione essa opção caso queira definir esse cliente como modelo de contrato: </Typography>
-                <Checkbox id="modelo" name="modelo" style={{ color: "black" }} checked={isChecked === 1} // Use o estado para controlar a propriedade 'checked'
-                    onChange={handleCheckboxChange}/>
-            </Box>
-
 
             <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2}>
                 <Box>

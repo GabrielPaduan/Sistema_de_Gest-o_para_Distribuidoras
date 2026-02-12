@@ -1,5 +1,5 @@
 import { Box, Button, Icon, Modal, TablePagination, TextareaAutosize, TextField, Typography } from "@mui/material";
-import { ClientDTO, ContractDTO, ContractDTOInsert, DadosProdutoComodatoDTO, LayoutBaseContratoProps, objectContractExclusion, ProductDTO, ProductsCategoriesDTO, SnapshotProductDTO } from "../utils/DTOS";
+import { ClientDTO, ContractDTO, ContractDTOInsert, DadosProdutoComodatoDTO, LayoutBaseContratoProps, ModelosContratoDTO, ModelosContratoItensDTO, objectContractExclusion, ProductDTO, ProductsCategoriesDTO, SnapshotProductDTO } from "../utils/DTOS";
 import React, { use, useEffect, useState } from "react";
 import { TableContract } from "./TableContract";
 import { getClientById, getModelClients, getModelContracts } from "../services/clientService"; // Supondo que você tenha este serviço
@@ -14,6 +14,8 @@ import { useNavigate } from "react-router-dom";
 import { useDebounce } from 'use-debounce';
 import { ProtectedComponent } from "./ProtectedComponent";
 import { getAllCategories } from "../services/categoriasProdutoService";
+import { getAllModelContracts, getModelContractById } from "../services/modeloContrato";
+import { getModelContractItensById } from "../services/modelContractItens";
 
 const style = {
   position: 'absolute',
@@ -46,7 +48,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
     const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
     const [loading, setLoading] = useState(false);
     const [observation, setObservation] = useState<string>("");
-    const [modelosContrato, setModelosContrato] = useState<ClientDTO[]>([]);
+    const [modelosContrato, setModelosContrato] = useState<ModelosContratoDTO[]>([]);
     const [selectedModelContract, setSelectedModelContract] = useState<number>(0);
     const [openModelo, setOpenModelo] = useState(false);
     const [openEdit, setOpenEdit] = useState(false);
@@ -151,7 +153,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                         }
                     });
 
-                    setModelosContrato(await getModelClients());
+                    setModelosContrato(await getAllModelContracts());
                 } catch (err) {
                     console.error("Erro ao buscar dados:", err);
                 }
@@ -305,37 +307,36 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
 
 
     const handleSearch = async (query: string) => {
-        if (query.length == 0) { // Não busca se o termo for muito curto
+        if (query.length == 0) { 
             await getAllProducts().then(allProducts => setProducts(allProducts));
             return;
         }
 
         setLoading(true);
         try {
-            // Chama nosso novo endpoint no backend
             const response = await searchProductsByName(query);
             setProducts(response);
         } catch (error) {
             console.error("Erro ao buscar produtos:", error);
-            setProducts([]); // Limpa os resultados em caso de erro
+            setProducts([]);
         } finally {
             setLoading(false);
         }
     };
 
     const handleInsertModelContract = async (modelId: number) => {
-        const modelContracts = await getModelContracts(modelId);
+        const modelContracts = await getModelContractItensById(modelId);
         if (!modelContracts) {
             return;
         }
         const createPromises = modelContracts.map(async (modelContract) => {
             const newContract: ContractDTOInsert = {
                 Cont_ID_Cli: client?.id || 0,
-                Cont_ID_Prod: modelContract.Cont_ID_Prod,
-                Cont_Comodato: modelContract.Cont_Comodato,
+                Cont_ID_Prod: modelContract.modelContItens_IDProd,
+                Cont_Comodato: modelContract.modelContItens_Comodato,
                 Cont_Qtde: 0,
                 Cont_ValorTotal: 0.00,
-                Cont_PorcLucro: 0.00
+                Cont_PorcLucro: modelContract.modelContItens_PorcLucro
             };
 
             return createContract(newContract).then (() => {
@@ -384,18 +385,14 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
     }, [debouncedSearchTerm]);
 
     useEffect(() => {
-    // Busca na lista completa de produtos 'products' (que é a usada na listagem do modal)
-    const product = products.find(p => p.ID_Prod === selectedProduct);
-    
-    if (product) {
-        // Se achou o produto, joga a margem dele para o estado editável
-        // Garante que seja número
-        setPorcLucro(Number(product.Prod_PorcLucro) || 0); 
-    } else {
-        // Se desmarcou, zera ou define um padrão
-        setPorcLucro(0); 
-    }
-}, [selectedProduct, products]);
+        const product = products.find(p => p.ID_Prod === selectedProduct);
+        
+        if (product) {
+            setPorcLucro(Number(product.Prod_PorcLucro) || 0); 
+        } else {
+            setPorcLucro(0); 
+        }
+    }, [selectedProduct, products]);
 
     return (
         <Box padding={10} sx={{ "@media (max-width: 800px)": { padding: 0, margin: "auto", width: "80%" } }}>
@@ -484,8 +481,6 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                 </Box>
             </Modal>
 
-
-            {/* Modal Referente ao modelo de Contrato */}
             <Modal
             open={openModelo}
             onClose={handleCloseModelo}
@@ -500,12 +495,12 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
 
                     <Box sx={{ maxHeight: "20vh", overflowY: "scroll", marginTop: 2 }}>
                         {modelosContrato.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((modelContract) => (
-                            <Box key={modelContract.id} sx={{ display: 'flex', justifyContent: 'space-between', padding: 1, borderBottom: '1px solid #ccc', cursor: 'pointer' }} onClick={() => setSelectedProduct(modelContract.id)}>
+                            <Box key={modelContract.ID_ModeloContrato} sx={{ display: 'flex', justifyContent: 'space-between', padding: 1, borderBottom: '1px solid #ccc', cursor: 'pointer' }} onClick={() => setSelectedProduct(modelContract.ID_ModeloContrato)}>
 
-                                <Typography width={"90%"} alignSelf={"center"}>{modelContract.cli_razaoSocial}</Typography>
+                                <Typography width={"90%"} alignSelf={"center"}>{modelContract.modelCont_Name}</Typography>
                                 <Checkbox
-                                    checked={modelContract.id === selectedModelContract}
-                                    onChange={(e) => setSelectedModelContract(e.target.checked ? modelContract.id : 0)}
+                                    checked={modelContract.ID_ModeloContrato === selectedModelContract}
+                                    onChange={(e) => setSelectedModelContract(e.target.checked ? modelContract.ID_ModeloContrato : 0)}
                                     sx={{ width: '9%', color: 'grey' }}
                                     color="secondary"
                                 />

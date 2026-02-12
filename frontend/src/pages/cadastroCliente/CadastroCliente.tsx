@@ -9,7 +9,7 @@ export class CadastroCliente extends React.Component {
           <>
             <DefaultHeader />
             <Box textAlign={"center"}>
-              <Typography variant="h4" fontSize={16} color="text.primary" textAlign={"center"} paddingTop={10}>
+              <Typography variant="h4" color="text.primary" textAlign={"center"} paddingTop={10}>
                 Cadastro de Clientes 
               </Typography>
               <Form />   

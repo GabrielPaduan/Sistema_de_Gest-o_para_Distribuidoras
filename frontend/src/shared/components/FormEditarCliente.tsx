@@ -28,7 +28,6 @@ export const FormEditarCliente: React.FC = () => {
         cli_cidade: "",
         cli_endNum: "",
         cli_responsavel: "",
-        cli_modelo: 0,
     });
     const navigate = useNavigate();
 
