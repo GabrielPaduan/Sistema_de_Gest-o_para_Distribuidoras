@@ -2,9 +2,9 @@ import { Box, Button, Paper, Tab, Table, TableBody, TableCell, TableContainer, T
 import React, { useEffect, useState } from "react";
 import { SearchField } from "./searchField";
 import { ClientDTO, PdfStructCompleteDTO, PdfStructDTO, ProductDTO, ProductsCategoriesDTO, SnapshotProductDTO, SnapshotProductDTOInsert } from "../utils/DTOS";
-import { getPdfByStatus, updatePdf, getPdfById } from "../services/pdfContract";
+import { getPdfByStatus, updatePdf, getPdfById, deletePdfContract } from "../services/pdfContract";
 import { getClientById, getClientByPDF } from "../services/clientService";
-import { getContractByClientId, updateContract } from "../services/contractService";
+import { getContractByClientId, removeContract, updateContract } from "../services/contractService";
 import { getProductById, updateProduct } from "../services/productService";
 import { PreviewReport } from "./PreviewReport";
 import { GenericButton } from "./GenericButton";
@@ -12,7 +12,7 @@ import { generateReport } from "../utils/Report";
 import { useNavigate } from "react-router-dom";
 import { ClientRow } from "./ClientRow";
 import { create } from "domain";
-import { createSnapshotProduct, getSnapshotProductsByPdfId } from "../services/SnapshotProductsService";
+import { createSnapshotProduct, deleteSnapshotProduct, getSnapshotProductsByPdfId } from "../services/SnapshotProductsService";
 import { getAllCategories } from "../services/categoriasProdutoService";
 
 interface TabPanelProps {
@@ -88,6 +88,18 @@ export const TableHistoricoContract: React.FC = () => {
         setSelectedPdf(pdf);
         setShowReport(true);
     };
+
+    const handleDeletePDF = async (pdf_id: number) => {
+    if (window.confirm("Tem certeza que deseja excluir este PDF? Esta ação não pode ser desfeita.")) {
+        try {
+            await deletePdfContract(pdf_id);
+            const updatedPdfs = pdfsCompleteData.filter(p => p.id !== pdf_id);
+            setPdfsCompleteData(updatedPdfs);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+};
 
     const handleCloseReport = () => {
         setShowReport(false);
@@ -278,7 +290,7 @@ export const TableHistoricoContract: React.FC = () => {
                                                     <TableCell sx={{ fontSize: 16, textAlign: "center" }}>{pdf.PDF_Client?.cli_razaoSocial}</TableCell>
                                                     <TableCell sx={{ fontSize: 16, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>{pdf.PDF_Generated_Date ? new Date(pdf.PDF_Generated_Date).toLocaleDateString('pt-BR', {timeZone: "UTC"}) : ""}</TableCell>
                                                     <TableCell sx={{ fontSize: 16, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>{pdf.PDF_Client?.cli_end === "" ? "Não informado" : pdf.PDF_Client?.cli_end}</TableCell>
-                                                    <TableCell sx={{ fontSize: 16, textAlign: "center" }}>{ pdf.PDF_Status == 0 ? <Button variant="contained" color="primary" onClick={() => handleShowReport(pdf)}>Visualizar</Button> : "Relatório Aprovado"}</TableCell>
+                                                    <TableCell sx={{ fontSize: 16, textAlign: "center" }}>{ pdf.PDF_Status == 0 ? <Button variant="contained" color="primary" onClick={() => handleShowReport(pdf)}>Visualizar</Button> : "Relatório Aprovado"}</TableCell>                                                   
                                                 </TableRow>
                                             ))
                                         )
@@ -301,7 +313,6 @@ export const TableHistoricoContract: React.FC = () => {
                     {selectedPdf && selectedPdf?.PDF_Client && showReport && (
                         <Box width={"100%"}>
                             <PreviewReport client={selectedPdf?.PDF_Client} contracts={selectedPdf?.PDF_Contracts} products={selectedPdf?.PDF_Products} productCategories={productCategories} />
-                            
                             <Box>
                                 <Typography variant="h5" sx={{ textAlign: 'center', mt: 4 }}>Observações:</Typography>
                                 <Typography variant="body1" sx={{ textAlign: 'center', mb: 2, fontSize: 14, borderRadius: '4px', padding: '10px', width: '80%', margin: 'auto' }}>
@@ -366,7 +377,7 @@ export const TableHistoricoContract: React.FC = () => {
                                                         const dataClientSingle = await getClientById(pdf.PDF_Client_Id);
                                                         const pdfComplete: PdfStructCompleteDTO = {
                                                             id: pdf.id,
-                                                            PDF_Status: pdf.id,
+                                                            PDF_Status: pdf.PDF_Status,
                                                             PDF_Generated_Date: pdf.PDF_Generated_Date,
                                                             PDF_Client: dataClientSingle,
                                                             PDF_Contracts: [],
@@ -375,10 +386,10 @@ export const TableHistoricoContract: React.FC = () => {
                                                         };
                              
                                                         if (pdfComplete) {
-                                                            
                                                             handleShowReport(pdfComplete);
                                                         }
                                                     }}
+                                                    handleDeletePDF={handleDeletePDF}
                                                 />
                                             ))
                                             

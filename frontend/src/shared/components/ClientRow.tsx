@@ -4,14 +4,14 @@ import { getPdfByClientId } from "../services/pdfContract";
 import { Box, Button, CircularProgress, Collapse, IconButton, Tab, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { Padding } from "@mui/icons-material";
 
 interface ClientRowProps {
     client: ClientDTO;
     handleViewPdf: (pdf: PdfStructDTO) => void;
+    handleDeletePDF: (pdfId: number) => void;
 }
 
-export const ClientRow: React.FC<ClientRowProps> = ({ client, handleViewPdf }) => {
+export const ClientRow: React.FC<ClientRowProps> = ({ client, handleViewPdf, handleDeletePDF }) => {
     const [isOpen, setIsOpen] = React.useState<boolean>(false);
     const [pdfContracts, setPdfContracts] = React.useState<PdfStructDTO[]>([]);
     const [loading, setLoading] = React.useState<boolean>(false);
@@ -30,9 +30,13 @@ export const ClientRow: React.FC<ClientRowProps> = ({ client, handleViewPdf }) =
                 }
             };
             fetchPdfContracts();
-        }
-     
-    }, [client.id, isOpen, pdfContracts.length]);
+        } 
+    }, [client.id, isOpen]);
+
+    const handleDeletePDFInList = (pdfId: number) => {
+        setPdfContracts(prevContracts => prevContracts.filter(pdf => pdf.id !== pdfId));
+        handleDeletePDF(pdfId);
+    }
 
     return (
         <React.Fragment>
@@ -65,22 +69,27 @@ export const ClientRow: React.FC<ClientRowProps> = ({ client, handleViewPdf }) =
                                 <Table size="small" aria-label="pdf-contracts">
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell sx={{ fontSize: 16, textAlign: "center" }}>DATA</TableCell> 
-                                            <TableCell sx={{ fontSize: 16, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>STATUS</TableCell>
-                                            <TableCell sx={{ fontSize: 16, textAlign: "center" }}>AÇÕES</TableCell>
+                                            <TableCell sx={{width: "33%", fontSize: 16, textAlign: "center" }}>DATA</TableCell> 
+                                            <TableCell sx={{ width: "33%", fontSize: 16, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>STATUS</TableCell>
+                                            <TableCell sx={{ width: "33%", fontSize: 16, textAlign: "center" }} colSpan={2}>AÇÕES</TableCell>
                                         </TableRow> 
                                     </TableHead>
                                     <TableBody>
                                         {pdfContracts.sort((a, b) => {return new Date(b.PDF_Generated_Date).getTime() - new Date(a.PDF_Generated_Date).getTime()}).map((pdf) => (
                                             <TableRow key={pdf.id}>
-                                                <TableCell sx={{ fontSize: 16, textAlign: "center" }}>{pdf.PDF_Generated_Date ? new Date(pdf.PDF_Generated_Date).toLocaleDateString('pt-BR', {timeZone: "UTC"}) : ""}</TableCell>
-                                                <TableCell sx={{ fontSize: 16, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>{pdf.PDF_Status}</TableCell>
-                                                <TableCell sx={{ fontSize: 16, textAlign: "center" }}>
-                                                    <Button variant="contained" color="primary" onClick={(e) => {
-                                                        e.stopPropagation(); 
-                                                        handleViewPdf(pdf); 
-                                                    }}>Visualizar</Button>
-                                                </TableCell>
+                                                <TableCell sx={{ width: "33%", fontSize: 16, textAlign: "center" }}>{pdf.PDF_Generated_Date ? new Date(pdf.PDF_Generated_Date).toLocaleDateString('pt-BR', {timeZone: "UTC"}) : ""}</TableCell>
+                                                <TableCell sx={{ width: "33%", fontSize: 16, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>{pdf.PDF_Status}</TableCell>
+                                                <Box display={"flex"} justifyContent={"center"} width={"100%"}>
+                                                    <TableCell sx={{width: "100%", fontSize: 16, textAlign: "center" }}>
+                                                        <Button variant="contained" color="primary" onClick={(e) => {
+                                                            e.stopPropagation(); 
+                                                            handleViewPdf(pdf); 
+                                                        }}>Visualizar</Button>
+                                                    </TableCell>
+                                                    <TableCell sx={{width:"100%", fontSize: 16, textAlign: "center" }}>
+                                                        <Button variant="contained" color="primary" onClick={() => handleDeletePDFInList(pdf.id)}>Excluir</Button>
+                                                    </TableCell>
+                                                </Box>
                                             </TableRow>
                                         ))}
                                     </TableBody>

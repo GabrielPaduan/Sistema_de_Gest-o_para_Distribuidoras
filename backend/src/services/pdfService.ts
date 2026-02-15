@@ -73,3 +73,10 @@ export const updatePdf = async (
     if (error) throw error;
     return data;
 };
+
+export const deletePdf = async (id: number): Promise<void> => {
+  console.log("Deleting PDF with ID:", id);
+    const { error } = await supabase.from('ContratosPDF').delete().eq('id', id);
+    console.log("Delete operation completed for PDF ID:", error ? `Error: ${error.message}` : "Success");
+    if (error) throw error;
+}

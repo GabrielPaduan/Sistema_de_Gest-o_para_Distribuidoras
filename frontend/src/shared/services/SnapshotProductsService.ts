@@ -10,3 +10,7 @@ export const getSnapshotProductsByPdfId = async (pdfId: number): Promise<Snapsho
     const response = await api.get(`/snapshotProducts/${pdfId}`);
     return response.data;
 }
+
+export const deleteSnapshotProduct = async (snapshotId: number): Promise<void> => {
+    await api.delete(`/snapshotProducts/${snapshotId}`);
+}

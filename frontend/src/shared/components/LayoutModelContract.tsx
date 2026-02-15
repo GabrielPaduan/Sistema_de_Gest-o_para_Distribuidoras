@@ -10,6 +10,7 @@ import { SearchField } from "./searchField";
 import { useDebounce } from "use-debounce";
 import { TableContractItens } from "./TableContractItens";
 import { set } from "date-fns";
+import { useNavigate } from "react-router";
 
 
 const style = {
@@ -44,6 +45,8 @@ export const LayoutModelContract: React.FC<LayoutModelContractProps> = ({ id }) 
     const [rowsPerPage, setRowsPerPage] = useState(3);
     const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
     const [selectedItems, setSelectedItems] = useState<objectContractExclusion[]>([]);
+    const navigate = useNavigate();
+
 
     const handleOpenAddItem = () => setOpenAddItem(true);
     const handleCloseAddItem = () => setOpenAddItem(false);
@@ -396,7 +399,7 @@ export const LayoutModelContract: React.FC<LayoutModelContractProps> = ({ id }) 
                         <Typography>Adicionar Produto</Typography>
                     </Button>
                  </Box>
-                 <GenericButton name="Voltar" type="button" link="/gerenciar-modelo-contratos" />
+                 <GenericButton name="Voltar" type="button" link="" onClick={() => navigate(-1)} />
             </Box>
         </Box>
     );

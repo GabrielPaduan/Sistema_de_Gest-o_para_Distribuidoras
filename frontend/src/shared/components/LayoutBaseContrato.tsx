@@ -14,8 +14,9 @@ import { useNavigate } from "react-router-dom";
 import { useDebounce } from 'use-debounce';
 import { ProtectedComponent } from "./ProtectedComponent";
 import { getAllCategories } from "../services/categoriasProdutoService";
-import { getAllModelContracts, getModelContractById } from "../services/modeloContrato";
+import { createModelContract, getAllModelContracts, getModelContractById } from "../services/modeloContrato";
 import { getModelContractItensById } from "../services/modelContractItens";
+import { create } from "@mui/material/styles/createTransitions";
 
 const style = {
   position: 'absolute',
@@ -55,6 +56,12 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
     const [contractToEdit, setContractToEdit] = useState<number>(0);
     const [selectedItems, setSelectedItems] = useState<objectContractExclusion[]>([]);
     const [productCategories, setProductsCategories] = useState<ProductsCategoriesDTO[]>([]);
+    const [modalCreateModelo, setModalCreateModelo] = useState(false);
+     const [newModeloContrato, setNewModeloContrato] = useState({
+        modelCont_Name: "",
+        modelCont_Descricao: "",
+        modelCont_Date: new Date().toISOString(),
+    });
 
     const handleToggleSelect = (contractId: number, productId: number) => {
         const isSelected = selectedItems.some(item => item.contractId === contractId);
@@ -64,6 +71,14 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
             setSelectedItems(prev => [...prev, { contractId, productId }]);
         }
     };
+
+    const openModalCreateModelo = () => {
+        setModalCreateModelo(true);
+    }
+    const closeModalCreateModelo = () => {
+        setModalCreateModelo(false);
+    }
+
 
     const handleBulkDelete = async () => {
         if (!window.confirm(`Deseja excluir ${selectedItems.length} contratos?`)) return;
@@ -162,8 +177,10 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
         fetchData();
     }, []); 
 
-    useEffect(() => {
+    // useEffect(() => {
+    const fetchDataContInsert = async (contractsInsert) => {
         try {
+            console.log("Contracts Insert: ", contractsInsert);
             const fetchDataContInsert = async () => {
                 const contractData = await getContractByClientId(id);
                 setContracts(Array.isArray(contractData) ? contractData : [contractData]);
@@ -182,8 +199,8 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
         } catch (err) {
             console.error("Erro ao buscar dados:", err);
         }
-        
-    }, [contractsInsert]);
+    }
+    // }, [contractsInsert]);
 
 
     const handleGeneratePdf = async () => {
@@ -206,7 +223,6 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
             
             navigate("/pagina-inicial");
         } catch (err) {
-            alert("PDF já criado no sistema!");
             console.error(err);
         }
     };
@@ -279,7 +295,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
             };
 
             try {
-                await createContract(newContract);
+                await createContract([newContract]);
                 setContractsInsert(newContract);
             } catch(err) {
                 console.error("Erro ao criar contrato:", err);
@@ -325,31 +341,41 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
     };
 
     const handleInsertModelContract = async (modelId: number) => {
-        const modelContracts = await getModelContractItensById(modelId);
-        if (!modelContracts) {
-            return;
-        }
-        const createPromises = modelContracts.map(async (modelContract) => {
-            const newContract: ContractDTOInsert = {
-                Cont_ID_Cli: client?.id || 0,
-                Cont_ID_Prod: modelContract.modelContItens_IDProd,
-                Cont_Comodato: modelContract.modelContItens_Comodato,
-                Cont_Qtde: 0,
-                Cont_ValorTotal: 0.00,
-                Cont_PorcLucro: modelContract.modelContItens_PorcLucro
-            };
-
-            return createContract(newContract).then (() => {
-                setContractsInsert(newContract);
-            });
-        });
-
         try {
-            await Promise.all(createPromises);
-        } catch (err) {
-            console.error("Erro ao criar contratos a partir do modelo:", err);
-        } finally {
+            const modelContracts = await getModelContractItensById(modelId);
+            if (!modelContracts) {
+                return;
+            }
+            
+            const contratosParaInserir = modelContracts
+                .filter(modelItem => {
+                    const jaPossui = productsClient?.some(pC => pC.ID_Prod === modelItem.modelContItens_IDProd);
+                    return !jaPossui;
+                })
+                .map(modelItem => ({
+                    Cont_ID_Cli: client?.id || 0,
+                    Cont_ID_Prod: modelItem.modelContItens_IDProd,
+                    Cont_Comodato: modelItem.modelContItens_Comodato,
+                    Cont_Qtde: 0,
+                    Cont_ValorTotal: 0.00,
+                    Cont_PorcLucro: modelItem.modelContItens_PorcLucro
+                }));
+
+            if (contratosParaInserir.length === 0) {
+                return null; 
+            }
+
+            const newContracts = await createContract(contratosParaInserir);
+        
+            if (newContracts) {
+                    newContracts.forEach(newContract => {
+                        setContractsInsert(newContract);
+                    });
+            }
             handleCloseModelo();
+        } catch (err) {
+            console.error("Erro ao aplicar modelo:", err);
+            alert("Erro ao criar contratos.");
         }
     }
 
@@ -370,6 +396,23 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
             }
         }
     };
+
+    const handleChangeNewContractModel = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setNewModeloContrato({
+            ...newModeloContrato,
+            [e.target.name]: e.target.value,
+        });
+    }
+    
+    const handleCreateNewContractModel = async () => {
+        try {
+            const newModelContract = await createModelContract(newModeloContrato);
+            setModelosContrato([...modelosContrato, newModelContract]);
+            closeModalCreateModelo();
+        } catch (error) {
+            console.error("Erro ao criar modelo de contrato:", error);
+        }
+    }
   
     useEffect(() => {
         if (openEdit && contractToEdit !== 0) {
@@ -397,6 +440,62 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
     return (
         <Box padding={10} sx={{ "@media (max-width: 800px)": { padding: 0, margin: "auto", width: "80%" } }}>
             <Modal
+                open={modalCreateModelo}
+                onClose={closeModalCreateModelo}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={{...style, textAlign: "center"}}>
+                    <Typography id="modal-modal-title" variant="h6" component="h2">
+                        Criar Modelo
+                    </Typography>
+                    <Box display={"flex"} flexDirection={"column"} gap={2} marginTop={2}>
+                        <TextField 
+                            label="Nome do Modelo" 
+                            name="modelCont_Name" 
+                            variant="outlined" 
+                            placeholder="Digite o nome do modelo" 
+                            value={newModeloContrato.modelCont_Name} 
+                            onChange={handleChangeNewContractModel} 
+                            sx={{ width: "100%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
+                            required
+                        />
+                        <TextField 
+                            label="Descrição do Modelo" 
+                            name="modelCont_Descricao" 
+                            variant="outlined" 
+                            placeholder="Digite a descrição do modelo" 
+                            value={newModeloContrato.modelCont_Descricao} 
+                            onChange={handleChangeNewContractModel} 
+                            sx={{ width: "100%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
+                            required
+                        />
+                    </Box>
+                    <Box display={"flex"} gap={2} justifyContent={"space-between"} width={"100%"} marginTop={2}>
+                        <Box width={"100%"}>
+                            <Button 
+                                variant="contained"
+                                color="primary"
+                                sx={{ padding: "15px", width: "100%" }}
+                                onClick={handleCreateNewContractModel}
+                            >
+                                Criar
+                            </Button>
+                        </Box>
+                        <Box width={"100%"}>
+                            <Button 
+                                variant="contained"
+                                color="primary"
+                                sx={{ padding: "15px", width: "100%" }}
+                                onClick={closeModalCreateModelo}
+                            >
+                                Fechar
+                            </Button>
+                        </Box>
+                    </Box>
+                </Box>
+            </Modal>
+            <Modal
             open={open}
             onClose={handleClose}
             aria-labelledby="modal-modal-title"
@@ -408,7 +507,6 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                     </Typography>
                     <Typography id="modal-modal-description" sx={{ mt: 2 }} />
 
-                    {/* <TextField variant="filled"  label="Código do Produto" name="codigoProduto" required placeholder="Digite o código do produto" fullWidth sx={{ marginBottom: 2 }}/> */}
                     <SearchField onSearchChange={setSearchTerm} />
                     <Box sx={{ maxHeight: "20vh", overflowY: "scroll", marginTop: 2 }}>
                         {products.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product) => (
@@ -498,6 +596,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                             <Box key={modelContract.ID_ModeloContrato} sx={{ display: 'flex', justifyContent: 'space-between', padding: 1, borderBottom: '1px solid #ccc', cursor: 'pointer' }} onClick={() => setSelectedProduct(modelContract.ID_ModeloContrato)}>
 
                                 <Typography width={"90%"} alignSelf={"center"}>{modelContract.modelCont_Name}</Typography>
+                                <Button onClick={() => navigate(`/contrato-modelo/${modelContract.ID_ModeloContrato}`)}><Icon sx={{ fontSize: 24 }}>edit</Icon></Button>
                                 <Checkbox
                                     checked={modelContract.ID_ModeloContrato === selectedModelContract}
                                     onChange={(e) => setSelectedModelContract(e.target.checked ? modelContract.ID_ModeloContrato : 0)}
@@ -525,6 +624,13 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                             >
                                 <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}> Confirmar</Typography>
                             </Button>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={() => openModalCreateModelo()}
+                            >
+                                <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}> Criar</Typography>
+                            </Button>
                             <Button onClick={handleCloseModelo} variant="contained" color="primary">
                                 <Typography variant="h6" fontSize={16} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}>Fechar</Typography>
                             </Button>
@@ -532,7 +638,6 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                     </Box>
                 </Box>
             </Modal>
-
 
             <Modal
             open={openEdit}

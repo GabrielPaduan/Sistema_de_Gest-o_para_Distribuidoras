@@ -78,9 +78,9 @@ export const TableClients: React.FC = () => {
                                         key={client.id}
                                         hover
                                         style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}
-                                        
+                                        onClick={() => navigate(`/contrato-cliente/${client.id}`)}
                                     >
-                                        <TableCell onClick={() => window.location.href = `/contrato-cliente/${client.id}`} sx={{ fontSize: 12, textAlign: "center" }}>{client.cli_razaoSocial}</TableCell>
+                                        <TableCell  sx={{ fontSize: 12, textAlign: "center" }}>{client.cli_razaoSocial}</TableCell>
                                         <ProtectedComponent allowedRoles={['1']}>
                                             <TableCell sx={{ fontSize: 14, textAlign: "center", padding: "10px" }}>
                                                 <Button onClick={() => navigate(`/editar-cliente/${client.id}`)}><Icon sx={{ fontSize: 30 }}>edit</Icon></Button>
@@ -101,9 +101,9 @@ export const TableClients: React.FC = () => {
                                         key={client.id}
                                         hover
                                         style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}
-                                        
+                                        onClick={() => navigate(`/contrato-cliente/${client.id}`)}
                                     >
-                                        <TableCell onClick={() => window.location.href = `/contrato-cliente/${client.id}`} sx={{ fontSize: 12, textAlign: "center" }}>{client.cli_razaoSocial}</TableCell>
+                                        <TableCell sx={{ fontSize: 12, textAlign: "center" }}>{client.cli_razaoSocial}</TableCell>
                                         <ProtectedComponent allowedRoles={['1']}>
                                             <TableCell sx={{ fontSize: 14, textAlign: "center", padding: "10px" }}>
                                                 <Button onClick={() => navigate(`/editar-cliente/${client.id}`)}><Icon sx={{ fontSize: 30 }}>edit</Icon></Button>

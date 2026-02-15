@@ -35,3 +35,7 @@ export const getPdfByClientId = async (clientId: number): Promise<PdfStructDTO |
    const response = await api.get(`/pdfContratos/client/${clientId}`);
    return response.data;
 }
+
+export const deletePdfContract = async (id: number): Promise<void> => {
+  await api.delete(`/pdfContratos/${id}`);
+}

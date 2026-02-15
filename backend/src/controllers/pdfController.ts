@@ -80,3 +80,12 @@ export const getPdfByClientId = async (req: express.Request, res: express.Respon
     res.status(500).json({ error: error.message });
   } 
 };
+
+export const deletePdf = async (req: express.Request, res: express.Response) => {
+  try {
+    await pdfService.deletePdf(Number(req.params.id));
+    res.status(204).send();
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+} 

@@ -32,3 +32,18 @@ export const getSnapshotProductsByPdfId = async (pdfId: number): Promise<Snapsho
         throw new Error("Error fetching snapshot products");
     }
 };
+
+export const deleteSnapshotProduct = async (snapshotId: number): Promise<void> => {
+    try {
+        const { error } = await supabase   
+            .from('ContratosPDF_Itens')
+            .delete()
+            .eq('ID_ContPDFItens', snapshotId);
+        if (error) {
+            throw new Error(`Error deleting snapshot product: ${error.message}`);
+        }
+    } catch (error) {  
+        console.error("Error in deleteSnapshotProduct:", error);
+        throw new Error("Error deleting snapshot product");
+    }
+}

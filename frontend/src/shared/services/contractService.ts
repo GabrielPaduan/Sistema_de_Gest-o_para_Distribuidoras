@@ -18,7 +18,8 @@ export const getContractByClientId = async (id: number): Promise<ContractDTO> =>
   return response.data;
 };
 
-export const createContract = async (contractData: Omit<ContractDTOInsert, 'id'>): Promise<ContractDTOInsert> => {
+export const createContract = async (contractData: Omit<ContractDTOInsert[], 'id'>): Promise<ContractDTOInsert[]> => {
+  console.log(contractData);
   const response = await api.post('/contratos', contractData);
   return response.data;
 };

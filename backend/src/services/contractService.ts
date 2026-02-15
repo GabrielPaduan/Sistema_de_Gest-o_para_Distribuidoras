@@ -8,7 +8,7 @@ export const findAllContracts = async (): Promise<ContractDTO[]> => {
 };
 
 export const createNewContract = async (contractData: Omit<ContractDTO, 'id'>): Promise<ContractDTO[]> => {
-    const { data, error } = await supabase.from('Contratos').insert([contractData]).select();
+    const { data, error } = await supabase.from('Contratos').insert(contractData).select();
     if (error) throw error;
     return data;
 };
@@ -27,15 +27,16 @@ export const removeContract = async (contractId: number): Promise<void> => {
 export const updateContract = async (
     contractId: number,
     cmdt: number,
+    qtde: number,
+    valorTotal: number,
     porcLucro: number
-): Promise<{ modelContItens_Comodato: number; modelContItens_PorcLucro: number }> => {
+): Promise<{ Cont_Comodato: number; Cont_Qtde: number; Cont_ValorTotal: number; Cont_PorcLucro: number }> => {
     const { data, error } = await supabase
         .from('Contratos')
-        .update({ Cont_Comodato: cmdt, Cont_PorcLucro: porcLucro })
+        .update({ Cont_Comodato: cmdt, Cont_Qtde: qtde, Cont_ValorTotal: valorTotal, Cont_PorcLucro: porcLucro })
         .eq('ID_Contrato', contractId)
-        .select('modelContItens_Comodato, modelContItens_PorcLucro')
+        .select('Cont_Comodato, Cont_Qtde, Cont_ValorTotal, Cont_PorcLucro')
         .single();
     if (error) throw error;
     return data;
 };
- 
