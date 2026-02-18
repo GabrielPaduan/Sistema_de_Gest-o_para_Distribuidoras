@@ -23,6 +23,7 @@ export const getPdfById = async (id: number): Promise<PdfStructDTO> => {
 }
 
 export const createPdf = async (pdfData: PdfStructInsertDTO) => {
+  console.log("Creating PDF contract with data:", pdfData);
   const { data, error } = await supabase.from("ContratosPDF").insert(pdfData).select();
   if (error) throw error;
   return data;
@@ -52,7 +53,7 @@ export const getPdfByClientId = async (clientId: number): Promise<PdfStructDTO[]
         .from('ContratosPDF')
         .select('*')
         .eq('PDF_Client_Id', clientId)
-        .eq('PDF_Status', 1);
+        .neq('PDF_Status', 0);
     if (error) throw error;
     return data;
 };
@@ -62,21 +63,51 @@ export const updatePdf = async (
     PDF_Client_Id: number,
     PDF_Status: number,
     PDF_Generated_Date: string,
-    PDF_Observacoes: string
-): Promise<{ PDF_Client_Id: number; PDF_Status: number; PDF_Generated_Date: string; PDF_Observacoes: string }> => {
-    const { data, error } = await supabase
+    PDF_Observacoes: string,
+    PDF_Valor: number,
+    PDF_ValorPago: number
+): Promise<{ PDF_Client_Id: number; PDF_Status: number; PDF_Generated_Date: string; PDF_Observacoes: string; PDF_Valor: number; PDF_ValorPago: number }> => {
+  console.log(`Updating PDF contract with ID ${id} and data:`, { PDF_Client_Id, PDF_Status, PDF_Generated_Date, PDF_Observacoes, PDF_Valor, PDF_ValorPago });  
+  if (PDF_Valor < 0 || PDF_ValorPago < 0) {
+    throw new Error("Valor e o valor pago do contrato não podem ser negativos.");
+  }
+
+  
+
+  const { data: contractData, error: contractError } = await supabase
+    .from('ContratosPDF')
+    .select('PDF_ValorPago')
+    .eq('id', id)
+    .single();
+
+
+  if (contractError) {
+    console.error("Erro ao buscar contrato relacionado ao PDF:", contractError);
+    throw new Error("Erro ao validar os valores do contrato.");
+  }
+
+  contractData.PDF_ValorPago = PDF_ValorPago + contractData.PDF_ValorPago;
+  
+
+  if (contractData.PDF_ValorPago.toFixed(2) > PDF_Valor.toFixed(2)) {
+    throw new Error("Valor pago não pode ser maior que o valor total do contrato.");
+  }
+
+  if (contractData.PDF_ValorPago.toFixed(2) === PDF_Valor.toFixed(2)) {
+    PDF_Status = 2;
+  }
+
+  const { data, error } = await supabase
         .from('ContratosPDF')
-        .update({ PDF_Client_Id: PDF_Client_Id, PDF_Status: PDF_Status, PDF_Generated_Date: PDF_Generated_Date, PDF_Observacoes: PDF_Observacoes })
+        .update({ PDF_Client_Id: PDF_Client_Id, PDF_Status: PDF_Status, PDF_Generated_Date: PDF_Generated_Date, PDF_Observacoes: PDF_Observacoes, PDF_Valor: PDF_Valor, PDF_ValorPago: contractData.PDF_ValorPago })
         .eq('id', id)
-        .select('PDF_Client_Id, PDF_Status, PDF_Generated_Date, PDF_Observacoes')
+        .select('PDF_Client_Id, PDF_Status, PDF_Generated_Date, PDF_Observacoes, PDF_Valor, PDF_ValorPago')
         .single();
     if (error) throw error;
     return data;
 };
 
 export const deletePdf = async (id: number): Promise<void> => {
-  console.log("Deleting PDF with ID:", id);
     const { error } = await supabase.from('ContratosPDF').delete().eq('id', id);
-    console.log("Delete operation completed for PDF ID:", error ? `Error: ${error.message}` : "Success");
     if (error) throw error;
 }

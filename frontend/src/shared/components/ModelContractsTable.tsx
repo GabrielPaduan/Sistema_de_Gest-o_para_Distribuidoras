@@ -15,7 +15,7 @@ export const ModelContractsTable: React.FC<ModelContractsTableProps> = ({ modelo
             <TableContainer component={Paper} sx={{ margin: "auto", cursor: "default", width: "100%" }}>
                 <Table width={"100%"}>
                     <TableHead>
-                        <TableRow>
+                        <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                             <TableCell>Nome</TableCell>
                             <TableCell>Descrição</TableCell>
                             <TableCell>Data</TableCell>

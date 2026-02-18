@@ -177,30 +177,30 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
         fetchData();
     }, []); 
 
-    // useEffect(() => {
-    const fetchDataContInsert = async (contractsInsert) => {
+    const fetchDataContInsert = async (contractsInsert: ContractDTOInsert[]) => {
         try {
             console.log("Contracts Insert: ", contractsInsert);
             const fetchDataContInsert = async () => {
                 const contractData = await getContractByClientId(id);
                 setContracts(Array.isArray(contractData) ? contractData : [contractData]);
-                if (contractsInsert && contractsInsert.Cont_ID_Prod !== undefined) {
-                    const productData = await getProductById(contractsInsert.Cont_ID_Prod);
-                    if (productData != null) {
-                        if (productsClient.map(p => p.ID_Prod).includes(productData.ID_Prod)) {
-                            setProductsClient(prevProducts => prevProducts.map(p => p.ID_Prod === productData.ID_Prod ? productData : p));
-                        } else {
+                if (contractsInsert && contractsInsert.length > 0) {
+                    for (const contract of contractsInsert) {
+                        const productData = await getProductById(contract.Cont_ID_Prod);
+                        if (productData != null) {
+                            if (productsClient.map(p => p.ID_Prod).includes(productData.ID_Prod)) {
+                                setProductsClient(prevProducts => prevProducts.map(p => p.ID_Prod === productData.ID_Prod ? productData : p));
+                            } else {
                             setProductsClient(prevProducts => [...prevProducts, ...(Array.isArray(productData) ? productData : [productData])]);
+                            }
                         }
                     }
-                }
-            };
+                };
+            }
             fetchDataContInsert();
         } catch (err) {
             console.error("Erro ao buscar dados:", err);
         }
     }
-    // }, [contractsInsert]);
 
 
     const handleGeneratePdf = async () => {
@@ -210,17 +210,9 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
             }
             
             const clientPDF = await getPendentPdfByClientId(id);
-            console.log(id);
-            if (clientPDF == null) {
                 const date = new Date();
                 date.setHours(12, 0, 0, 0);
-                await createPDFContracts({ PDF_Client_Id: id, PDF_Status: 0, PDF_Generated_Date: date.toISOString(), PDF_Observacoes: observation });
-                console.log("CREATE")
-            } else {
-                console.log("UPDATE")
-                await updatePdf(clientPDF.id, {id: clientPDF.id, PDF_Client_Id: clientPDF.PDF_Client_Id, PDF_Status: 0, PDF_Generated_Date: new Date().toISOString(), PDF_Observacoes: observation });
-            }
-            
+                await createPDFContracts({ PDF_Client_Id: id, PDF_Status: 0, PDF_Generated_Date: date.toISOString(), PDF_Observacoes: observation, PDF_Valor: contracts.reduce((acc, contract) => acc + contract.Cont_ValorTotal, 0), PDF_ValorPago: 0 });
             navigate("/pagina-inicial");
         } catch (err) {
             console.error(err);
@@ -371,6 +363,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                     newContracts.forEach(newContract => {
                         setContractsInsert(newContract);
                     });
+                    fetchDataContInsert(newContracts);
             }
             handleCloseModelo();
         } catch (err) {

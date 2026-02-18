@@ -17,6 +17,7 @@ export const getClientByPDF = async (): Promise<ClientDTO> => {
 };
 
 export const createClient = async (clientData: Omit<ClientDTO, 'id'>): Promise<ClientDTO[]> => {
+  console.log("Dados enviados para criação do cliente:", clientData); // Log para verificar os dados enviados
   const response = await api.post('/clientes', clientData);
   return response.data;
 };
@@ -37,4 +38,8 @@ export const getModelContracts = async (modelId: number): Promise<ContractDTO[]>
 
 export const updateClient = async (clientData: ClientDTO): Promise<void> => {
   await api.put(`/clientes/${clientData.id}`, clientData);
+}
+
+export const updateClientStatus = async (id: number): Promise<void> => {
+  await api.put(`/clientes/status/${id}`);
 }

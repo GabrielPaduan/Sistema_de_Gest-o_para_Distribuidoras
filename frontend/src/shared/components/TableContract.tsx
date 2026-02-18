@@ -26,7 +26,7 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
         if (prateleiraA - prateleiraB === 0) {
             return productA?.Prod_CodProduto.localeCompare(productB?.Prod_CodProduto || "") || 0;
         }
-        return prateleiraA - prateleiraB;
+        return prateleiraB - prateleiraA;
     });
 
     return (

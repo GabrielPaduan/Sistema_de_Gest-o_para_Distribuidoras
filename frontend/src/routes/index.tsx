@@ -11,9 +11,9 @@ import { EstoqueProdutos } from "../pages/estoqueProdutos/EstoqueProdutos";
 import { CadastroProduto } from "../pages/cadastroProduto/CadastroProduto";
 import { EditarProduto } from "../pages/editarProduto/EditarProduto";
 import { EditarCliente } from "../pages/editarCliente/EditarCliente";
-import { PaginaClientes } from "../pages/paginaClientes/PaginaClientes";
 import { PaginaModeloContratos } from "../pages/PaginaModeloContratos/PaginaModeloContratos";
 import { ContratoModelo } from "../pages/contratoModelo/contratoModelo";
+import { PaginaVendas } from "../pages/paginaVendas/PaginaVendas";
 
 export const AppRoutes = () => {
   return (
@@ -30,9 +30,9 @@ export const AppRoutes = () => {
         <Route path="/cadastro-produto" element={<ProtectedRoute><CadastroProduto /></ProtectedRoute>} /> 
         <Route path="/editar-produto/:id" element={<ProtectedRoute><EditarProduto /></ProtectedRoute>} />
         <Route path="/editar-cliente/:id" element={<ProtectedRoute><EditarCliente /></ProtectedRoute>} />
-        <Route path="/gerenciar-clientes" element={<ProtectedRoute><PaginaClientes /></ProtectedRoute>} />
         <Route path="/gerenciar-modelo-contratos" element={<ProtectedRoute><PaginaModeloContratos /></ProtectedRoute>} />
         <Route path="/contrato-modelo/:id" element={<ProtectedRoute><ContratoModelo /></ProtectedRoute>} />
+        <Route path="/pagina-vendas" element={<ProtectedRoute><PaginaVendas /></ProtectedRoute>} />
     </Routes>
  );
 };

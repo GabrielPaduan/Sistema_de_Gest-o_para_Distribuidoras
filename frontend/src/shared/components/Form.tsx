@@ -1,10 +1,8 @@
 import { Box, Button, Checkbox, MenuItem, Select, TextField, Typography } from "@mui/material";
-import { FormField } from "./FormField";
 import { GenericButton } from "./GenericButton";
 import { useState } from "react";
 import { ClientDTOInsert } from "../utils/DTOS";
 import { createClient } from "../services/clientService";
-import { create } from "domain";
 import { useNavigate } from "react-router-dom";
 
 export const Form: React.FC = () => {
@@ -32,11 +30,17 @@ export const Form: React.FC = () => {
                 cli_celular: formData.get("cel") as string,
                 cli_endNum: formData.get("endNum") as string,
                 cli_responsavel: formData.get("responsavel") as string,
+                cli_ClienteAtivo: formData.get("ativo") === "on" ? true : false,
             };
+
             setClient(newClient);
             const idCliente = await createClient(newClient);
-            setClient(null);
-            navigate(`/contrato-cliente/${idCliente[0].id}`);
+            if (newClient.cli_ClienteAtivo) {
+                navigate(`/contrato-cliente/${idCliente[0].id}`);
+            } else {
+                navigate("/visualizar-clientes");
+            }
+            setClient(null); 
         } catch (error) {
             console.error("Error submitting form:", error);
         }
@@ -106,6 +110,12 @@ export const Form: React.FC = () => {
                     <TextField id="responsavel" name="responsavel" variant="outlined" placeholder="Digite o responsável" sx={{ width: "100%", '@media (max-width: 800px)': { width: "83%" } }} />
                 </Box>
             </Box>
+            <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={1}>
+                <Typography variant="subtitle1" color="text.primary">
+                    Cliente Ativo
+                </Typography>
+                <Checkbox id="ativo" name="ativo" color="primary" sx={{ color: "primary.main" }} />
+            </Box>
 
             <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2}>
                 <Box>
@@ -116,7 +126,7 @@ export const Form: React.FC = () => {
                     </Button>
                 </Box>
                 <Box>
-                    <GenericButton name="Voltar" type="button" link="/gerenciar-clientes" />
+                    <GenericButton name="Voltar" type="button" link="/" onClick={() => navigate(-1)} />
                 </Box>
             </Box>
         </Box>

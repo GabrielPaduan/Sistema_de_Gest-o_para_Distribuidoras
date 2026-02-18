@@ -33,6 +33,7 @@ interface LayoutModelContractProps {
 export const LayoutModelContract: React.FC<LayoutModelContractProps> = ({ id }) => {
     const [modelContract, setModelContract] = useState<ModelosContratoDTO | null>(null);
     const [products, setProducts] = useState<ProductDTO[]>([]);
+    const [productsContract, setProductsContract] = useState<ProductDTO[]>([]);
     const [modelContractItens, setModelContractItens] = useState<ModelosContratoItensDTO[]>([]);
     const [productCategories, setProductCategories] = useState<ProductsCategoriesDTO[]>([]);
     const [openAddItem, setOpenAddItem] = useState(false);
@@ -122,6 +123,8 @@ export const LayoutModelContract: React.FC<LayoutModelContractProps> = ({ id }) 
                 setModelContractItens(modelContractItensData);
                 const productsData = await getAllProducts();
                 setProducts(productsData);
+                setProductsContract(productsData.filter(p => modelContractItensData.some(i => i.modelContItens_IDProd === p.ID_Prod)));
+                
                 const productCategoriesData = await getAllCategories();
                 setProductCategories(productCategoriesData);
             } catch (error) {
@@ -173,6 +176,7 @@ export const LayoutModelContract: React.FC<LayoutModelContractProps> = ({ id }) 
             };
             const createdItem = await createModelContractItem(newItem);
             setModelContractItens(prev => [...prev, createdItem]);
+            setProductsContract(prev => [...prev, products.find(p => p.ID_Prod === productId)!]);
             handleCloseAddItem();
         } catch (error) {
             console.error("Erro ao inserir item de contrato:", error);
@@ -361,7 +365,7 @@ export const LayoutModelContract: React.FC<LayoutModelContractProps> = ({ id }) 
                 display="flex" 
                 justifyContent="flex-end" 
                 alignItems="center"
-                height="50px" // Altura fixa para não pular layout
+                height="50px" 
             >
                 {selectedItems.length > 0 ? (
                     <Box display="flex" alignItems="center" gap={2} bgcolor="#ffebee" p={1} borderRadius={2} width="100%" justifyContent="space-between">
@@ -387,7 +391,7 @@ export const LayoutModelContract: React.FC<LayoutModelContractProps> = ({ id }) 
             <TableContractItens 
                 contracts={modelContractItens} 
                 productsCategories={productCategories} 
-                products={products} 
+                products={productsContract} 
                 selectedItems={selectedItems}
                 onToggleSelect={handleToggleSelect}
                 onRemoveItem={handleRemoveContract}

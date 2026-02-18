@@ -1,4 +1,4 @@
-import { Box, Button, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs, Typography } from "@mui/material";
+import { Box, Button, InputAdornment, Modal, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs, TextField, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { SearchField } from "./searchField";
 import { ClientDTO, PdfStructCompleteDTO, PdfStructDTO, ProductDTO, ProductsCategoriesDTO, SnapshotProductDTO, SnapshotProductDTOInsert } from "../utils/DTOS";
@@ -20,6 +20,18 @@ interface TabPanelProps {
   index: number;
   value: number;
 }
+
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 'auto',
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};
 
 function CustomTabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -59,6 +71,17 @@ export const TableHistoricoContract: React.FC = () => {
     const [snapshotProducts, setSnapshotProducts] = React.useState<SnapshotProductDTO[]>([]);
     const [productCategories, setProductsCategories] = useState<ProductsCategoriesDTO[]>([]);
     const navigate = useNavigate();
+    const [modalPaymentOpen, setModalPaymentOpen] = useState(false);
+    const [valorPago, setValorPago] = useState(0);
+
+    const handleOpenPaymentModal = () => {
+        setModalPaymentOpen(true);
+    };
+
+    const handleClosePaymentModal = () => {
+        setModalPaymentOpen(false);
+        setValorPago(0);
+    };
     
 
     const handleChangeTab = (event: React.SyntheticEvent, newValue: number) => {
@@ -114,6 +137,35 @@ export const TableHistoricoContract: React.FC = () => {
         setPage(0);
     };
 
+    const handlePayment = async (paymentType: number) => {
+        const updatedPdf = {
+            id: selectedPdf?.id || 0,
+            PDF_Client_Id: selectedPdf?.PDF_Client?.id || 0,
+            PDF_Status: selectedPdf?.PDF_Status || 0,
+            PDF_Generated_Date: selectedPdf?.PDF_Generated_Date || new Date().toISOString(),
+            PDF_Observacoes: selectedPdf?.PDF_Observacoes || "",
+            PDF_Valor: selectedPdf?.PDF_Valor || 0,
+            PDF_ValorPago: paymentType === 1 ? selectedPdf?.PDF_Valor || 0 : valorPago
+        };
+        try {
+            await updatePdf(selectedPdf?.id || 0, updatedPdf);
+            const updatedPdfs = pdfsCompleteData.map(pdf => {
+                if (pdf.id === selectedPdf?.id) {
+                    return {
+                        ...pdf,
+                        PDF_ValorPago: paymentType === 1 ? selectedPdf?.PDF_Valor || 0 : valorPago
+                    };
+                }
+                return pdf;
+            });
+            setPdfsCompleteData(updatedPdfs);
+        } catch (err) {
+            console.error(err);
+        }
+
+        handleClosePaymentModal();
+    };
+
     useEffect(() => {
         const fetchPDFContracts = async () => {
             try {
@@ -130,7 +182,9 @@ export const TableHistoricoContract: React.FC = () => {
                             PDF_Client: dataClient,
                             PDF_Contracts: [],
                             PDF_Products: [],
-                            PDF_Observacoes: pdf.PDF_Observacoes
+                            PDF_Observacoes: pdf.PDF_Observacoes,
+                            PDF_Valor: pdf.PDF_Valor,
+                            PDF_ValorPago: pdf.PDF_ValorPago
                         };
                     })
                 );
@@ -170,6 +224,8 @@ export const TableHistoricoContract: React.FC = () => {
             PDF_Status: 1,
             PDF_Generated_Date: selectedPdf.PDF_Generated_Date,
             PDF_Observacoes: "", 
+            PDF_Valor: selectedPdf.PDF_Valor,
+            PDF_ValorPago: selectedPdf.PDF_ValorPago
         };
 
         try {
@@ -229,7 +285,7 @@ export const TableHistoricoContract: React.FC = () => {
                     );
                 }
             }
-
+            handleCloseReport();
         } catch (error) {
             console.error("Erro ao confirmar o PDF ou atualizar contratos:", error);
         } finally {
@@ -248,6 +304,66 @@ export const TableHistoricoContract: React.FC = () => {
 
     return (
         <Box sx={{ width: "70%", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", marginTop: 3, '@media (max-width:800px)': { width: '95%' } }}>
+             <Modal
+                open={modalPaymentOpen}
+                onClose={handleClosePaymentModal}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={{...style, textAlign: "center"}}>
+                    <Typography id="modal-modal-title" variant="h6" component="h2">
+                        Lançar Pagamento
+                    </Typography>
+                    <Box display={"flex"} flexDirection={"column"} gap={2} marginTop={2}>
+                        <Typography variant="h6">Valor Total do Contrato: R${selectedPdf?.PDF_Valor.toFixed(2)}</Typography>
+                        <Typography variant="h6">Valor Pago: R${selectedPdf?.PDF_ValorPago.toFixed(2)}</Typography>
+                        <Box display={"flex"} justifyContent={"center"} gap={2}>
+                            <TextField
+                                label="Valor Pago"
+                                variant="outlined"
+                                placeholder="Digite o valor pago"
+                                value={valorPago}
+                                onChange={(e) => setValorPago(Number(e.target.value))}
+                                sx={{ width: "100%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }}
+                                slotProps={{
+                                    input: {
+                                    startAdornment: <InputAdornment position="start"><Typography sx={{ color: 'gray' }}>R$</Typography></InputAdornment>,
+                                    },
+                                }}
+                                type="number"
+                            />
+                            <Button 
+                                variant="contained"
+                                color="primary"
+                                sx={{ width: "100%" }}
+                                onClick={() => handlePayment(0)}
+                            >
+                                <Typography variant="h6" fontSize={14}>Confirmar</Typography>
+                            </Button>
+                        </Box>
+                    </Box>
+                    <Box display={"flex"} gap={2} justifyContent={"space-between"} width={"100%"} marginTop={2}>
+                            <Button 
+                                variant="contained"
+                                color="primary"
+                                sx={{ width: "100%" }}
+                                onClick={() => handlePayment(1)}
+                            >
+                                <Typography variant="h6" fontSize={14}>Deixar como Pago</Typography>
+                            </Button>
+                            <Button 
+                                variant="contained"
+                                color="primary"
+                                sx={{ width: "100%" }}
+                                onClick={handleClosePaymentModal}
+                            >
+                                <Typography variant="h6" fontSize={14}>Fechar</Typography>
+                            </Button>
+
+                    </Box>
+                </Box>
+            </Modal>
+            
             <Box width={'100%'}>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-evenly' }}>
                         <Tabs value={valueTab} onChange={handleChangeTab} aria-label="basic tabs example">
@@ -358,6 +474,7 @@ export const TableHistoricoContract: React.FC = () => {
                                         <TableCell sx={{ fontSize: 14, textAlign: "Center"}}/>
                                         <TableCell  sx={{ fontSize: 14, textAlign: "center" }}>Nome</TableCell>
                                         <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>Endereço</TableCell>
+                                        <TableCell sx={{ fontSize: 14, textAlign: "center" }}>Saldo Devedor</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -382,7 +499,9 @@ export const TableHistoricoContract: React.FC = () => {
                                                             PDF_Client: dataClientSingle,
                                                             PDF_Contracts: [],
                                                             PDF_Products: [],
-                                                            PDF_Observacoes: pdf.PDF_Observacoes
+                                                            PDF_Observacoes: pdf.PDF_Observacoes,
+                                                            PDF_Valor: pdf.PDF_Valor,
+                                                            PDF_ValorPago: pdf.PDF_ValorPago
                                                         };
                              
                                                         if (pdfComplete) {
@@ -390,6 +509,7 @@ export const TableHistoricoContract: React.FC = () => {
                                                         }
                                                     }}
                                                     handleDeletePDF={handleDeletePDF}
+                                                    handleOpenPaymentModal={handleOpenPaymentModal}
                                                 />
                                             ))
                                             
@@ -420,22 +540,27 @@ export const TableHistoricoContract: React.FC = () => {
                                     {selectedPdf.PDF_Observacoes ? selectedPdf.PDF_Observacoes : "Nenhuma observação adicionada."}
                                 </Typography>
                             </Box>
-                            
                             <Box display={"flex"} justifyContent={"center"} gap={2} sx={{ textAlign: 'center', my: 4, '@media (max-width: 800px)': { flexDirection: "column", gap: 2 } }}>
                                 <Button
                                     variant="contained"
-                                    size="large"
                                     onClick={ selectedPdf.PDF_Status === 0 ? handleConfirmPdf : () => generateReport(selectedPdf.PDF_Client!, selectedPdf.PDF_Contracts, selectedPdf.PDF_Products, snapshotProducts, productCategories)}
                                 >
-                                    <Typography variant="h6">Gerar Contrato</Typography>
+                                    <Typography variant="h6" fontSize={14}>Gerar Contrato</Typography>
                                 </Button>
                                 <Button
                                     variant="contained"
-                                    size="large"
                                     onClick={() => navigate(`/contrato-cliente/${selectedPdf.PDF_Client?.id}`)}
                                     sx={{ display: selectedPdf.PDF_Status === 0 ? "block" : "none" }}
                                 >
-                                    <Typography variant="h6">Editar</Typography>
+                                    <Typography variant="h6" fontSize={14}>Editar</Typography>
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    sx={{ display: selectedPdf.PDF_Status === 1 ? "block" : "none" }}
+                                    onClick={() => handleOpenPaymentModal()}
+                                >
+                                    <Typography variant="h6" fontSize={14}>Pagamento</Typography>
                                 </Button>
                                 <Button
                                     variant="contained"
@@ -443,7 +568,7 @@ export const TableHistoricoContract: React.FC = () => {
                                     sx={{ padding: "15px" }}
                                     onClick={() => handleCloseReport()}
                                 >
-                                    <Typography variant="h6">Ocultar Relatório</Typography>
+                                    <Typography variant="h6" fontSize={14}>Ocultar Relatório</Typography>
                                 </Button>
                             </Box>
                         </Box>

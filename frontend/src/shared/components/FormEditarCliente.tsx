@@ -28,6 +28,7 @@ export const FormEditarCliente: React.FC = () => {
         cli_cidade: "",
         cli_endNum: "",
         cli_responsavel: "",
+        cli_ClienteAtivo: false,
     });
     const navigate = useNavigate();
 
@@ -77,6 +78,7 @@ export const FormEditarCliente: React.FC = () => {
     };
 
     useShortcut("F1", () => submitForm());
+    useShortcut("Escape", () => navigate(-1));
 
     return (
         <Box
@@ -143,6 +145,12 @@ export const FormEditarCliente: React.FC = () => {
                     <TextField id="responsavel" name="cli_responsavel" variant="outlined" placeholder="Digite o responsável" sx={{ width: "100%", '@media (max-width: 800px)': { width: "83%" } }} value={formData?.cli_responsavel} onChange={handleChange} />
                 </Box>
             </Box>
+            <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={1}>
+                <Typography variant="subtitle1" color="text.primary">
+                    Cliente Ativo
+                </Typography>
+                <Checkbox id="ativo" name="cli_ClienteAtivo" color="primary" sx={{ color: "primary.main" }} checked={formData?.cli_ClienteAtivo} onChange={(e) => setFormData((prevData) => ({ ...prevData, cli_ClienteAtivo: e.target.checked }))} />
+            </Box>
             <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2}>
                 <Box>
                     <Button variant="contained" color="primary" type="submit" sx={{ margin: "10px auto", padding: "15px", '@media (max-width: 800px)': { width: "100%" } }}>
@@ -152,7 +160,7 @@ export const FormEditarCliente: React.FC = () => {
                     </Button>
                 </Box>
                 <Box>
-                    <GenericButton name="Voltar" type="button" link="/visualizar-clientes" />
+                    <GenericButton name="Voltar [Esc]" type="button" link="/" onClick={() => navigate(-1)} />
                 </Box>
             </Box>
         </Box>

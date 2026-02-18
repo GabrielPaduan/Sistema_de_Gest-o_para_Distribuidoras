@@ -19,12 +19,34 @@ const style = {
   p: 4,
 };
 
-export const TableClients: React.FC = () => {
+export const TableClientsWithContract: React.FC = () => {
     const [clientsData, setClientsData] = React.useState<ClientDTO[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const[page, setPage] = useState(0);
     const[rowsPerPage, setRowsPerPage] = useState(5);
     const navigate = useNavigate();
+    const [openSwitchClientStatus, setOpenSwitchClientStatus] = useState(false);
+    const [selectedClientId, setSelectedClientId] = useState<number>(0);
+
+    const handleOpenSwitchClientStatus = (id: number) => {
+        setSelectedClientId(id);
+        setOpenSwitchClientStatus(true);
+    }
+
+    const handleClose = () => {
+        setOpenSwitchClientStatus(false);
+    }
+
+    const handleSwitchClientStatus = async (id: number) => {
+        await updateClientStatus(id);
+        setClientsData(clientsData.map(client => {
+            if (client.id === id) {
+                return { ...client, cli_ClienteAtivo: !client.cli_ClienteAtivo };
+            }
+            return client;
+        }));
+        handleClose();
+    }
     
     const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
         setPage(newPage);
@@ -59,11 +81,31 @@ export const TableClients: React.FC = () => {
     }
 
     const handleNavigateToContract = (id: number, isClientActive: boolean) => {
+        if (isClientActive === false) {
+            handleOpenSwitchClientStatus(id);
+            return;
+        }
         navigate(`/contrato-cliente/${id}`);
     }
 
     return (
         <Box sx={{ maxWidth: "70%", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", marginTop: 3, marginBottom: 2, '@media (max-width: 800px)': { maxWidth: "90%" } }}>
+            <Modal
+                open={openSwitchClientStatus}
+                onClose={handleClose}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={{ ...style, '@media (max-width: 800px)': { width: "80%" } }}>
+                    <Typography id="modal-modal-title" variant="h6" component="h2">
+                        Deseja alterar o status deste cliente para ativo?
+                    </Typography>
+                    <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2} marginTop={3}>
+                        <Button variant="contained" color="primary" onClick={() => handleSwitchClientStatus(selectedClientId)}>Sim</Button>
+                        <Button variant="contained" color="primary" onClick={() => handleClose()}>Não</Button>
+                    </Box>
+                </Box>
+            </Modal>
             <SearchField onSearchChange={setSearchTerm} />
             <TableContainer component={Paper} sx={{margin: "auto", cursor: "default", overflowY: "scroll", maxHeight: "45vh", marginTop: 3 }}>
                 <Table stickyHeader>

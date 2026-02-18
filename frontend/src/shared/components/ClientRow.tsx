@@ -9,12 +9,14 @@ interface ClientRowProps {
     client: ClientDTO;
     handleViewPdf: (pdf: PdfStructDTO) => void;
     handleDeletePDF: (pdfId: number) => void;
+    handleOpenPaymentModal: () => void;
 }
 
-export const ClientRow: React.FC<ClientRowProps> = ({ client, handleViewPdf, handleDeletePDF }) => {
+export const ClientRow: React.FC<ClientRowProps> = ({ client, handleViewPdf, handleDeletePDF, handleOpenPaymentModal }) => {
     const [isOpen, setIsOpen] = React.useState<boolean>(false);
     const [pdfContracts, setPdfContracts] = React.useState<PdfStructDTO[]>([]);
     const [loading, setLoading] = React.useState<boolean>(false);
+    const [saldoDevedor, setSaldoDevedor] = React.useState<number>(0);
 
     useEffect(() => {
         if (isOpen && pdfContracts.length === 0) {
@@ -33,6 +35,15 @@ export const ClientRow: React.FC<ClientRowProps> = ({ client, handleViewPdf, han
         } 
     }, [client.id, isOpen]);
 
+    useEffect(() => {
+        const calcularSaldoDevedor = () => {
+            const totalValor = pdfContracts.reduce((acc, pdf) => acc + (pdf.PDF_Valor || 0), 0);
+            const totalValorPago = pdfContracts.reduce((acc, pdf) => acc + (pdf.PDF_ValorPago || 0), 0);
+            setSaldoDevedor(totalValor - totalValorPago < 0 ? 0 : totalValor - totalValorPago);
+        }
+        calcularSaldoDevedor();
+    }, [pdfContracts]);
+
     const handleDeletePDFInList = (pdfId: number) => {
         setPdfContracts(prevContracts => prevContracts.filter(pdf => pdf.id !== pdfId));
         handleDeletePDF(pdfId);
@@ -48,9 +59,10 @@ export const ClientRow: React.FC<ClientRowProps> = ({ client, handleViewPdf, han
                 </TableCell>
                 <TableCell sx={{ fontSize: 16, textAlign: "center" }}>{client.cli_razaoSocial}</TableCell>
                 <TableCell sx={{ fontSize: 16, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>{client.cli_end === "" ? "Não informado" : client.cli_end}</TableCell>
+                <TableCell sx={{ fontSize: 16, textAlign: "center" }}>R$ {saldoDevedor.toFixed(2)}</TableCell>
             </TableRow>
             <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={3}>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
                     <Collapse in={isOpen} timeout="auto" unmountOnExit>
                         <Box sx={{ margin: 1, padding: 2, backgroundColor: "#f9f9f9" }}>
                             <Typography variant="h6" gutterBottom component="div">
@@ -71,25 +83,40 @@ export const ClientRow: React.FC<ClientRowProps> = ({ client, handleViewPdf, han
                                         <TableRow>
                                             <TableCell sx={{width: "33%", fontSize: 16, textAlign: "center" }}>DATA</TableCell> 
                                             <TableCell sx={{ width: "33%", fontSize: 16, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>STATUS</TableCell>
-                                            <TableCell sx={{ width: "33%", fontSize: 16, textAlign: "center" }} colSpan={2}>AÇÕES</TableCell>
+                                            <TableCell sx={{width: "33%", fontSize: 16, textAlign: "center" }} colSpan={2}>Financeiro</TableCell> 
+                                            <TableCell sx={{ width: "33%", fontSize: 16, textAlign: "center" }} colSpan={3}>AÇÕES</TableCell>
                                         </TableRow> 
                                     </TableHead>
                                     <TableBody>
                                         {pdfContracts.sort((a, b) => {return new Date(b.PDF_Generated_Date).getTime() - new Date(a.PDF_Generated_Date).getTime()}).map((pdf) => (
                                             <TableRow key={pdf.id}>
                                                 <TableCell sx={{ width: "33%", fontSize: 16, textAlign: "center" }}>{pdf.PDF_Generated_Date ? new Date(pdf.PDF_Generated_Date).toLocaleDateString('pt-BR', {timeZone: "UTC"}) : ""}</TableCell>
-                                                <TableCell sx={{ width: "33%", fontSize: 16, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>{pdf.PDF_Status}</TableCell>
-                                                <Box display={"flex"} justifyContent={"center"} width={"100%"}>
-                                                    <TableCell sx={{width: "100%", fontSize: 16, textAlign: "center" }}>
+                                                <TableCell sx={{ width: "33%", fontSize: 16, textAlign: "center", '@media (max-width:600px)': { display: 'none' } }}>{pdf.PDF_Status === 0 ? "Não Gerado" : pdf.PDF_Status === 1 ? "Aguardando Pagamento" : "Concluído"}</TableCell>
+                                                <TableCell sx={{ width: "33%", fontSize: 16, textAlign: "center" }} colSpan={2}>
+                                                    <Box display={"flex"} justifyContent={"center"} width={"100%"} gap={2}> 
+                                                        <Typography variant="h6" fontSize={16}>TOTAL: R$ {pdf.PDF_Valor?.toFixed(2) || "0.00"}</Typography>
+                                                        <Typography variant="h6" fontSize={16}>PAGO: R$ {pdf.PDF_ValorPago?.toFixed(2) || "0.00"}</Typography>
+                                                    </Box>
+                                                </TableCell>
+                                                <TableCell sx={{width: "100%", fontSize: 16, textAlign: "center" }}>
+                                                    <Box display={"flex"} justifyContent={"center"} width={"100%"} gap={2}>
                                                         <Button variant="contained" color="primary" onClick={(e) => {
                                                             e.stopPropagation(); 
                                                             handleViewPdf(pdf); 
-                                                        }}>Visualizar</Button>
-                                                    </TableCell>
-                                                    <TableCell sx={{width:"100%", fontSize: 16, textAlign: "center" }}>
-                                                        <Button variant="contained" color="primary" onClick={() => handleDeletePDFInList(pdf.id)}>Excluir</Button>
-                                                    </TableCell>
-                                                </Box>
+                                                        }}>
+                                                            <Typography variant="h6" fontSize={14}>Visualizar</Typography>
+                                                        </Button>
+                                                        <Button
+                                                            variant="contained"
+                                                            color="primary"
+                                                            sx={{ display: pdf.PDF_Status === 1 ? "block" : "none" }}
+                                                            onClick={() => handleOpenPaymentModal()}
+                                                        >
+                                                            <Typography variant="h6" fontSize={14}>Pagamento</Typography>
+                                                        </Button>
+                                                        <Button variant="contained" color="primary" onClick={() => handleDeletePDFInList(pdf.id)}><Typography variant="h6" fontSize={14}>Excluir</Typography></Button>
+                                                    </Box>
+                                                </TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>

@@ -16,6 +16,7 @@ export interface ClientDTO {
     cli_uf: string;
     cli_insEstadual: string;   
     cli_responsavel: string;
+    cli_ClienteAtivo: boolean;
 }
 
 export interface ClientDTOInsert {
@@ -35,6 +36,7 @@ export interface ClientDTOInsert {
     cli_uf: string;
     cli_insEstadual: string;
     cli_responsavel: string;
+    cli_ClienteAtivo: boolean;
 }
 
 export interface ProductDTO {
@@ -126,6 +128,8 @@ export interface PdfStructDTO {
     PDF_Status: number;
     PDF_Generated_Date: string;
     PDF_Observacoes: string;
+    PDF_Valor: number;
+    PDF_ValorPago: number;
 }
 
 export interface PdfStructInsertDTO {
@@ -133,6 +137,8 @@ export interface PdfStructInsertDTO {
     PDF_Status: number;
     PDF_Generated_Date: string;
     PDF_Observacoes: string;
+    PDF_Valor: number;
+    PDF_ValorPago: number;
 }
 
 export interface PdfStructCompleteDTO {
@@ -143,6 +149,8 @@ export interface PdfStructCompleteDTO {
     PDF_Contracts: ContractDTO[];
     PDF_Products: ProductDTO[];
     PDF_Observacoes: string;
+    PDF_Valor: number;
+    PDF_ValorPago: number;
 }
 
 export interface DadosProdutoComodatoDTO {

@@ -17,11 +17,13 @@ export const getPdfById = async (id: number): Promise<PdfStructDTO> => {
 }
 
 export const createPDFContracts = async (pdfData: PdfStructInsertDTO): Promise<PdfStructInsertDTO> => {
+  console.log("Creating PDF contract with data:", pdfData);
   const response = await api.post('/pdfContratos', pdfData);
   return response.data;
 };
 
 export const updatePdf = async (id: number, pdfData: PdfStructDTO): Promise<PdfStructDTO> => {
+  console.log(`Updating PDF contract with ID ${id} and data:`, pdfData);
   const response = await api.put(`/pdfContratos/${id}`, pdfData);
   return response.data;
 };

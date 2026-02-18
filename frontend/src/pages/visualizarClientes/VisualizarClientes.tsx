@@ -1,6 +1,6 @@
 import { Box, TableCell, Typography } from "@mui/material";
 import React from "react";
-import { DefaultHeader, GenericButton, TableClients } from "../../shared/components";
+import { DefaultHeader, GenericButton, ProtectedComponent, TableClients } from "../../shared/components";
 
 
 export class VisualizarClientes extends React.Component {
@@ -13,8 +13,13 @@ export class VisualizarClientes extends React.Component {
               Listagem de Clientes
             </Typography>
             <TableClients />
-            <Box sx={{ width: '10%', '@media (max-width: 800px)': { width: '90%' }, margin: "auto" }}>
-              <GenericButton name="Voltar" type="button" link="/gerenciar-clientes" />
+            <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={4} paddingBottom={10} sx={{ '@media ( min-width: 320px) and (max-width: 800px)': { flexDirection: 'column', alignItems: 'center', gap: 1 } }}>
+              <ProtectedComponent allowedRoles={['1']}>
+                  <GenericButton name="Cadastrar Cliente" type="button" link="/cadastro-clientes" />
+              </ProtectedComponent>
+              <Box >
+                <GenericButton name="Voltar" type="button" link="/pagina-inicial" />
+              </Box>
             </Box>
           </Box>
         </>

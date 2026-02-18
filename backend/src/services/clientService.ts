@@ -48,6 +48,7 @@ export const findModelClients = async (): Promise<ClientDTO[]> => {
 };
 
 export const createNewClient = async (clientData: ClientDTOInsert): Promise<ClientDTO[]> => {
+    console.log("Teste - Dados do cliente a serem inseridos:", clientData);
     const { data, error } = await supabase
         .from('Clientes')
         .insert([clientData])
@@ -95,3 +96,13 @@ export const getModelContracts = async (modelId: number): Promise<ContractDTO[] 
 
     return contratos || null;
 };
+
+export const updateStatusClient = async (id: number): Promise<boolean> => {
+    const { error } = await supabase
+        .from('Clientes')
+        .update({ cli_ClienteAtivo: true })
+        .eq('id', id);
+
+    if (error) throw error;
+    return true;
+}

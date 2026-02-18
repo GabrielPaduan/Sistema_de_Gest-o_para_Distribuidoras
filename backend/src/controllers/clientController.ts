@@ -93,3 +93,16 @@ export const updateClient = async (req: express.Request, res: express.Response) 
         res.status(500).json({ error: error.message });
     }
 };
+
+export const updateClientStatus = async (req: express.Request, res: express.Response) => {
+    const { id } = req.params;
+    try {
+        const updatedClient = await clientService.updateStatusClient(Number(id));
+        if (!updatedClient) {
+            return res.status(404).json({ error: "Client not found" });
+        }
+        res.status(200).json(updatedClient);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+}
