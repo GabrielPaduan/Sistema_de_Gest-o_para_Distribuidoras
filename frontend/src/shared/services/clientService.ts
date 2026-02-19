@@ -17,7 +17,6 @@ export const getClientByPDF = async (): Promise<ClientDTO> => {
 };
 
 export const createClient = async (clientData: Omit<ClientDTO, 'id'>): Promise<ClientDTO[]> => {
-  console.log("Dados enviados para criação do cliente:", clientData); // Log para verificar os dados enviados
   const response = await api.post('/clientes', clientData);
   return response.data;
 };
@@ -42,4 +41,12 @@ export const updateClient = async (clientData: ClientDTO): Promise<void> => {
 
 export const updateClientStatus = async (id: number): Promise<void> => {
   await api.put(`/clientes/status/${id}`);
+}
+
+export const searchClientsByName = async (name: string): Promise<ClientDTO[]> => {
+  console.log("Searching clients with name:", name);
+  const response = await api.get(`/clientes/search`, {
+    params: { q: name }
+  });
+  return response.data;
 }

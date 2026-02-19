@@ -106,3 +106,17 @@ export const updateClientStatus = async (req: express.Request, res: express.Resp
         res.status(500).json({ error: error.message });
     }
 }
+
+export const searchClientsByName = async (req: express.Request, res: express.Response) => {
+    const q = req.query.q as string;
+    try {
+        if (typeof q !== 'string') {
+            return res.status(400).json({ error: "Query parameter 'q' is required and must be a string" });
+        }
+        const clients = await clientService.searchClientsByName(q);
+        res.status(200).json(clients);
+    }
+    catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+}

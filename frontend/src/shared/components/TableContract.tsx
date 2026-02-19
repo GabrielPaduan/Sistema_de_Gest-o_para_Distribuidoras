@@ -112,8 +112,7 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
                                 </TableRow>
                             );
                         })
-                    )
-                    
+                    )        
                     }
                 </TableBody>
             </Table>
