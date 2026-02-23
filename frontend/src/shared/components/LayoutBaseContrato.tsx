@@ -288,7 +288,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
 
             try {
                 await createContract([newContract]);
-                setContractsInsert(newContract);
+                fetchDataContInsert([newContract]);
             } catch(err) {
                 console.error("Erro ao criar contrato:", err);
             }          
