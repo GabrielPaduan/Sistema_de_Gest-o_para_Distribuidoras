@@ -90,4 +90,30 @@ export const updateClient = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+export const updateClientStatus = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const updatedClient = await clientService.updateStatusClient(Number(id));
+        if (!updatedClient) {
+            return res.status(404).json({ error: "Client not found" });
+        }
+        res.status(200).json(updatedClient);
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+export const searchClientsByName = async (req, res) => {
+    const q = req.query.q;
+    try {
+        if (typeof q !== 'string') {
+            return res.status(400).json({ error: "Query parameter 'q' is required and must be a string" });
+        }
+        const clients = await clientService.searchClientsByName(q);
+        res.status(200).json(clients);
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 //# sourceMappingURL=clientController.js.map

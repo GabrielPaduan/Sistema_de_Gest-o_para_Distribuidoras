@@ -382,7 +382,6 @@ export const LayoutModelContract: React.FC<LayoutModelContractProps> = ({ id }) 
                         </Button>
                     </Box>
                 ) : (
-                    // Espaço vazio ou instruções quando nada selecionado
                     <Typography variant="body2" color="text.secondary">
                         Selecione itens na tabela para ações em massa
                     </Typography>
@@ -398,12 +397,10 @@ export const LayoutModelContract: React.FC<LayoutModelContractProps> = ({ id }) 
                 openEditItem={handleOpenEditItem}
             />
             <Box display={"flex"} justifyContent={"center"} gap={2}>
-                 <Box>
-                    <Button variant="contained" color="primary" sx={{ padding: "15px", width: "100%", '@media (max-width: 800px)': { padding: "15px" } }} onClick={() => handleOpenAddItem()}>
-                        <Typography>Adicionar Produto</Typography>
-                    </Button>
-                 </Box>
-                 <GenericButton name="Voltar" type="button" link="" onClick={() => navigate(-1)} />
+                <Button variant="contained" color="primary" sx={{ padding: "15px", width: "100%", '@media (max-width: 800px)': { padding: "15px" } }} onClick={() => handleOpenAddItem()}>
+                    <Typography>Adicionar Produto</Typography>
+                </Button>
+                 <GenericButton name="Voltar" type="button" onClick={() => navigate(-1)} />
             </Box>
         </Box>
     );

@@ -44,7 +44,6 @@ export const TelaEstoque: React.FC = () => {
     const [productsData, setProductsData] = useState<ProductDTO[]>([]);
     const [displayProductSearch, setDisplayProductSearch] = useState<'flex' | 'none'>('flex');
     const [selectedProductLaunch, setSelectedProductLaunch] = useState<ProductLaunching>({ ID_Prod: 0, Prod_CodProduto: "", Prod_Estoque: 0, Prod_CustoCompra: 0, Prod_Observacao: "", Prod_QuantidadeLancada: 0 });
-    const [ProductLaunch, setProductLaunch] = useState<ProductLaunch>();
     const { user } = useAuth()
 
     const ITEM_HEIGHT = 48; 
@@ -518,7 +517,7 @@ export const TelaEstoque: React.FC = () => {
                     </Box>
                 </ProtectedComponent>
                 <Box width={"33%"} sx={{ '@media (max-width: 800px)': { width: '100%' } }}>
-                    <GenericButton name="Voltar" type="button" link="/" />
+                    <GenericButton name="Voltar" type="button" onClick={() => navigate("/pagina-inicial")} />
                 </Box>
             </Box>
         </Box>

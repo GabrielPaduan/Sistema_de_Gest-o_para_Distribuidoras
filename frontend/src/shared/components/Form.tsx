@@ -126,7 +126,7 @@ export const Form: React.FC = () => {
                     </Button>
                 </Box>
                 <Box>
-                    <GenericButton name="Voltar" type="button" link="/" onClick={() => navigate(-1)} />
+                    <GenericButton name="Voltar" type="button" onClick={() => navigate(-1)} />
                 </Box>
             </Box>
         </Box>

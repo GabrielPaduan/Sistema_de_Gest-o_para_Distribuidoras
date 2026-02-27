@@ -44,7 +44,6 @@ export const updateClientStatus = async (id: number): Promise<void> => {
 }
 
 export const searchClientsByName = async (name: string): Promise<ClientDTO[]> => {
-  console.log("Searching clients with name:", name);
   const response = await api.get(`/clientes/search`, {
     params: { q: name }
   });

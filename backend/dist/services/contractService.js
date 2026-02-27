@@ -6,7 +6,7 @@ export const findAllContracts = async () => {
     return data;
 };
 export const createNewContract = async (contractData) => {
-    const { data, error } = await supabase.from('Contratos').insert([contractData]).select();
+    const { data, error } = await supabase.from('Contratos').insert(contractData).select();
     if (error)
         throw error;
     return data;

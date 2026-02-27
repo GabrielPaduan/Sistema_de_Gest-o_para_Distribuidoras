@@ -6,8 +6,10 @@ import { ClientDTO, ClientDTOInsert, ContractDTO, ContractDTOInsert, ProductDTO,
 import { useNavigate } from "react-router-dom";
 import { useDebounce } from "use-debounce"
 import { TableContract } from "./TableContract"
-import { getAllProducts, getProductById } from "../services/productService"
-import { getContractByClientId } from "../services/contractService"
+import { getAllProducts, searchProductsByName } from "../services/productService"
+import { GenericButton } from "./GenericButton"
+import { getAllCategories } from "../services/categoriasProdutoService"
+import { generateReport } from "../utils/Report"
 
 const style = {
   position: 'absolute',
@@ -26,6 +28,7 @@ export const FormVendas: React.FC = () => {
     const [productsClient, setProductsClient] = useState<ProductDTO[]>([]);
     const [contracts, setContracts] = useState<ContractDTO[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [searchTermProducts, setSearchTermProducts] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [contractsInsert, setContractsInsert] = useState<ContractDTOInsert>();
@@ -57,6 +60,7 @@ export const FormVendas: React.FC = () => {
     const [displayClientSearch, setDisplayClientSearch] = useState(false);
     const [selectedClient, setSelectedClient] = useState<ClientDTO | null>(null);
     const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
+    const [debouncedSearchTermProducts] = useDebounce(searchTermProducts, 500);
     const navigate = useNavigate();
     const [vendasType, setVendasType] = useState(0);
     const [newClientState, setNewClientState] = useState(false);
@@ -110,6 +114,8 @@ export const FormVendas: React.FC = () => {
                 setClientsData(Array.isArray(data) ? data : []);
                 const productsData = await getAllProducts();
                 setProducts(productsData || []);
+                const categoriesData = await getAllCategories();
+                setProductCategories(categoriesData || []);
             } catch (error) {
                 console.error("Erro ao buscar clientes:", error);
             }
@@ -118,25 +124,44 @@ export const FormVendas: React.FC = () => {
     }, [])
 
     const handleFillClient = (client: ClientDTO) => {
-        console.log("Cliente selecionado:", client);
         setSelectedClient(client);
         setDisplayClientSearch(false);
     }
 
-    const handleSearch = async (query: string) => {
-        setPage(0);
+    const handleSearch = async (query: string, type: number) => {
+        setPage(0); 
         if (!query) {
-            const data = await getAllClients();
-            setClientsData(Array.isArray(data) ? data : []);
-            return;
+            switch (type) {
+                case 0:
+                    const data = await getAllClients();
+                    setClientsData(Array.isArray(data) ? data : []);
+                    break;
+                case 1: 
+                    const productsData = await getAllProducts();
+                    setProducts(productsData || []);
+                    break;
+            }
         }
         try {
-            const response = await searchClientsByName(query);
-           
-            setClientsData(response || []);
-            
+            switch (type) {
+                case 0:
+                    const response = await searchClientsByName(query);
+                    setClientsData(response || []);
+                    break;
+                case 1:
+                    const responseProducts = await searchProductsByName(query);
+                    setProducts(responseProducts || []);
+                    break;
+                }
         } catch (error) {
-            setClientsData([]);
+            switch (type) {
+                case 0:            
+                    setClientsData([]);
+                    break;
+                case 1:
+                    setProducts([]);
+                    break;
+            }
         }
     }
 
@@ -145,11 +170,13 @@ export const FormVendas: React.FC = () => {
             handleInsertClient();
             setNewClientState(true);
         } else {
-            // Lógica para efetuar a venda e o cadastro do novo cliente
+            const client = selectedClient ? selectedClient : newClientData;
+            generateReport(client, contracts, productsClient, [], productCategories);
+            setNewClientState(false);
         }
     }
 
-  const handleInsertContract = async (client: ClientDTO, productId: number, cmdt: number, porcLucro: number) => {
+    const handleInsertContract = async (client: ClientDTO, productId: number, cmdt: number, porcLucro: number) => {
         const newContract: ContractDTOInsert = {
             Cont_ID_Cli: client?.id || 0,
             Cont_ID_Prod: productId,
@@ -195,7 +222,6 @@ export const FormVendas: React.FC = () => {
     
         if (contractToUpdate) {
             try {
-                // await updateContract(contractToUpdate.ID_Contrato, newComodato, contractToUpdate.Cont_Qtde, contractToUpdate.Cont_ValorTotal, newPorcLucro);
                 setContracts(currentContracts =>
                     currentContracts.map(c => 
                         c.ID_Contrato === contractToUpdate.ID_Contrato ? { ...c, Cont_Comodato: newComodato, Cont_PorcLucro: newPorcLucro } : c
@@ -230,21 +256,72 @@ export const FormVendas: React.FC = () => {
                 cli_responsavel: newClientData.cli_responsavel,
                 cli_ClienteAtivo: newClientData.cli_ClienteAtivo,
             };
-            const clientData = await createClient(newClientDataInsert);
-            newClientData.id = clientData[0].id;
-            console.log("Cliente criado com ID:", clientData[0].id);
-            console.log("Cliente criado com ID:", newClientData.id);
-            const data = await getAllClients();
-            setClientsData(Array.isArray(data) ? data : []);
 
         } catch (error) {
             console.error("Erro ao criar cliente:", error);
         }
     }
 
+     const handleAddProduct = (contractId: number, cmdt: number) => {
+        setContracts(currentContracts =>
+            currentContracts.map(c => {
+                const product = productsClient.find(p => p.ID_Prod === c.Cont_ID_Prod);
+                let totalValue = 0;
+
+                if (c.Cont_PorcLucro > 0) {
+                    totalValue = product ? product.Prod_CustoCompra + (product.Prod_CustoCompra * (c.Cont_PorcLucro / 100)) : 0;
+                } else {
+                    totalValue = product ? product.Prod_CustoCompra + (product.Prod_CustoCompra * (product.Prod_PorcLucro / 100)) : 0;
+                }
+                
+                if (
+                    c.ID_Contrato === contractId &&
+                    product?.Prod_Estoque !== undefined &&
+                    c.Cont_Qtde < product.Prod_Estoque
+                ) {
+                    const newQuantity = c.Cont_Qtde + 1;
+                    return { ...c, Cont_Qtde: newQuantity, Cont_ValorTotal: newQuantity * totalValue };
+                }
+                return c;
+            })
+        );
+    };
+
+    const handleRemoveProduct = (contractId: number) => {
+        setContracts(currentContracts =>
+            currentContracts.map(c => {
+                const product = productsClient.find(p => p.ID_Prod === c.Cont_ID_Prod);
+                let totalValue = 0;
+                if (c.Cont_PorcLucro > 0) {
+                    totalValue = product ? product.Prod_CustoCompra + (product.Prod_CustoCompra * (c.Cont_PorcLucro / 100)) : 0;
+                } else {
+                    totalValue = product ? product.Prod_CustoCompra + (product.Prod_CustoCompra * (product.Prod_PorcLucro / 100)) : 0;
+                }
+                if (c.ID_Contrato === contractId && c.Cont_Qtde > 0 && product?.Prod_Valor !== undefined) {
+                    const newQuantity = c.Cont_Qtde - 1;
+                    return { ...c, Cont_Qtde: newQuantity, Cont_ValorTotal: newQuantity * totalValue };
+                }
+                return c;
+            })
+        );
+    };
+
+    const onRemoveContract = (contractId: number) => {
+        setContracts(currentContracts => currentContracts.filter(c => c.ID_Contrato !== contractId));
+        const contract = contracts.find(c => c.ID_Contrato === contractId);
+        if (contract) {
+            const productId = contract.Cont_ID_Prod;
+            setProductsClient(currentProducts => currentProducts.filter(p => p.ID_Prod !== productId));
+        }
+    };
+
     useEffect(() => {
-        handleSearch(debouncedSearchTerm);
+        handleSearch(debouncedSearchTerm, 0);
     }, [debouncedSearchTerm]);
+
+    useEffect(() => {
+        handleSearch(debouncedSearchTermProducts, 1);
+    }, [debouncedSearchTermProducts])
 
     return (
         <Box width={"100%"} margin={"auto"}>
@@ -260,13 +337,16 @@ export const FormVendas: React.FC = () => {
                     </Typography>
                     <Typography id="modal-modal-description" sx={{ mt: 2 }} />
 
-                    <SearchField onSearchChange={setSearchTerm} />
+                    <SearchField onSearchChange={setSearchTermProducts} />
                     <Box sx={{ maxHeight: "20vh", overflowY: "scroll", marginTop: 2 }}>
                         {products.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product) => (
                             <Box key={product.ID_Prod} sx={{ display: 'flex', justifyContent: 'space-between', padding: 1, borderBottom: '1px solid #ccc', cursor: 'pointer' }} onClick={() => setSelectedProduct(product.ID_Prod)}>
                                 <Checkbox
                                     checked={product.ID_Prod === selectedProduct}
-                                    onChange={(e) => setSelectedProduct(e.target.checked ? product.ID_Prod : 0)}
+                                    onChange={(e) => {
+                                        setSelectedProduct(e.target.checked ? product.ID_Prod : 0)
+                                        setPorcLucro(product.Prod_PorcLucro);
+                                    }}
                                     sx={{ width: '9%', color: 'grey' }}
                                     color="secondary"
                                 />
@@ -281,7 +361,7 @@ export const FormVendas: React.FC = () => {
                         onPageChange={handleChangePage}
                         rowsPerPage={rowsPerPage}
                         onRowsPerPageChange={handleChangeRowsPerPage}
-                        rowsPerPageOptions={[3, 7, 12]}
+                        rowsPerPageOptions={[3, 5, 7]}
                     />
                     <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} gap={2} mt={2} sx={{ '@media (max-width: 800px)': { flexDirection: "column" } }}>
                         <Box display={"flex"} alignItems={"center"} justifyContent={"space-evenly"} width={"60%"} height={"100%"} sx={{ '@media (max-width: 800px)': { width: "100%" } }}>
@@ -396,7 +476,7 @@ export const FormVendas: React.FC = () => {
                     </Box>
                 </Modal>
             <Box display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} gap={2} mt={2}>
-                <Box width={"100%"} display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} gap={2} mt={2}>   
+                <Box width={"70%"} display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} gap={2} mt={2}>   
                     <Box sx={{ display: 'flex', justifyContent: 'space-evenly' }}>
                         <Tabs value={vendasType} onChange={handleChangeVendasType} aria-label="basic tabs example">
                             <Tab label="Novo Cliente" sx={{ color: 'black', opacity: 0.5, '&.Mui-selected': { opacity: 1 } }} />
@@ -411,7 +491,7 @@ export const FormVendas: React.FC = () => {
                         }} />
                         
                         {displayClientSearch && (
-                            <Box width={"70%"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} gap={2} mt={2}>
+                            <Box width={"100%"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} gap={2} mt={2}>
                                 {clientsData.length > 0 ? (
                                     <TableContainer>
                                         <Table>
@@ -453,7 +533,7 @@ export const FormVendas: React.FC = () => {
                                 )}
                             </Box>
                         )}
-                            <Box display={"flex"} gap={2} sx={{ flexDirection: { xs: 'column', sm: 'row' }, width: "70%" }}>
+                            <Box display={"flex"} flexDirection={"column"} gap={2} sx={{ width: "100%" }}>
                                 <Box display={"flex"} gap={2} sx={{ flexDirection: { xs: 'column', sm: 'row' }, width: "100%" }}>
                                     <TextField label="Cliente Selecionado" value={selectedClient ? selectedClient.cli_razaoSocial : ''} InputProps={{ readOnly: true }} fullWidth />
                                     <Box width={"20%"} marginLeft={2}>
@@ -471,7 +551,27 @@ export const FormVendas: React.FC = () => {
                                     </Box>
                                     <TextField label="Documento" value={selectedClient ? selectedClient.cli_doc : ''} InputProps={{ readOnly: true }} fullWidth />
                                 </Box>
-                               
+                               <TableContract
+                                    client={selectedClient}
+                                    contracts={contracts}
+                                    products={productsClient}
+                                    selectedItems={[]}
+                                    onToggleSelect={() => {}}
+                                    onAddProduct={handleAddProduct}
+                                    onRemoveProduct={handleRemoveProduct}
+                                    onRemoveContract={onRemoveContract}
+                                    openEditContract={(contractId, productId) => handleOpenEdit(contractId, productId)}
+                                    productCategories={productCategories}
+                                />
+                                <Box sx={{width: "100%", '@media (max-width: 800px)': { width: '100%' } }}  display={"flex"} justifyContent={"center"} gap={2}>
+                                    <Button variant="contained" color="primary" sx={{ width: "100%", padding: "15px", '@media (max-width: 800px)': { padding: "15px" } }} onClick={handleOpenAddProductModal}>
+                                        <Typography variant="h6" fontSize={'14px'} sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }}>Adicionar Produto</Typography>
+                                    </Button>
+                                    <Button onClick={() => handleChangeNewClientState()}  variant="contained" color="primary" sx={{ width: "100%", padding: "15px", '@media (max-width: 800px)': { padding: "15px" } }}>
+                                        <Typography variant="h6" fontSize={14}>Concluir Venda</Typography>
+                                    </Button>
+                                    <GenericButton name="Voltar" type="button" onClick={() => navigate("/pagina-inicial")} />
+                                </Box>  
                             </Box>
                         </Box>
                     )}
@@ -479,20 +579,25 @@ export const FormVendas: React.FC = () => {
                         <Box display={"flex"} flexDirection={"column"} justifyContent={"center"} alignItems={"center"} gap={2} sx={{ width: "100%" }}>
                             {!newClientState && (
                                 <Box component={"form"} display={"flex"} gap={2} flexDirection={"column"} sx={{ width: "70%" }}>
-                                    <TextField label="Razão Social" variant="outlined" onChange={(e) => setNewClientData({...newClientData, cli_razaoSocial: e.target.value})} fullWidth placeholder="Digite a razão social" sx={{ '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' } }}/>
+                                    <TextField label="Razão Social" variant="outlined" onChange={(e) => setNewClientData({...newClientData, cli_razaoSocial: e.target.value})} value={newClientData ? newClientData.cli_razaoSocial : ''} fullWidth placeholder="Digite a razão social" sx={{ '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' } }}/>
                                     <Box width={"100%"} display={"flex"} gap={2}>
                                         <Select
                                             labelId="doc-select-label"
                                             id="doc-select"
                                             defaultValue={0}
                                             name="cli_typeDoc"
+                                            value={newClientData ? newClientData.cli_typeDoc : 0}
                                             onChange={(e) => setNewClientData({...newClientData, cli_typeDoc: e.target.value})}
                                             fullWidth
                                         >
                                             <MenuItem value={0}>CPF</MenuItem>
                                             <MenuItem value={1}>CNPJ</MenuItem>
                                         </Select>
-                                        <TextField label="Documento" variant="outlined" sx={{ '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' } }} onChange={(e) => setNewClientData({...newClientData, cli_doc: e.target.value})} fullWidth placeholder="Digite o número do documento" />
+                                        <TextField label="Documento" variant="outlined" sx={{ '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' } }} onChange={(e) => setNewClientData({...newClientData, cli_doc: e.target.value})} value={newClientData ? newClientData.cli_doc : ""} fullWidth placeholder="Digite o número do documento" />
+                                    </Box>
+                                    <Box width={"100%"} display={"flex"} justifyContent={"center"} gap={2}>
+                                        <GenericButton name="Próximo" type="button" onClick={() => handleChangeNewClientState()} />
+                                        <GenericButton name="Voltar" type="button" onClick={() => navigate("/pagina-inicial")} />
                                     </Box>
                                 </Box>
                             )}
@@ -505,34 +610,29 @@ export const FormVendas: React.FC = () => {
                                         products={productsClient}
                                         selectedItems={[]}
                                         onToggleSelect={() => {}}
-                                        onAddProduct={() => {}}    
-                                        onRemoveProduct={() => {}}
-                                        onRemoveContract={() => {}}
+                                        onAddProduct={handleAddProduct}    
+                                        onRemoveProduct={handleRemoveProduct}
+                                        onRemoveContract={onRemoveContract}
                                         openEditContract={(contractId, productId) => handleOpenEdit(contractId, productId)}
-                                        productCategories={[]}
+                                        productCategories={productCategories}
                                     />
                                     <Box sx={{width: "100%", '@media (max-width: 800px)': { width: '100%' } }}  display={"flex"} justifyContent={"center"} gap={2}>
-                                        <Button variant="contained" color="primary" sx={{ padding: "15px", '@media (max-width: 800px)': { padding: "15px" } }} onClick={handleOpenAddProductModal}>
+                                        <Button variant="contained" color="primary" sx={{ width: "100%", padding: "15px", '@media (max-width: 800px)': { padding: "15px" } }} onClick={handleOpenAddProductModal}>
                                             <Typography variant="h6" fontSize={'14px'} sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }}>Adicionar Produto</Typography>
                                         </Button>
+                                        <Button variant="contained" color="primary" sx={{ width: "100%", padding: "15px", '@media (max-width: 800px)': { padding: "15px" } }} onClick={() => setNewClientState(false)}>
+                                            <Typography variant="h6" fontSize={'14px'} sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }}>Editar Cliente</Typography>
+                                        </Button>
+                                        <Button onClick={() => handleChangeNewClientState()}  variant="contained" color="primary" sx={{ width: "100%", padding: "15px", '@media (max-width: 800px)': { padding: "15px" } }}>
+                                            <Typography variant="h6" fontSize={14}>Concluir Venda</Typography>
+                                        </Button>
+                                        <GenericButton name="Voltar" type="button" onClick={() => navigate("/pagina-inicial")} />
                                     </Box>  
-                                </Box>
-                                
+                                </Box>    
                             )}
-                            <Box width={"100%"} display={"flex"} justifyContent={"center"} gap={2}>
-                                <Button onClick={() => handleChangeNewClientState()} variant="contained" color="primary" sx={{ padding: "15px"}}>
-                                    <Typography variant="h6" fontSize={14}>{!newClientState ? "Próximo" : "Concluir Venda"}</Typography>
-                                </Button>
-                            </Box>
-                        
                         </Box>
                     )}
                 </Box>
-            </Box>
-            <Box display={"flex"} width={"100%"} justifyContent={"center"} alignItems={"center"} gap={2} mt={2} sx={{ flexDirection: "row" }}>
-                <Button onClick={() => navigate("/pagina-inicial")} variant="contained" color="primary" sx={{ padding: "15px" }}>
-                    <Typography variant="h6" fontSize={14} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}>Voltar</Typography>
-                </Button>
             </Box>
         </Box>
     )

@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import React from "react";
-import { DefaultHeader, FormEditarCliente, GenericButton } from "../../shared/components";
+import { DefaultHeader, FormEditarCliente } from "../../shared/components";
 
 export class EditarCliente extends React.Component {
     render() {

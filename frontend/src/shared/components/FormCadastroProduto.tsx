@@ -297,7 +297,7 @@ export const FormCadastroProduto: React.FC = () => {
                     </Button>
                 </Box>
                 <Box>
-                    <GenericButton name="Voltar" type="button" link="/estoque-produtos" />
+                    <GenericButton name="Voltar" type="button" onClick={() => navigate("/estoque-produtos")} />
                 </Box>
             </Box>
         </Box>

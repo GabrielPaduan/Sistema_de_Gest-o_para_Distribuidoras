@@ -40,6 +40,7 @@ export const findModelClients = async () => {
     return data;
 };
 export const createNewClient = async (clientData) => {
+    console.log("Teste - Dados do cliente a serem inseridos:", clientData);
     const { data, error } = await supabase
         .from('Clientes')
         .insert([clientData])
@@ -81,5 +82,24 @@ export const getModelContracts = async (modelId) => {
     }
     const contratos = Array.isArray(data) && data.length > 0 ? data[0]?.Contratos : undefined;
     return contratos || null;
+};
+export const updateStatusClient = async (id) => {
+    const { error } = await supabase
+        .from('Clientes')
+        .update({ cli_ClienteAtivo: true })
+        .eq('id', id);
+    if (error)
+        throw error;
+    return true;
+};
+export const searchClientsByName = async (name) => {
+    console.log("Searching clients with name:", name);
+    const { data, error } = await supabase
+        .from('Clientes')
+        .select('*')
+        .ilike('cli_razaoSocial', `%${name}%`);
+    if (error)
+        throw error;
+    return data;
 };
 //# sourceMappingURL=clientService.js.map

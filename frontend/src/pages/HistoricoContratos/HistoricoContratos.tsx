@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import { DefaultHeader, GenericButton, TableHistoricoContract } from "../../shared/components";
+import { DefaultHeader, TableHistoricoContract } from "../../shared/components";
 import React from "react";
 
 export class HistoricoContratos extends React.Component {

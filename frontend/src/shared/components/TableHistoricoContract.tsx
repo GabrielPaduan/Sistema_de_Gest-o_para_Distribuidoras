@@ -423,7 +423,7 @@ export const TableHistoricoContract: React.FC = () => {
                                     rowsPerPageOptions={[5, 10, 15]}
                                 />
                             </TableContainer>
-                            <GenericButton name="Voltar" type="button" link="/gerenciar-clientes" />
+                            <GenericButton name="Voltar" type="button" onClick={() => navigate("/gerenciar-clientes")} />
                         </Box>
                     )}
                     {selectedPdf && selectedPdf?.PDF_Client && showReport && (
@@ -527,7 +527,7 @@ export const TableHistoricoContract: React.FC = () => {
                                     rowsPerPageOptions={[5, 10, 15]}
                                 />
                             </TableContainer>
-                            <GenericButton name="Voltar" type="button" link="/gerenciar-clientes" />
+                            <GenericButton name="Voltar" type="button" onClick={() => navigate("/gerenciar-clientes")} />
                         </Box>
                     )}
                     {(selectedPdf || snapshotProducts.length > 0) && selectedPdf?.PDF_Client && showReport && (

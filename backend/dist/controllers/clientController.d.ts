@@ -7,4 +7,6 @@ export declare const deleteClient: (req: express.Request, res: express.Response)
 export declare const getModelClients: (req: express.Request, res: express.Response) => Promise<void>;
 export declare const getModelContracts: (req: express.Request, res: express.Response) => Promise<express.Response<any, Record<string, any>> | undefined>;
 export declare const updateClient: (req: express.Request, res: express.Response) => Promise<express.Response<any, Record<string, any>> | undefined>;
+export declare const updateClientStatus: (req: express.Request, res: express.Response) => Promise<express.Response<any, Record<string, any>> | undefined>;
+export declare const searchClientsByName: (req: express.Request, res: express.Response) => Promise<express.Response<any, Record<string, any>> | undefined>;
 //# sourceMappingURL=clientController.d.ts.map

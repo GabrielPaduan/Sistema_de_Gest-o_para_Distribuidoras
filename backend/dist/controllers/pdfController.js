@@ -46,8 +46,8 @@ export const createPdf = async (req, res) => {
 };
 export const updatePdf = async (req, res) => {
     try {
-        const { PDF_Client_Id, PDF_Status, PDF_Generated_Date, PDF_Observacoes } = req.body;
-        const updatedPdf = await pdfService.updatePdf(Number(req.params.id), PDF_Client_Id, PDF_Status, PDF_Generated_Date, PDF_Observacoes);
+        const { PDF_Client_Id, PDF_Status, PDF_Generated_Date, PDF_Observacoes, PDF_Valor, PDF_ValorPago } = req.body;
+        const updatedPdf = await pdfService.updatePdf(Number(req.params.id), PDF_Client_Id, PDF_Status, PDF_Generated_Date, PDF_Observacoes, PDF_Valor, PDF_ValorPago);
         res.status(200).json(updatedPdf);
     }
     catch (error) {
@@ -67,6 +67,15 @@ export const getPdfByClientId = async (req, res) => {
     try {
         const pdf = await pdfService.getPdfByClientId(Number(req.params.clientId));
         res.status(200).json(pdf);
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+export const deletePdf = async (req, res) => {
+    try {
+        await pdfService.deletePdf(Number(req.params.id));
+        res.status(204).send();
     }
     catch (error) {
         res.status(500).json({ error: error.message });

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { text } from "stream/consumers";
 import { ModelosContratoDTO } from "../utils/DTOS";
 import { createModelContract, deleteModelContract, getAllModelContracts } from "../services/modeloContrato";
+import { useNavigate } from "react-router-dom";
 
 const style = {
   position: 'absolute',
@@ -26,6 +27,7 @@ export const TelaGerenciarModelos: React.FC = () => {
         modelCont_Descricao: "",
         modelCont_Date: new Date().toISOString(),
     });
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchModelosContrato = async () => {
@@ -137,19 +139,15 @@ export const TelaGerenciarModelos: React.FC = () => {
                 onRemoveModel={onRemoveModel}
             />
             <Box display={"flex"} gap={2} justifyContent={"center"} width={"100%"}>
-                <Box>
-                    <Button 
-                        variant="contained"
-                        color="primary"
-                        sx={{ padding: "15px", width: "100%" }}
-                        onClick={openModalCreateModelo}
-                    >
-                        Adicionar Modelo
-                    </Button>
-                </Box>
-                <Box>
-                    <GenericButton name="Voltar" type="button" link="/" />
-                </Box>
+                <Button 
+                    variant="contained"
+                    color="primary"
+                    sx={{ padding: "15px", width: "100%" }}
+                    onClick={openModalCreateModelo}
+                >
+                    Adicionar Modelo
+                </Button>
+                <GenericButton name="Voltar" type="button" onClick={() => navigate("/pagina-inicial")} />
             </Box>
         </Box>
     )

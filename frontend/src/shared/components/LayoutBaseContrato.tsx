@@ -783,7 +783,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
                             </Button>
                         </Box>
                         <Box sx={{ width: "25%", '@media (max-width: 800px)': { width: '100%' } }}>
-                            <GenericButton name="Voltar" type="button" link="/visualizar-clientes" />
+                            <GenericButton name="Voltar" type="button" onClick={() => navigate("/visualizar-clientes")} />
                         </Box>
                     </Box>
                 </Box>

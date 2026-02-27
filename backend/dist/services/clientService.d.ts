@@ -7,4 +7,6 @@ export declare const createNewClient: (clientData: ClientDTOInsert) => Promise<C
 export declare const findClientById: (id: number) => Promise<ClientDTO | null>;
 export declare const deleteClientById: (id: number) => Promise<boolean>;
 export declare const getModelContracts: (modelId: number) => Promise<ContractDTO[] | null>;
+export declare const updateStatusClient: (id: number) => Promise<boolean>;
+export declare const searchClientsByName: (name: string) => Promise<ClientDTO[]>;
 //# sourceMappingURL=clientService.d.ts.map

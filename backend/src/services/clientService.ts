@@ -108,11 +108,10 @@ export const updateStatusClient = async (id: number): Promise<boolean> => {
 }
 
 export const searchClientsByName = async (name: string): Promise<ClientDTO[]> => {
-    console.log("Searching clients with name:", name);
     const { data, error } = await supabase
         .from('Clientes')
         .select('*')
         .ilike('cli_razaoSocial', `%${name}%`);
     if (error) throw error;
-    return data;
+    return data || [];
 }

@@ -9,6 +9,8 @@ import userRoutes from './routes/userRoutes.js';
 import snapshotProductsRoutes from './routes/snapshotProductsRoutes.js';
 import productCategoriesRoutes from './routes/productsCategoriesRoutes.js';
 import productLaunchRoutes from './routes/productLaunchRoutes.js';
+import modeloContratoRoutes from './routes/modeloContratoRoutes.js';
+import modelContractItensRoutes from './routes/modelContractItensRoutes.js';
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 3001;
@@ -32,6 +34,8 @@ app.use('/cadastro', userRoutes);
 app.use('/snapshotProducts', snapshotProductsRoutes);
 app.use('/categoriasProduto', productCategoriesRoutes);
 app.use('/product-launches', productLaunchRoutes);
+app.use('/modelosContrato', modeloContratoRoutes);
+app.use('/modelosContratoItens', modelContractItensRoutes);
 app.listen(port, () => {
     console.log(`🚀 Servidor backend rodando na porta http://localhost:${port}`);
 });

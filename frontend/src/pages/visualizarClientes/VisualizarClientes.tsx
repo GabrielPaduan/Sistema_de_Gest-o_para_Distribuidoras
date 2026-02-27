@@ -1,6 +1,7 @@
 import { Box, TableCell, Typography } from "@mui/material";
 import React from "react";
 import { DefaultHeader, GenericButton, ProtectedComponent, TableClients } from "../../shared/components";
+import { useNavigate } from "react-router/dist/lib/hooks";
 
 
 export class VisualizarClientes extends React.Component {
@@ -13,13 +14,11 @@ export class VisualizarClientes extends React.Component {
               Listagem de Clientes
             </Typography>
             <TableClients />
-            <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={4} paddingBottom={10} sx={{ '@media ( min-width: 320px) and (max-width: 800px)': { flexDirection: 'column', alignItems: 'center', gap: 1 } }}>
+            <Box display={"flex"} justifyContent={"center"} alignItems={"center"} margin={"auto"} gap={4} paddingBottom={10} width={"70%"} sx={{ '@media ( min-width: 320px) and (max-width: 800px)': { flexDirection: 'column', alignItems: 'center', gap: 1 } }}>
               <ProtectedComponent allowedRoles={['1']}>
-                  <GenericButton name="Cadastrar Cliente" type="button" link="/cadastro-clientes" />
+                  <GenericButton name="Cadastrar Cliente" type="button" onClick = {() => window.location.href = "/cadastro-clientes"} />
               </ProtectedComponent>
-              <Box >
-                <GenericButton name="Voltar" type="button" link="/pagina-inicial" />
-              </Box>
+              <GenericButton name="Voltar" type="button" onClick={() => window.location.href = "/pagina-inicial"} />
             </Box>
           </Box>
         </>

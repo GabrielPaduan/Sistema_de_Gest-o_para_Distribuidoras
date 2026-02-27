@@ -1,14 +1,16 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { ProductDTO, ProductLaunch, ProductsCategoriesDTO, ProductsCategoriesDTOInsert } from "../utils/DTOS"; 
+import { ProductDTO, ProductLaunch, ProductLaunching, ProductsCategoriesDTO, ProductsCategoriesDTOInsert } from "../utils/DTOS"; 
 import { useEffect, useState } from "react";
-import { getProductById, updateProduct } from "../services/productService"; 
-import { Box, TextField, Typography, Button, InputAdornment, CircularProgress, Alert, Select, MenuItem, Modal, SelectChangeEvent, TableContainer, Table, TableHead, TableCell, TableBody, TableRow, Tabs, Tab } from "@mui/material";
+import { getProductById, launchProduct, updateProduct } from "../services/productService"; 
+import { Box, TextField, Typography, Button, InputAdornment, CircularProgress, Alert, Select, MenuItem, Modal, SelectChangeEvent, TableContainer, Table, TableHead, TableCell, TableBody, TableRow, Tabs, Tab, TablePagination } from "@mui/material";
 import { GenericButton } from "./GenericButton";
 import { createCategory, getAllCategories } from "../services/categoriasProdutoService";
 import { format } from "date-fns";
 
 import { useShortcut } from "../hooks/useShortcut";
-import { getLaunchByProductId } from "../services/productLaunchService";
+import { createLaunch, getLaunchByProductId } from "../services/productLaunchService";
+import { ProtectedComponent } from "./ProtectedComponent";
+import { useAuth } from "../context";
 
 const style = {
   position: 'absolute',
@@ -34,6 +36,9 @@ export const FormEditarProduto: React.FC = () => {
     const [prateleira, setPrateleira] = useState<number>(0);
     const [lancamentosProduto, setLancamentosProduto] = useState<ProductLaunch[]>([]);
     const [lancType, setLancType] = useState<0 | 1>(0);
+    const [openLancamentos, setOpenLancamentos] = useState(false);
+    const [selectedProductLaunch, setSelectedProductLaunch] = useState<ProductLaunching>({ ID_Prod: 0, Prod_CodProduto: "", Prod_Estoque: 0, Prod_CustoCompra: 0, Prod_Observacao: "", Prod_QuantidadeLancada: 0 });
+    const { user } = useAuth();
 
     const ITEM_HEIGHT = 48; 
     const ITEM_PADDING_TOP = 8; 
@@ -47,9 +52,12 @@ export const FormEditarProduto: React.FC = () => {
     };
 
 
-
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+    const handleOpenLancamentos = () => setOpenLancamentos(true);
+    const handleCloseLancamentos = () => {
+        setOpenLancamentos(false);
+    }
 
     const handleInsertCategory = async (nomeCategoria: ProductsCategoriesDTOInsert) => {
         await createCategory(nomeCategoria);
@@ -79,6 +87,14 @@ export const FormEditarProduto: React.FC = () => {
                 setLoading(true);
                 setError(null);
                 const productData = await getProductById(idProd);
+                setSelectedProductLaunch({
+                    ID_Prod: productData.ID_Prod,
+                    Prod_CodProduto: productData.Prod_CodProduto,
+                    Prod_Estoque: productData.Prod_Estoque,
+                    Prod_CustoCompra: productData.Prod_CustoCompra,
+                    Prod_Observacao: "",
+                    Prod_QuantidadeLancada: 0
+                });
                 const lancamentoData = await getLaunchByProductId(idProd);
                 setLancamentosProduto(lancamentoData);
                 if (productData) {
@@ -157,6 +173,12 @@ export const FormEditarProduto: React.FC = () => {
             };
         });
     };
+
+    useEffect(() => {
+        if (formData) {
+            handleCustoChange({ target: { value: formData.Prod_CustoCompra.toString() } } as React.ChangeEvent<HTMLInputElement>);
+        }
+    }, [formData?.Prod_CustoCompra]);
 
     const handlePorcChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newPorc = parseFloat(e.target.value) || 0;
@@ -248,7 +270,7 @@ export const FormEditarProduto: React.FC = () => {
         return (
             <Box display="flex" flexDirection="column" gap={2} justifyContent="center" alignItems="center" height="80vh">
                 <Alert severity="error" sx={{ width: '100%', maxWidth: '70%' }}>{error || "Produto não pôde ser carregado."}</Alert>
-                <GenericButton name="Voltar" type="button" link="/estoque-produtos" />
+                <GenericButton name="Voltar" type="button" onClick={() => navigate("/estoque-produtos")} />
             </Box>
         );
     }
@@ -261,8 +283,172 @@ export const FormEditarProduto: React.FC = () => {
         }  
     };
 
+    const handleChangeProductToLaunch = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = event.target;
+        if (selectedProductLaunch) {
+            setSelectedProductLaunch((prevData) => ({
+                ...prevData!,
+                [name]: value
+            }));
+        } 
+    };
+
+    const enviarLancamento = async () => {           
+            try {
+                const response = await launchProduct(selectedProductLaunch, lancType);
+                const responseLaunch = await createLaunch({
+                    ID_LancProd: 0,
+                    LancProd_IDProd: selectedProductLaunch.ID_Prod,
+                    LancProd_CodProd: selectedProductLaunch.Prod_CodProduto,
+                    LancProd_QtdeLanc: Number(selectedProductLaunch.Prod_QuantidadeLancada),
+                    LancProd_CustoCompra: Number(selectedProductLaunch.Prod_CustoCompra),
+                    LancProd_Data: new Date().toISOString(),
+                    LancProd_OperadorId: user ? Number(user.sub) : 0,
+                    LancProd_OperadorName: user ? user.name : '',
+                    LancProd_Observacao: selectedProductLaunch.Prod_Observacao,
+                    LancProd_Tipo: lancType
+                })
+                handleCloseLancamentos();
+                
+                setFormData(prevData => {
+                    if (!prevData) return null;
+                    const estoqueAnterior = prevData.Prod_Estoque;
+                    const novaQuantidadeLancada = Number(selectedProductLaunch.Prod_QuantidadeLancada) || 0;
+                    const novoEstoque = lancType === 0 ? estoqueAnterior + novaQuantidadeLancada : estoqueAnterior - novaQuantidadeLancada;
+                    if (lancType === 0) {
+                        if (prevData.Prod_CustoCompra <= selectedProductLaunch.Prod_CustoCompra) {
+                            const novoCustoCompra = selectedProductLaunch.Prod_CustoCompra;
+                            
+                            return {
+                                ...prevData,
+                                Prod_Estoque: novoEstoque,
+                                Prod_CustoCompra: novoCustoCompra
+                            };
+                        } else {
+                            selectedProductLaunch.Prod_CustoCompra = prevData.Prod_CustoCompra;
+                        }
+                    }
+                    return {
+                        ...prevData,
+                        Prod_Estoque: novoEstoque
+                    };
+                });
+
+                setLancamentosProduto(prevLancamentos => {
+                    const newLancamento: ProductLaunch = {
+                        ID_LancProd: responseLaunch.ID_LancProd,
+                        LancProd_IDProd: selectedProductLaunch.ID_Prod,
+                        LancProd_CodProd: selectedProductLaunch.Prod_CodProduto,
+                        LancProd_QtdeLanc: Number(selectedProductLaunch.Prod_QuantidadeLancada),
+                        LancProd_CustoCompra: Number(selectedProductLaunch.Prod_CustoCompra),
+                        LancProd_Data: new Date().toISOString(),
+                        LancProd_OperadorId: user ? Number(user.sub) : 0,
+                        LancProd_OperadorName: user ? user.name : '',
+                        LancProd_Observacao: selectedProductLaunch.Prod_Observacao,
+                        LancProd_Tipo: lancType
+                    };
+                    return [...prevLancamentos, newLancamento];
+                })
+                    
+
+            } catch (error) {
+                console.error("Error launching product:", error);
+            }
+        }
+
     return (
         <>
+            <Modal
+                open={openLancamentos}
+                onClose={handleCloseLancamentos}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+                >
+                <Box sx={{ ...style, '@media (max-width: 800px)': { width: "80%" } }}>
+                    <Typography id="modal-modal-title" variant="h6" component="h2" textAlign={"center"}>
+                        Realizar Lançamento
+                    </Typography>
+                    <Typography id="modal-modal-description" sx={{ mt: 2 }} />
+
+                    <Box sx={{ display: 'flex', justifyContent: 'space-evenly' }}>
+                        <Tabs value={lancType} onChange={handleChangeLancType} aria-label="basic tabs example">
+                            <Tab label="Entrada" sx={{ color: 'black', opacity: 0.5, '&.Mui-selected': { opacity: 1 } }} />
+                            <Tab label="Saída" sx={{ color: 'black', opacity: 0.5, '&.Mui-selected': { opacity: 1 } }} />
+                        </Tabs>
+                    </Box>
+
+                    <Box display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} gap={2} mt={2}>
+                        <Box display={"flex"} gap={2} sx={{ flexDirection: { xs: 'column', sm: 'row' }, width: "100%" }}>
+                            <TextField 
+                                label="Código do Produto" 
+                                name="Prod_CodProduto" 
+                                variant="outlined" 
+                                placeholder="Digite o código de produto" 
+                                disabled
+                                value={selectedProductLaunch.Prod_CodProduto} 
+                                onChange={handleChangeProductToLaunch} 
+                                sx={{ width: "100%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
+                                required
+                            />
+                            <TextField 
+                                label="Estoque" 
+                                name="Prod_Estoque" 
+                                variant="outlined"
+                                disabled 
+                                value={selectedProductLaunch.Prod_Estoque} 
+                                onChange={handleChangeProductToLaunch} 
+                                sx={{width: "100%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
+                            />
+                        </Box>
+                        <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"} gap={2} sx={{ flexDirection: { xs: 'column', sm: 'row' }, width: "100%" }}>
+                            <TextField 
+                                label="Quantidade a ser lançada" 
+                                name="Prod_QuantidadeLancada" 
+                                variant="outlined" 
+                                placeholder="Digite a quantidade" 
+                                type="number"
+                                value={selectedProductLaunch.Prod_QuantidadeLancada} 
+                                onChange={handleChangeProductToLaunch} 
+                                sx={{width: "100%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
+                            />
+                            { lancType === 0 &&
+                                <TextField 
+                                    label="Custo de Compra Unitário" 
+                                    name="Prod_CustoCompra" 
+                                    variant="outlined" 
+                                    placeholder="Digite o custo de compra unitário" 
+                                    value={selectedProductLaunch.Prod_CustoCompra} 
+                                    onChange={handleChangeProductToLaunch} 
+                                    type="number"  
+                                    InputProps={{ 
+                                        startAdornment: <InputAdornment position="start">R$</InputAdornment>,
+                                        inputProps: { min: 0 } 
+                                    }} 
+                                    sx={{width: "100%", '& .MuiInputLabel-root': { color: 'gray' }, '& .css-yo7muh-MuiTypography-root':{ color: 'black' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' },'@media (max-width: 800px)': { width: "100%" } }} 
+                                    onFocus={(event) => event.target.select()}
+                                />
+                            }
+                        </Box>
+                        <TextField
+                            label="Observações"
+                            name="Prod_Observacao"
+                            variant="outlined"
+                            placeholder="Digite alguma observação"
+                            value={selectedProductLaunch.Prod_Observacao}
+                            onChange={handleChangeProductToLaunch}
+                            sx={{width: "100%", '& .MuiInputLabel-root': { color: 'gray' }, '& .MuiInputLabel-root.Mui-focused': { color: '#181393' }, '@media (max-width: 800px)': { width: "100%" } }} 
+                        />
+                    </Box>
+                    <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"} gap={2} mt={2} sx={{ flexDirection: "row"  }}>
+                        <Button onClick={enviarLancamento} variant="contained" color="primary" sx={{ width: "100%" }}>
+                            <Typography variant="h6" fontSize={14}>Confirmar Lançamento</Typography>
+                        </Button>
+                        <Button onClick={handleCloseLancamentos} variant="contained" color="primary" sx={{ width: "100%" }}>
+                            <Typography variant="h6" fontSize={14} sx={{ '@media (max-width: 800px)': { fontSize: '12px' } }}>Voltar</Typography>
+                        </Button>
+                    </Box>
+                </Box>
+            </Modal>
             <Modal
                 open={open}
                 onClose={handleClose}
@@ -521,7 +707,7 @@ export const FormEditarProduto: React.FC = () => {
                                     )
                                 }
                                 {
-                                lancamentosProduto.length > 0 && lancType === 0 && lancamentosProduto.filter(l => l.LancProd_Tipo === 0).map((lancamento) => (
+                                lancamentosProduto.length > 0 && lancType === 0 && lancamentosProduto.sort((a, b) => new Date(b.LancProd_Data).getTime() - new Date(a.LancProd_Data).getTime()).filter(l => l.LancProd_Tipo === 0).map((lancamento) => (
                                     <TableRow  key={lancamento.ID_LancProd}>    
                                         <TableCell><Typography variant="h6" fontSize={14} textAlign={"center"}>{lancamento.LancProd_CodProd}</Typography></TableCell>
                                         <TableCell><Typography variant="h6" fontSize={14} textAlign={"center"}>{lancamento.LancProd_QtdeLanc}</Typography></TableCell>
@@ -532,7 +718,7 @@ export const FormEditarProduto: React.FC = () => {
                                     </TableRow>
                                 ))}
                                 {
-                                    lancamentosProduto.length > 0 && lancType === 1 && lancamentosProduto.filter(l => l.LancProd_Tipo === 1).map((lancamento) => (
+                                    lancamentosProduto.length > 0 && lancType === 1 && lancamentosProduto.sort((a, b) => new Date(b.LancProd_Data).getTime() - new Date(a.LancProd_Data).getTime()).filter(l => l.LancProd_Tipo === 1).map((lancamento) => (
                                         <TableRow key={lancamento.ID_LancProd}>    
                                             <TableCell><Typography variant="h6" fontSize={14} textAlign={"center"}>{lancamento.LancProd_CodProd}</Typography></TableCell>
                                             <TableCell><Typography variant="h6" fontSize={14} textAlign={"center"}>{lancamento.LancProd_QtdeLanc}</Typography></TableCell>
@@ -548,6 +734,11 @@ export const FormEditarProduto: React.FC = () => {
                 </Box>
 
                 <Box display={"flex"} justifyContent={"center"} alignItems={"center"} gap={2}>
+                    <ProtectedComponent allowedRoles={['1']}>
+                        <Box>
+                            <Button onClick={() => handleOpenLancamentos()} variant="contained" color="primary" sx={{ padding: "15px", width: "100%" }}><Typography variant="h6" fontSize={14}>Lançamentos</Typography></Button>
+                        </Box>
+                    </ProtectedComponent>
                     <Box>
                         <Button variant="contained" color="primary" type="submit" sx={{ margin: "10px auto", padding: "15px", '@media (max-width: 800px)': { width: "100%" }  }}>
                             <Typography variant="h6" fontSize={14} color="text.secondary" sx={{ '@media (max-width: 800px)': { fontSize: "1rem" } }} >
@@ -556,7 +747,7 @@ export const FormEditarProduto: React.FC = () => {
                         </Button>
                     </Box>
                     <Box>
-                        <GenericButton name="Voltar" type="button" link="" onClick={() => navigate(-1)} />
+                        <GenericButton name="Voltar" type="button" onClick={() => navigate(-1)} />
                     </Box>
                 </Box>
             </Box>

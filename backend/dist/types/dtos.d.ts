@@ -16,7 +16,7 @@ export interface ClientDTO {
     cli_uf: string;
     cli_insEstadual: string;
     cli_responsavel: string;
-    cli_modelo: number;
+    cli_ClienteAtivo: boolean;
 }
 export interface ClientDTOInsert {
     cli_razaoSocial: string;
@@ -35,7 +35,7 @@ export interface ClientDTOInsert {
     cli_uf: string;
     cli_insEstadual: string;
     cli_responsavel: string;
-    cli_modelo: number;
+    cli_ClienteAtivo: boolean;
 }
 export interface ProductDTO {
     ID_Prod: number;
@@ -66,12 +66,16 @@ export interface PdfStructDTO {
     PDF_Status: number;
     PDF_Generated_Date: string;
     PDF_Observacoes: string;
+    PDF_Valor: number;
+    PDF_ValorPago: number;
 }
 export interface PdfStructInsertDTO {
     PDF_Client_Id: number;
     PDF_Status: number;
     PDF_Generated_Date: string;
     PDF_Observacoes: string;
+    PDF_Valor: number;
+    PDF_ValorPago: number;
 }
 export interface UserDTO {
     usu_id: number;
@@ -125,5 +129,29 @@ export interface ProductLaunch {
     LancProd_OperadorName: string;
     LancProd_Observacao: string;
     LancProd_Tipo: number;
+}
+export interface ModelosContratoDTO {
+    ID_ModeloContrato: number;
+    modelCont_Name: string;
+    modelCont_Descricao: string;
+    modelCont_Date: string;
+}
+export interface ModelosContratoDTOInsert {
+    modelCont_Name: string;
+    modelCont_Descricao: string;
+    modelCont_Date: string;
+}
+export interface ModelosContratoItensDTO {
+    ID_ModelosContratoItens: number;
+    modelContItens_IDModelCont: number;
+    modelContItens_IDProd: number;
+    modelContItens_Comodato: number;
+    modelContItens_PorcLucro: number;
+}
+export interface ModelosContratoItensDTOInsert {
+    modelContItens_IDModelCont: number;
+    modelContItens_IDProd: number;
+    modelContItens_Comodato: number;
+    modelContItens_PorcLucro: number;
 }
 //# sourceMappingURL=dtos.d.ts.map

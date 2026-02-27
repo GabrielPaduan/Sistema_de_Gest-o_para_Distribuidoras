@@ -6,4 +6,5 @@ export declare const createPdf: (req: express.Request, res: express.Response) =>
 export declare const updatePdf: (req: express.Request, res: express.Response) => Promise<void>;
 export declare const getPendentPdfByClientId: (req: express.Request, res: express.Response) => Promise<void>;
 export declare const getPdfByClientId: (req: express.Request, res: express.Response) => Promise<void>;
+export declare const deletePdf: (req: express.Request, res: express.Response) => Promise<void>;
 //# sourceMappingURL=pdfController.d.ts.map

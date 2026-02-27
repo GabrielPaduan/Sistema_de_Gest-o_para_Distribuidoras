@@ -160,7 +160,7 @@ export const FormEditarCliente: React.FC = () => {
                     </Button>
                 </Box>
                 <Box>
-                    <GenericButton name="Voltar [Esc]" type="button" link="/" onClick={() => navigate(-1)} />
+                    <GenericButton name="Voltar [Esc]" type="button" onClick={() => navigate(-1)} />
                 </Box>
             </Box>
         </Box>

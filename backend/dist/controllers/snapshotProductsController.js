@@ -1,5 +1,5 @@
 import express from 'express';
-import { createSnapshotProduct, getSnapshotProductsByPdfId } from '../services/snapshotProductsService.js';
+import { createSnapshotProduct, deleteSnapshotProduct, getSnapshotProductsByPdfId } from '../services/snapshotProductsService.js';
 export const createSnapshotProductController = async (req, res) => {
     try {
         const snapshotData = req.body;
@@ -24,6 +24,20 @@ export const getSnapshotProductsByPdfIdController = async (req, res) => {
     catch (error) {
         console.error("Error in getSnapshotProductsByPdfId controller:", error);
         res.status(500).json({ error: "Error fetching snapshot products" });
+    }
+};
+export const deleteSnapshotProductController = async (req, res) => {
+    try {
+        const snapshotId = req.params.snapshotId;
+        if (!snapshotId) {
+            return res.status(400).json({ error: "snapshotId parameter is required" });
+        }
+        await deleteSnapshotProduct(parseInt(snapshotId));
+        res.status(204).send();
+    }
+    catch (error) {
+        console.error("Error in deleteSnapshotProduct controller:", error);
+        res.status(500).json({ error: "Error deleting snapshot product" });
     }
 };
 //# sourceMappingURL=snapshotProductsController.js.map

@@ -23,8 +23,9 @@ export const createProduct = async (productData: ProductDTOInsert): Promise<Prod
 };
 
 export const searchProductsByName = async (nameQuery: string): Promise<ProductDTO[]> => {
+  
   const response = await api.get('/produtos/search-name', {
-    params: { q: nameQuery } // Passa o termo de busca como query parameter
+    params: { q: nameQuery } 
   });
   return response.data;
 }

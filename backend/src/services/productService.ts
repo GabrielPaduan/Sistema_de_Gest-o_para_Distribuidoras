@@ -49,9 +49,6 @@ export const findProductByContractId = async (contractId: number): Promise<Produ
 };
 
 export const searchProductsByName = async (nameQuery: string): Promise<any[]> => {
-    if (!nameQuery) {
-        return []; // Retorna vazio se a busca for vazia
-    }
 
     try {
         const { data, error } = await supabase

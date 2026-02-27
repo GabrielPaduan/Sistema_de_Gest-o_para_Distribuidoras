@@ -21,6 +21,7 @@ export const getPdfById = async (id) => {
     return data;
 };
 export const createPdf = async (pdfData) => {
+    console.log("Creating PDF contract with data:", pdfData);
     const { data, error } = await supabase.from("ContratosPDF").insert(pdfData).select();
     if (error)
         throw error;
@@ -48,20 +49,45 @@ export const getPdfByClientId = async (clientId) => {
         .from('ContratosPDF')
         .select('*')
         .eq('PDF_Client_Id', clientId)
-        .eq('PDF_Status', 1);
+        .neq('PDF_Status', 0);
     if (error)
         throw error;
     return data;
 };
-export const updatePdf = async (id, PDF_Client_Id, PDF_Status, PDF_Generated_Date, PDF_Observacoes) => {
+export const updatePdf = async (id, PDF_Client_Id, PDF_Status, PDF_Generated_Date, PDF_Observacoes, PDF_Valor, PDF_ValorPago) => {
+    console.log(`Updating PDF contract with ID ${id} and data:`, { PDF_Client_Id, PDF_Status, PDF_Generated_Date, PDF_Observacoes, PDF_Valor, PDF_ValorPago });
+    if (PDF_Valor < 0 || PDF_ValorPago < 0) {
+        throw new Error("Valor e o valor pago do contrato não podem ser negativos.");
+    }
+    const { data: contractData, error: contractError } = await supabase
+        .from('ContratosPDF')
+        .select('PDF_ValorPago')
+        .eq('id', id)
+        .single();
+    if (contractError) {
+        console.error("Erro ao buscar contrato relacionado ao PDF:", contractError);
+        throw new Error("Erro ao validar os valores do contrato.");
+    }
+    contractData.PDF_ValorPago = PDF_ValorPago + contractData.PDF_ValorPago;
+    if (contractData.PDF_ValorPago.toFixed(2) > PDF_Valor.toFixed(2)) {
+        throw new Error("Valor pago não pode ser maior que o valor total do contrato.");
+    }
+    if (contractData.PDF_ValorPago.toFixed(2) === PDF_Valor.toFixed(2)) {
+        PDF_Status = 2;
+    }
     const { data, error } = await supabase
         .from('ContratosPDF')
-        .update({ PDF_Client_Id: PDF_Client_Id, PDF_Status: PDF_Status, PDF_Generated_Date: PDF_Generated_Date, PDF_Observacoes: PDF_Observacoes })
+        .update({ PDF_Client_Id: PDF_Client_Id, PDF_Status: PDF_Status, PDF_Generated_Date: PDF_Generated_Date, PDF_Observacoes: PDF_Observacoes, PDF_Valor: PDF_Valor, PDF_ValorPago: contractData.PDF_ValorPago })
         .eq('id', id)
-        .select('PDF_Client_Id, PDF_Status, PDF_Generated_Date, PDF_Observacoes')
+        .select('PDF_Client_Id, PDF_Status, PDF_Generated_Date, PDF_Observacoes, PDF_Valor, PDF_ValorPago')
         .single();
     if (error)
         throw error;
     return data;
+};
+export const deletePdf = async (id) => {
+    const { error } = await supabase.from('ContratosPDF').delete().eq('id', id);
+    if (error)
+        throw error;
 };
 //# sourceMappingURL=pdfService.js.map
