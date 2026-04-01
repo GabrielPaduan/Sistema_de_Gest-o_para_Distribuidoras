@@ -25,6 +25,7 @@ export const getPdfById = async (id: number): Promise<PdfStructDTO> => {
 export const createPdf = async (pdfData: PdfStructInsertDTO) => {
   console.log("Creating PDF contract with data:", pdfData);
   const { data, error } = await supabase.from("ContratosPDF").insert(pdfData).select();
+  console.log(error)
   if (error) throw error;
   return data;
 };

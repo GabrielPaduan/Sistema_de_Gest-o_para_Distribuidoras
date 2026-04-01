@@ -23,6 +23,7 @@ export const getPdfById = async (id) => {
 export const createPdf = async (pdfData) => {
     console.log("Creating PDF contract with data:", pdfData);
     const { data, error } = await supabase.from("ContratosPDF").insert(pdfData).select();
+    console.log(error);
     if (error)
         throw error;
     return data;

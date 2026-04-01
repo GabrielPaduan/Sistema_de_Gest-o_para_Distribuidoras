@@ -17,6 +17,7 @@ import { getAllCategories } from "../services/categoriasProdutoService";
 import { createModelContract, getAllModelContracts, getModelContractById } from "../services/modeloContrato";
 import { getModelContractItensById } from "../services/modelContractItens";
 import { create } from "@mui/material/styles/createTransitions";
+import { useAuth } from "../context";
 
 const style = {
   position: 'absolute',
@@ -62,6 +63,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
         modelCont_Descricao: "",
         modelCont_Date: new Date().toISOString(),
     });
+    const { user } = useAuth()
 
     const handleToggleSelect = (contractId: number, productId: number) => {
         const isSelected = selectedItems.some(item => item.contractId === contractId);
@@ -210,9 +212,9 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
             }
             
             const clientPDF = await getPendentPdfByClientId(id);
-                const date = new Date();
-                date.setHours(12, 0, 0, 0);
-                await createPDFContracts({ PDF_Client_Id: id, PDF_Status: 0, PDF_Generated_Date: date.toISOString(), PDF_Observacoes: observation, PDF_Valor: contracts.reduce((acc, contract) => acc + contract.Cont_ValorTotal, 0), PDF_ValorPago: 0 });
+            const date = new Date();
+            date.setHours(12, 0, 0, 0);
+            await createPDFContracts({ PDF_Client_Id: id, PDF_Status: 0, PDF_Generated_Date: date.toISOString(), PDF_Observacoes: observation, PDF_Valor: contracts.reduce((acc, contract) => acc + contract.Cont_ValorTotal, 0), PDF_ValorPago: 0, PDF_Responsavel: String(user?.name)});
             navigate("/pagina-inicial");
         } catch (err) {
             console.error(err);
@@ -791,7 +793,7 @@ export const LayoutBaseContrato: React.FC<LayoutBaseContratoProps> = ({ id }) =>
             { 
             showReport && client && (
                 <Box>
-                    <PreviewReport client={client} contracts={contracts} products={productsClient} snapshotProducts={undefined} productCategories={productCategories} />
+                    <PreviewReport client={client} contracts={contracts} products={productsClient} snapshotProducts={undefined} productCategories={productCategories} ownerName={user ? user?.name : ""} data={new Date().toLocaleDateString('pt-BR', {timeZone: "UTC"})}/>
 
                     <Box display={"flex"} justifyContent={"center"} sx={{ width: '80%', margin: 'auto', textAlign: 'center', my: 4, gap: 4, '@media (max-width: 800px)': { gap: 2 } }}>
                         <Button

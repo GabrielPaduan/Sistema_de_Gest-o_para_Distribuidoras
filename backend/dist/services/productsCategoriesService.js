@@ -28,17 +28,25 @@ export const updateCategory = async (categoryID, categoria) => {
     return data;
 };
 export const deleteCategory = async (categoryID) => {
-    const { error: errorProducts } = await supabase
-        .from('Produtos')
-        .update({ Prod_Categoria: null })
-        .eq('Prod_Categoria', categoryID);
-    if (errorProducts)
-        throw errorProducts;
-    const { error } = await supabase
-        .from('CategoriasProdutos')
-        .delete()
-        .eq('ID_CategoriaProduto', categoryID);
-    if (error)
-        throw error;
+    if (categoryID !== 0) {
+        const { error: errorSnapshots } = await supabase
+            .from('ContratosPDF_Itens')
+            .update({ snapshot_prod_cat: 0 })
+            .eq('snapshot_prod_cat', categoryID);
+        if (errorSnapshots)
+            throw errorSnapshots;
+        const { error: errorProducts } = await supabase
+            .from('Produtos')
+            .update({ Prod_Categoria: 0 })
+            .eq('Prod_Categoria', categoryID);
+        if (errorProducts)
+            throw errorProducts;
+        const { error } = await supabase
+            .from('CategoriasProdutos')
+            .delete()
+            .eq('ID_CategoriaProduto', categoryID);
+        if (error)
+            throw error;
+    }
 };
 //# sourceMappingURL=productsCategoriesService.js.map

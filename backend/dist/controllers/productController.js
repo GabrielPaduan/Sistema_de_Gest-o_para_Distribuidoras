@@ -67,10 +67,10 @@ export const getProductByContractId = async (req, res) => {
 };
 export const searchProducts = async (req, res) => {
     const query = req.query.q;
-    if (!query) {
-        return res.status(400).json({ message: 'O termo de busca (q) é obrigatório.' });
-    }
     try {
+        if (typeof query !== 'string') {
+            return res.status(400).json({ error: "Query parameter 'q' is required and must be a string" });
+        }
         const products = await productService.searchProductsByName(query);
         res.status(200).json(products);
     }

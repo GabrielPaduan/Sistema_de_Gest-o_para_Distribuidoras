@@ -68,6 +68,7 @@ export interface PdfStructDTO {
     PDF_Observacoes: string;
     PDF_Valor: number;
     PDF_ValorPago: number;
+    PDF_Responsavel: string;
 }
 export interface PdfStructInsertDTO {
     PDF_Client_Id: number;
@@ -76,6 +77,7 @@ export interface PdfStructInsertDTO {
     PDF_Observacoes: string;
     PDF_Valor: number;
     PDF_ValorPago: number;
+    PDF_Responsavel: string;
 }
 export interface UserDTO {
     usu_id: number;

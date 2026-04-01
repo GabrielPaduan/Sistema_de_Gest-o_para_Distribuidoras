@@ -10,6 +10,7 @@ import { getAllProducts, searchProductsByName } from "../services/productService
 import { GenericButton } from "./GenericButton"
 import { getAllCategories } from "../services/categoriasProdutoService"
 import { generateReport } from "../utils/Report"
+import { useAuth } from "../context"
 
 const style = {
   position: 'absolute',
@@ -31,7 +32,6 @@ export const FormVendas: React.FC = () => {
     const [searchTermProducts, setSearchTermProducts] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [contractsInsert, setContractsInsert] = useState<ContractDTOInsert>();
     const [newClientData, setNewClientData] = useState<ClientDTO>({
         id: 0,
         cli_email: "",
@@ -67,6 +67,7 @@ export const FormVendas: React.FC = () => {
     const [openAddProductModal, setOpenAddProductModal] = useState(false);
     const [openEdit, setOpenEdit] = useState(false);
     const [contractToEdit, setContractToEdit] = useState<number>(0);
+    const { user } = useAuth()
 
     const handleOpenAddProductModal = () => {
         setOpenAddProductModal(true);
@@ -171,7 +172,30 @@ export const FormVendas: React.FC = () => {
             setNewClientState(true);
         } else {
             const client = selectedClient ? selectedClient : newClientData;
-            generateReport(client, contracts, productsClient, [], productCategories);
+            if (vendasType === 0 && !selectedClient) {
+                const newClientDataInsert: ClientDTOInsert = {
+                    cli_razaoSocial: newClientData.cli_razaoSocial,
+                    cli_doc: newClientData.cli_doc,
+                    cli_typeDoc: newClientData.cli_typeDoc,
+                    cli_end: newClientData.cli_end,
+                    cli_cep: newClientData.cli_cep,
+                    cli_email: newClientData.cli_email,
+                    cli_bairro: newClientData.cli_bairro,
+                    cli_uf: newClientData.cli_uf,
+                    cli_insEstadual: newClientData.cli_insEstadual,
+                    cli_dddTel: newClientData.cli_dddTel,
+                    cli_telefone: newClientData.cli_telefone,
+                    cli_dddCel: newClientData.cli_dddCel,
+                    cli_cidade: newClientData.cli_cidade,
+                    cli_celular: newClientData.cli_celular,
+                    cli_endNum: newClientData.cli_endNum,
+                    cli_responsavel: newClientData.cli_responsavel,
+                    cli_ClienteAtivo: newClientData.cli_ClienteAtivo,
+                };
+                createClient(newClientDataInsert);
+            }
+            generateReport(client, contracts, productsClient, [], productCategories, user ? user?.name : "", new Date().toLocaleDateString('pt-BR', {timeZone: "UTC"}));
+            
             setNewClientState(false);
         }
     }

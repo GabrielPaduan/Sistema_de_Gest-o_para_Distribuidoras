@@ -28,6 +28,8 @@ export const createUserService = async (userData: UserInsertDTO): Promise<any> =
 
 export const loginUser = async (loginData: LoginDTO): Promise<any> => {
     loginData.nome = loginData.nome.toLocaleLowerCase();
+
+    console.log("Attempting to authenticate user:", loginData.nome);
     try {
         const { data: user, error } = await supabase
             .from('Usuarios')

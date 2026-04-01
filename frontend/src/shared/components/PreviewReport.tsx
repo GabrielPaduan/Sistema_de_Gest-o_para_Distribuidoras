@@ -25,8 +25,10 @@ interface RelatorioPreviewProps {
     products: ProductDTO[];
     snapshotProducts?: SnapshotProductDTO[];
     productCategories: ProductsCategoriesDTO[];
+    ownerName: string;
+    data: string;
 }
-export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contracts, products, snapshotProducts, productCategories }) => {
+export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contracts, products, snapshotProducts, productCategories, ownerName, data }) => {
     const theme = useTheme();
     let valorTotalGeral = 0;
     if(snapshotProducts == undefined) {
@@ -39,24 +41,81 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
             return sum + (snapshot.snapshot_valor_total_item ?? 0);
         }, 0);
     }
+    
+    const productMap = new Map(products.map(p=> [p.ID_Prod, p]));
+    const categoriesMap = new Map(productCategories.map(pC => [pC.ID_CategoriaProduto, pC]))
 
     snapshotProducts?.sort((a, b) => {
-        const prateleiraA = productCategories.find(cat => cat.ID_CategoriaProduto === a.snapshot_prod_cat)?.Cat_Prateleira || 0;
-        const prateleiraB = productCategories.find(cat => cat.ID_CategoriaProduto === b.snapshot_prod_cat)?.Cat_Prateleira || 0;
-        if (prateleiraA - prateleiraB === 0) {
+        const prateleiraA = categoriesMap.get(a.snapshot_prod_cat)?.Cat_Prateleira || 0;
+        const prateleiraB = categoriesMap.get(b.snapshot_prod_cat)?.Cat_Prateleira || 0;
+        const categoriaA = categoriesMap.get(a.snapshot_prod_cat) || 0;
+        const categoriaB = categoriesMap.get(b.snapshot_prod_cat) || 0;
+        
+        if (!categoriaA || !categoriaB) {
+            return 0;
+        }
+
+        const prodCodA = a.snapshot_prod_cod || "";
+        const prodCodB = b.snapshot_prod_cod || "";
+        const catNameA = categoriaA.CatProd_Nome || "";
+        const catNameB = categoriaB.CatProd_Nome || "";
+
+        const sortOptions = { numeric: true, sensitivity: 'base' } as const;
+
+        if (prateleiraA === 0 && prateleiraB !== 0) {
+            return 1;
+        }
+        if (prateleiraA !== 0 && prateleiraB === 0) {
+            return -1;
+        }
+
+        if (prateleiraA === 0 && prateleiraB === 0) {
+            const nomeComparado = catNameA.localeCompare(catNameB, undefined, sortOptions);
+            if (nomeComparado !== 0) return nomeComparado;
+            return prodCodA.localeCompare(prodCodB, undefined, sortOptions);
+        }
+        
+        if (prateleiraA === prateleiraB) {
             return a.snapshot_prod_cod.localeCompare(b.snapshot_prod_cod || "") || 0;
         }
         return prateleiraA - prateleiraB;
     })
 
     contracts.sort((a, b) => {
-        const productA = products.find(p => p.ID_Prod === a.Cont_ID_Prod);
-        const productB = products.find(p => p.ID_Prod === b.Cont_ID_Prod);
-        const prateleiraA = productCategories.find(cat => cat.ID_CategoriaProduto === productA?.Prod_Categoria)?.Cat_Prateleira || 0;
-        const prateleiraB = productCategories.find(cat => cat.ID_CategoriaProduto === productB?.Prod_Categoria)?.Cat_Prateleira || 0;
-        if (prateleiraA - prateleiraB === 0) {
-            return productA?.Prod_CodProduto.localeCompare(productB?.Prod_CodProduto || "") || 0;
+        const productA = productMap.get(a.Cont_ID_Prod);
+        const productB = productMap.get(b.Cont_ID_Prod);
+        
+        const categoriaA = productA ? categoriesMap.get(productA?.Prod_Categoria) : undefined
+        const categoriaB = productB ? categoriesMap.get(productB?.Prod_Categoria) : undefined
+        
+        if (!categoriaA || !categoriaB) {
+            return 0;
         }
+
+        const prateleiraA = categoriaA.Cat_Prateleira;
+        const prateleiraB = categoriaB.Cat_Prateleira;
+
+        const prodCodA = productA?.Prod_CodProduto || "";
+        const prodCodB = productB?.Prod_CodProduto || "";
+        const catNameA = categoriaA.CatProd_Nome || "";
+        const catNameB = categoriaB.CatProd_Nome || "";
+
+        const sortOptions = { numeric: true, sensitivity: 'base' } as const;
+
+        if (prateleiraA === 0 && prateleiraB !== 0)  return 1;
+        if (prateleiraA !== 0 && prateleiraB === 0)  return -1;
+        
+       
+        if (prateleiraA === 0 && prateleiraB === 0) {
+            const nomeComparado = catNameA.localeCompare(catNameB, undefined, sortOptions);
+            if (nomeComparado !== 0) return nomeComparado;
+            return prodCodA.localeCompare(prodCodB, undefined, sortOptions);
+        }
+
+        if (prateleiraA === prateleiraB) {
+            return prodCodA.localeCompare(prodCodB, undefined, sortOptions)
+        }
+
         return prateleiraA - prateleiraB;
     });
 
@@ -165,8 +224,8 @@ export const PreviewReport: React.FC<RelatorioPreviewProps> = ({ client, contrac
                 {/* RODAPÉ E TOTAL */}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mt: 4 }}>
                     <Box>
-                        <Typography variant="body2"><strong>Responsável:</strong> Tiago Cernev Neves</Typography>
-                        <Typography variant="body2"><strong>Data de Criação:</strong> {new Date().toLocaleDateString('pt-BR')}</Typography>
+                        <Typography variant="body2"><strong>Responsável:</strong> {ownerName}</Typography>
+                        <Typography variant="body2"><strong>Data de Criação:</strong> {new Date(data).toLocaleDateString('pt-BR', {timeZone: "UTC"})}</Typography>
                     </Box>
                     <Box sx={{ textAlign: 'right' }}>
                         <Typography variant="subtitle1" color="text.secondary">Valor Total do Contrato:</Typography>

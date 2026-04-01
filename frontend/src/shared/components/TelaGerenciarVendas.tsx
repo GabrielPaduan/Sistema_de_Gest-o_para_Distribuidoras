@@ -7,7 +7,6 @@ export const TelaGerenciarVendas: React.FC = () => {
         <Box>
             <Typography variant="h6" align="center" paddingTop={10}>VENDAS</Typography>
             <FormVendas />
-            {/* <TableClients /> */}
         </Box>
     )
 }

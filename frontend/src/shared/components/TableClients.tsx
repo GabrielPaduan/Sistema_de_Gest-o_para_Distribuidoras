@@ -59,7 +59,11 @@ export const TableClients: React.FC = () => {
     }
 
     const handleNavigateToContract = (id: number, isClientActive: boolean) => {
-        navigate(`/contrato-cliente/${id}`);
+        if (isClientActive) {
+             navigate(`/contrato-cliente/${id}`);
+        } else {
+            alert("O cliente selecionado não possui contrato!");
+        }
     }
 
     return (

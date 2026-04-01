@@ -18,17 +18,46 @@ export const TableContract: React.FC<CustomTableContractProps> = ({ contracts, p
     onToggleSelect, onAddProduct, onRemoveProduct, onRemoveContract, openEditContract, productCategories }) => {
     const navigate = useNavigate();
 
-    const sortedContracts = [...contracts].sort((a, b) => {
-        const productA = products.find(p => p.ID_Prod === a.Cont_ID_Prod);
-        const productB = products.find(p => p.ID_Prod === b.Cont_ID_Prod);
-        const prateleiraA = productCategories.find(cat => cat.ID_CategoriaProduto === productA?.Prod_Categoria)?.Cat_Prateleira || 0;
-        const prateleiraB = productCategories.find(cat => cat.ID_CategoriaProduto === productB?.Prod_Categoria)?.Cat_Prateleira || 0;
-        if (prateleiraA - prateleiraB === 0) {
-            return productA?.Prod_CodProduto.localeCompare(productB?.Prod_CodProduto || "") || 0;
-        }
-        return prateleiraB - prateleiraA;
-    });
+    const productMap = new Map(products.map(p => [p.ID_Prod, p]));
+    const categoryMap = new Map(productCategories.map(cat => [cat.ID_CategoriaProduto, cat]));
 
+    const sortedContracts = [...contracts].sort((a, b) => {
+        const productA = productMap.get(a.Cont_ID_Prod);
+        const productB = productMap.get(b.Cont_ID_Prod);
+
+        const categoriaA = productA ? categoryMap.get(productA.Prod_Categoria) : undefined;
+        const categoriaB = productB ? categoryMap.get(productB.Prod_Categoria) : undefined;
+        
+        if (!categoriaA || !categoriaB) {
+            return 0;
+        }
+
+        const shelfA = categoriaA.Cat_Prateleira;
+        const shelfB = categoriaB.Cat_Prateleira;
+        
+        const codeA = productA?.Prod_CodProduto || "";
+        const codeB = productB?.Prod_CodProduto || "";
+        const nameA = categoriaA.CatProd_Nome || "";
+        const nameB = categoriaB.CatProd_Nome || "";
+
+        const sortOptions = { numeric: true, sensitivity: 'base' } as const;
+
+        if (shelfA === 0 && shelfB !== 0) return 1;
+        if (shelfB === 0 && shelfA !== 0) return -1;
+
+        if (shelfA === 0 && shelfB === 0) {
+            const nameCompare = nameA.localeCompare(nameB, undefined, sortOptions);
+            if (nameCompare !== 0) return nameCompare;
+            
+            return codeA.localeCompare(codeB, undefined, sortOptions);
+        }
+        
+        if (shelfA === shelfB) {
+            return codeA.localeCompare(codeB, undefined, sortOptions);
+        }
+        
+        return shelfA - shelfB;
+    });
     return (
         <TableContainer component={Paper} sx={{ margin: "auto", cursor: "default", width: "100%" }}>
             <Table width="100%">

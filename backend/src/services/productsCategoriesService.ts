@@ -30,15 +30,23 @@ export const updateCategory = async (categoryID: number, categoria: ProductsCate
 }   
 
 export const deleteCategory = async (categoryID: number): Promise<void> => {
-    const { error: errorProducts } = await supabase
-        .from('Produtos')
-        .update({ Prod_Categoria: null })
-        .eq('Prod_Categoria', categoryID);
-    if (errorProducts) throw errorProducts;
+    if (categoryID !== 0) {
+        const { error: errorSnapshots } = await supabase
+            .from('ContratosPDF_Itens')
+            .update({ snapshot_prod_cat: 0 })
+            .eq('snapshot_prod_cat', categoryID);
+        if (errorSnapshots) throw errorSnapshots;
 
-    const { error } = await supabase
-        .from('CategoriasProdutos')
-        .delete()
-        .eq('ID_CategoriaProduto', categoryID);
-    if (error) throw error;
+        const { error: errorProducts } = await supabase
+            .from('Produtos')
+            .update({ Prod_Categoria: 0 })
+            .eq('Prod_Categoria', categoryID);
+        if (errorProducts) throw errorProducts;
+
+        const { error } = await supabase
+            .from('CategoriasProdutos')
+            .delete()
+            .eq('ID_CategoriaProduto', categoryID);
+        if (error) throw error;
+    }
 };

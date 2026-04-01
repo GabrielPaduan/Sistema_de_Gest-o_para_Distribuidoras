@@ -130,6 +130,7 @@ export interface PdfStructDTO {
     PDF_Observacoes: string;
     PDF_Valor: number;
     PDF_ValorPago: number;
+    PDF_Responsavel: string;
 }
 
 export interface PdfStructInsertDTO {
@@ -139,6 +140,7 @@ export interface PdfStructInsertDTO {
     PDF_Observacoes: string;
     PDF_Valor: number;
     PDF_ValorPago: number;
+    PDF_Responsavel: string;
 }
 
 export interface PdfStructCompleteDTO {
@@ -151,6 +153,7 @@ export interface PdfStructCompleteDTO {
     PDF_Observacoes: string;
     PDF_Valor: number;
     PDF_ValorPago: number;
+    PDF_Responsavel: string;
 }
 
 export interface DadosProdutoComodatoDTO {

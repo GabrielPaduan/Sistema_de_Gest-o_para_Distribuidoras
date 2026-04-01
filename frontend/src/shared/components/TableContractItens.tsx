@@ -15,16 +15,36 @@ interface TableContractItensProps {
 
 export const TableContractItens: React.FC<TableContractItensProps> = ({ contracts, productsCategories, products, selectedItems, onToggleSelect, onRemoveItem, openEditItem }) => {
     const navigate = useNavigate();
-    const sortedContracts = [...contracts].sort((a, b) => {
+    contracts.sort((a, b) => {
         const productA = products.find(p => p.ID_Prod === a.modelContItens_IDProd);
         const productB = products.find(p => p.ID_Prod === b.modelContItens_IDProd);
         const prateleiraA = productsCategories.find(cat => cat.ID_CategoriaProduto === productA?.Prod_Categoria)?.Cat_Prateleira || 0;
         const prateleiraB = productsCategories.find(cat => cat.ID_CategoriaProduto === productB?.Prod_Categoria)?.Cat_Prateleira || 0;
-        if (prateleiraA - prateleiraB === 0) {
-            return productA?.Prod_CodProduto.localeCompare(productB?.Prod_CodProduto || "") || 0;
+        const categoriaA = productsCategories.find(cat => cat.ID_CategoriaProduto === productA?.Prod_Categoria); 
+        const categoriaB = productsCategories.find(cat => cat.ID_CategoriaProduto === productB?.Prod_Categoria); 
+        const prodCodA = productA?.Prod_CodProduto || "";
+        const prodCodB = productB?.Prod_CodProduto || "";
+        const catNameA = categoriaA?.CatProd_Nome || "";
+        const catNameB = categoriaB?.CatProd_Nome || "";
+
+        const sortOptions = { numeric: true, sensitivity: 'base' } as const;
+
+        if (prateleiraA === 0 && prateleiraB !== 0)  return 1;
+        if (prateleiraA !== 0 && prateleiraB === 0)  return -1;
+        
+    
+        if (prateleiraA === 0 && prateleiraB === 0) {
+            const nomeComparado = catNameA.localeCompare(catNameB, undefined, sortOptions);
+            if (nomeComparado !== 0) return nomeComparado;
+            return prodCodA.localeCompare(prodCodB, undefined, sortOptions);
         }
+
+        if (prateleiraA === prateleiraB) {
+            return prodCodA.localeCompare(prodCodB, undefined, sortOptions)
+        }
+
         return prateleiraA - prateleiraB;
-    });
+    })
 
     return (
         <TableContainer component={Paper} sx={{ margin: "auto", cursor: "default", width: "100%" }}>
@@ -53,13 +73,13 @@ export const TableContractItens: React.FC<TableContractItensProps> = ({ contract
                 </TableHead>
                 <TableBody>
                     {
-                    sortedContracts.length === 0 ? (
+                    contracts.length === 0 ? (
                         <TableRow>
                             <TableCell colSpan={13} sx={{ textAlign: "center", fontSize: 14 }}>Nenhum contrato cadastrado</TableCell>
                         </TableRow>
                     ) : (
                         
-                        sortedContracts.map((contract) => {
+                        contracts.map((contract) => {
                             const product = products.find(p => p.ID_Prod === contract.modelContItens_IDProd);
                             if (!product) return null;
                         

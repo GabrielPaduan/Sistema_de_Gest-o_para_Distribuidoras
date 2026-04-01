@@ -93,13 +93,12 @@ export const updateStatusClient = async (id) => {
     return true;
 };
 export const searchClientsByName = async (name) => {
-    console.log("Searching clients with name:", name);
     const { data, error } = await supabase
         .from('Clientes')
         .select('*')
         .ilike('cli_razaoSocial', `%${name}%`);
     if (error)
         throw error;
-    return data;
+    return data || [];
 };
 //# sourceMappingURL=clientService.js.map

@@ -43,9 +43,6 @@ export const findProductByContractId = async (contractId) => {
     return product ?? null;
 };
 export const searchProductsByName = async (nameQuery) => {
-    if (!nameQuery) {
-        return []; // Retorna vazio se a busca for vazia
-    }
     try {
         const { data, error } = await supabase
             .from('Produtos')

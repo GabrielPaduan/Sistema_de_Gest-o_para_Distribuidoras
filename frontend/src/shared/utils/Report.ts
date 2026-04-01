@@ -5,7 +5,7 @@ import autoTable from "jspdf-autotable";
 import { ClientDTO, ContractDTO, ProductDTO, ProductsCategoriesDTO, SnapshotProductDTO } from "../utils/DTOS";
 import logo from '../assets/logo_empresa.png';
 
-export const generateReport = (client: ClientDTO, contracts: ContractDTO[], products: ProductDTO[], snapshotProducts: SnapshotProductDTO[], categorias: ProductsCategoriesDTO[]) => {
+export const generateReport = (client: ClientDTO, contracts: ContractDTO[], products: ProductDTO[], snapshotProducts: SnapshotProductDTO[], categorias: ProductsCategoriesDTO[], ownerName: string, data: string) => {
     const doc = new jsPDF('p', 'mm', 'a4'); 
     const pageHeight = doc.internal.pageSize.height;
     const pageWidth = doc.internal.pageSize.width;
@@ -47,14 +47,34 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
     let allRows: any[] = [];
     
     const dataToMap = snapshotProducts.length === 0 ? contracts.sort((a, b) => {
-             const productA = products.find(p => p.ID_Prod === a.Cont_ID_Prod);
-             const productB = products.find(p => p.ID_Prod === b.Cont_ID_Prod);
-             const prateleiraA = categorias.find(cat => cat.ID_CategoriaProduto === productA?.Prod_Categoria)?.Cat_Prateleira || 0;
-             const prateleiraB = categorias.find(cat => cat.ID_CategoriaProduto === productB?.Prod_Categoria)?.Cat_Prateleira || 0;
-             if (prateleiraA - prateleiraB === 0) {
-                 return productA?.Prod_CodProduto.localeCompare(productB?.Prod_CodProduto || "") || 0;
-             }
-             return prateleiraA - prateleiraB;
+            const productA = products.find(p => p.ID_Prod === a.Cont_ID_Prod);
+            const productB = products.find(p => p.ID_Prod === b.Cont_ID_Prod);
+            const prateleiraA = categorias.find(cat => cat.ID_CategoriaProduto === productA?.Prod_Categoria)?.Cat_Prateleira || 0;
+            const prateleiraB = categorias.find(cat => cat.ID_CategoriaProduto === productB?.Prod_Categoria)?.Cat_Prateleira || 0;
+            const categoriaA = categorias.find(cat => cat.ID_CategoriaProduto === productA?.Prod_Categoria); 
+            const categoriaB = categorias.find(cat => cat.ID_CategoriaProduto === productB?.Prod_Categoria); 
+            const prodCodA = productA?.Prod_CodProduto || "";
+            const prodCodB = productB?.Prod_CodProduto || "";
+            const catNameA = categoriaA?.CatProd_Nome || "";
+            const catNameB = categoriaB?.CatProd_Nome || "";
+
+            const sortOptions = { numeric: true, sensitivity: 'base' } as const;
+
+            if (prateleiraA === 0 && prateleiraB !== 0)  return 1;
+            if (prateleiraA !== 0 && prateleiraB === 0)  return -1;
+            
+        
+            if (prateleiraA === 0 && prateleiraB === 0) {
+                const nomeComparado = catNameA.localeCompare(catNameB, undefined, sortOptions);
+                if (nomeComparado !== 0) return nomeComparado;
+                return prodCodA.localeCompare(prodCodB, undefined, sortOptions);
+            }
+
+            if (prateleiraA === prateleiraB) {
+                return prodCodA.localeCompare(prodCodB, undefined, sortOptions)
+            }
+
+            return prateleiraA - prateleiraB;
          }) : snapshotProducts;
 
     if (snapshotProducts.length === 0) {
@@ -94,7 +114,8 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
 
     let finalY = y;
     if (shouldSplit) {
-        const midpoint = 32;
+        // CORREÇÃO AQUI: Divide a lista exatamente no meio, não importa o tamanho dela
+        const midpoint = Math.ceil(allRows.length / 2); 
         const rowsLeft = allRows.slice(0, midpoint);
         const rowsRight = allRows.slice(midpoint);
 
@@ -102,6 +123,7 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
         
         const startPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
 
+        // Desenha a coluna da Esquerda
         autoTable(doc, {
             ...tableStyles,
             head: [tableColumn],
@@ -114,8 +136,10 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
         const finalYLeft = (doc as any).lastAutoTable.finalY;
         const endPageLeft = (doc as any).internal.getCurrentPageInfo().pageNumber;
 
+        // Volta para a página onde a tabela começou para alinhar a coluna da Direita
         doc.setPage(startPage);
 
+        // Desenha a coluna da Direita
         autoTable(doc, {
             ...tableStyles,
             head: [tableColumn],
@@ -128,10 +152,11 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
         const finalYRight = (doc as any).lastAutoTable.finalY;
         const endPageRight = (doc as any).internal.getCurrentPageInfo().pageNumber;
 
+        // Avança o documento para a última página que foi gerada pelo transbordo
         const maxPage = Math.max(endPageLeft, endPageRight);
-        
         doc.setPage(maxPage);
 
+        // Calcula onde o rodapé deve ser desenhado baseado na coluna mais longa da última página
         if (endPageLeft === endPageRight) {
             finalY = Math.max(finalYLeft, finalYRight);
         } else if (endPageLeft > endPageRight) {
@@ -161,7 +186,7 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
     if (finalY + 30 > pageHeight) {
         doc.addPage();
         finalY = 20;
-    }
+    } 
 
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
@@ -174,8 +199,8 @@ export const generateReport = (client: ClientDTO, contracts: ContractDTO[], prod
     
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Responsável: Tiago Cernev Neves`, margin, pageHeight - 10);
-    doc.text(`Emitido em: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - margin, pageHeight - 10, { align: 'right' });
+    doc.text(`Responsável: ${ownerName ? ownerName : "Não Definido"}`, margin, pageHeight - 10);
+    doc.text(`Emitido em: ${new Date(data).toLocaleDateString('pt-BR', {timeZone: "UTC"})}`, pageWidth - margin, pageHeight - 10, { align: 'right' });
 
     doc.save(`relatorio-${client.cli_razaoSocial?.replace(/\s+/g, '-') || 'cliente'}.pdf`);
 }

@@ -81,6 +81,25 @@ export const TableProducts: React.FC<TableProductsProps> = ({products, categoria
     useEffect(() => {
         handleSearch(debouncedSearchTerm);
     }, [debouncedSearchTerm]);
+
+    const sortedProducts = [...filteredProducts].sort((a, b) => {
+        const categoryA = categorias?.find(catA => catA.ID_CategoriaProduto === a.Prod_Categoria);
+        const categoryB = categorias?.find(catB => catB.ID_CategoriaProduto === b.Prod_Categoria);
+        
+        const nomeCatA = categoryA?.CatProd_Nome || "";
+        const nomeCatB = categoryB?.CatProd_Nome || "";
+
+        if (nomeCatA === "" && nomeCatB !== "") return 1;
+        if (nomeCatB === "" && nomeCatB !== "") return -1;
+
+        const comparacaoCategoria = nomeCatA.localeCompare(nomeCatB);
+
+        if (comparacaoCategoria !== 0) {
+            return comparacaoCategoria;
+        }
+
+        return (a.Prod_CodProduto || "").localeCompare(b.Prod_CodProduto || "");
+    });
     
     return (
         <Box sx={{ maxWidth: "70%", display: "flex", flexDirection: "column", alignItems: "center", margin: "auto", marginTop: 3, marginBottom: 2, '@media (max-width: 800px)': { maxWidth: "90%" } }}>
@@ -117,13 +136,13 @@ export const TableProducts: React.FC<TableProductsProps> = ({products, categoria
                     </TableHead>
                     <TableBody>
                         {
-                            filteredProducts.length === 0 ? (
+                            sortedProducts.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={9} sx={{ textAlign: "center", fontSize: 14 }}>Nenhum produto cadastrado</TableCell>
                                 </TableRow>
                             ) : (
                              
-                                filteredProducts.sort((a, b) => b.Prod_Categoria - a.Prod_Categoria).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(product => (
+                                sortedProducts.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(product => (
                                         <TableRow key={product.ID_Prod} hover sx={{ cursor: 'pointer' }} onClick={() => handleNavigateToEdit(product.ID_Prod)}>
                                             <ProtectedComponent allowedRoles={['1', '2']}>
                                                 <TableCell sx={{ fontSize: 14, textAlign: "center", '@media (max-width: 800px)': { fontSize: "11px", padding: "10px" } }}>{product.Prod_CodProduto}</TableCell>

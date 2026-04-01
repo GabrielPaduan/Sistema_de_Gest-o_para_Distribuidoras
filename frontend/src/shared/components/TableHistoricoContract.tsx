@@ -14,6 +14,7 @@ import { ClientRow } from "./ClientRow";
 import { create } from "domain";
 import { createSnapshotProduct, deleteSnapshotProduct, getSnapshotProductsByPdfId } from "../services/SnapshotProductsService";
 import { getAllCategories } from "../services/categoriasProdutoService";
+import { useAuth } from "../context";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -145,7 +146,8 @@ export const TableHistoricoContract: React.FC = () => {
             PDF_Generated_Date: selectedPdf?.PDF_Generated_Date || new Date().toISOString(),
             PDF_Observacoes: selectedPdf?.PDF_Observacoes || "",
             PDF_Valor: selectedPdf?.PDF_Valor || 0,
-            PDF_ValorPago: paymentType === 1 ? selectedPdf?.PDF_Valor || 0 : valorPago
+            PDF_ValorPago: paymentType === 1 ? selectedPdf?.PDF_Valor || 0 : valorPago,
+            PDF_Responsavel: String(selectedPdf?.PDF_Responsavel)
         };
         try {
             await updatePdf(selectedPdf?.id || 0, updatedPdf);
@@ -184,7 +186,8 @@ export const TableHistoricoContract: React.FC = () => {
                             PDF_Products: [],
                             PDF_Observacoes: pdf.PDF_Observacoes,
                             PDF_Valor: pdf.PDF_Valor,
-                            PDF_ValorPago: pdf.PDF_ValorPago
+                            PDF_ValorPago: pdf.PDF_ValorPago,
+                            PDF_Responsavel: pdf.PDF_Responsavel
                         };
                     })
                 );
@@ -225,7 +228,8 @@ export const TableHistoricoContract: React.FC = () => {
             PDF_Generated_Date: selectedPdf.PDF_Generated_Date,
             PDF_Observacoes: "", 
             PDF_Valor: selectedPdf.PDF_Valor,
-            PDF_ValorPago: selectedPdf.PDF_ValorPago
+            PDF_ValorPago: selectedPdf.PDF_ValorPago,
+            PDF_Responsavel: selectedPdf.PDF_Responsavel
         };
 
         try {
@@ -235,7 +239,7 @@ export const TableHistoricoContract: React.FC = () => {
             
             if (selectedCompletePDF && selectedCompletePDF.PDF_Client) {
             
-                generateReport(selectedCompletePDF.PDF_Client, selectedCompletePDF.PDF_Contracts, selectedCompletePDF.PDF_Products, snapshotProducts, productCategories);
+                generateReport(selectedCompletePDF.PDF_Client, selectedCompletePDF.PDF_Contracts, selectedCompletePDF.PDF_Products, snapshotProducts, productCategories, selectedCompletePDF.PDF_Responsavel, selectedCompletePDF.PDF_Generated_Date);
                 selectedCompletePDF.PDF_Status = 1;
 
                 const contractData = await getContractByClientId(selectedCompletePDF.PDF_Client.id);
@@ -428,7 +432,7 @@ export const TableHistoricoContract: React.FC = () => {
                     )}
                     {selectedPdf && selectedPdf?.PDF_Client && showReport && (
                         <Box width={"100%"}>
-                            <PreviewReport client={selectedPdf?.PDF_Client} contracts={selectedPdf?.PDF_Contracts} products={selectedPdf?.PDF_Products} productCategories={productCategories} />
+                            <PreviewReport client={selectedPdf?.PDF_Client} contracts={selectedPdf?.PDF_Contracts} products={selectedPdf?.PDF_Products} productCategories={productCategories} ownerName={selectedPdf.PDF_Responsavel} data={selectedPdf.PDF_Generated_Date} />
                             <Box>
                                 <Typography variant="h5" sx={{ textAlign: 'center', mt: 4 }}>Observações:</Typography>
                                 <Typography variant="body1" sx={{ textAlign: 'center', mb: 2, fontSize: 14, borderRadius: '4px', padding: '10px', width: '80%', margin: 'auto' }}>
@@ -501,7 +505,8 @@ export const TableHistoricoContract: React.FC = () => {
                                                             PDF_Products: [],
                                                             PDF_Observacoes: pdf.PDF_Observacoes,
                                                             PDF_Valor: pdf.PDF_Valor,
-                                                            PDF_ValorPago: pdf.PDF_ValorPago
+                                                            PDF_ValorPago: pdf.PDF_ValorPago,
+                                                            PDF_Responsavel: pdf.PDF_Responsavel
                                                         };
                              
                                                         if (pdfComplete) {
@@ -532,7 +537,7 @@ export const TableHistoricoContract: React.FC = () => {
                     )}
                     {(selectedPdf || snapshotProducts.length > 0) && selectedPdf?.PDF_Client && showReport && (
                         <Box width={"100%"}>
-                            <PreviewReport client={selectedPdf?.PDF_Client} contracts={selectedPdf?.PDF_Contracts} products={selectedPdf?.PDF_Products} productCategories={productCategories} snapshotProducts={snapshotProducts}  />
+                            <PreviewReport client={selectedPdf?.PDF_Client} contracts={selectedPdf?.PDF_Contracts} products={selectedPdf?.PDF_Products} productCategories={productCategories} snapshotProducts={snapshotProducts} ownerName={selectedPdf.PDF_Responsavel} data={selectedPdf.PDF_Generated_Date} />
                             
                             <Box>
                                 <Typography variant="h5" sx={{ textAlign: 'center', mt: 4 }}>Observações:</Typography>
@@ -543,7 +548,7 @@ export const TableHistoricoContract: React.FC = () => {
                             <Box display={"flex"} justifyContent={"center"} gap={2} sx={{ textAlign: 'center', my: 4, '@media (max-width: 800px)': { flexDirection: "column", gap: 2 } }}>
                                 <Button
                                     variant="contained"
-                                    onClick={ selectedPdf.PDF_Status === 0 ? handleConfirmPdf : () => generateReport(selectedPdf.PDF_Client!, selectedPdf.PDF_Contracts, selectedPdf.PDF_Products, snapshotProducts, productCategories)}
+                                    onClick={ selectedPdf.PDF_Status === 0 ? handleConfirmPdf : () => generateReport(selectedPdf.PDF_Client!, selectedPdf.PDF_Contracts, selectedPdf.PDF_Products, snapshotProducts, productCategories, selectedPdf.PDF_Responsavel, selectedPdf.PDF_Generated_Date)}
                                 >
                                     <Typography variant="h6" fontSize={14}>Gerar Contrato</Typography>
                                 </Button>
